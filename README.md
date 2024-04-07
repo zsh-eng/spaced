@@ -85,3 +85,15 @@ The `ref` for handling rollbacks is also updated.
 Notes:
 
 - We can use zustand to handle the state management on client side.
+
+`updateStateBox`
+
+Handles changes to the state.
+
+If current type is New, then we prioritise next card to be Learning, Review, New - in that order (depending on whetehr these cards are available).
+
+If current type is Learning, then we prioritise the next card to Review, New, Learning.
+
+If current type is Review, then we prioritise the next card to be Learning, New, Review.
+
+If the type to change to is Learning, but the card is not due to be learnt, then we randomly choose between Review and New.
