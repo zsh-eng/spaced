@@ -20,6 +20,9 @@ dependencies:
   react-dom:
     specifier: ^18
     version: 18.2.0(react@18.2.0)
+  ts-fsrs:
+    specifier: ^3.5.3
+    version: 3.5.3
 
 devDependencies:
   '@types/node':
@@ -3393,6 +3396,10 @@ packages:
       loose-envify: 1.4.0
     dev: false
 
+  /seedrandom@3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
+    dev: false
+
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
@@ -3697,6 +3704,13 @@ packages:
     dependencies:
       typescript: 5.4.4
     dev: true
+
+  /ts-fsrs@3.5.3:
+    resolution: {integrity: sha512-PfcCq7hiYuUVQZHhjAhZTf7IvMYiIOqgIh51cUIkQ+lOuUJd6WRMxOP8ao1CMhXySOpAGOJjev8y4jF0gZAxDA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      seedrandom: 3.0.5
+    dev: false
 
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
