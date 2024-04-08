@@ -1,13 +1,17 @@
+import Flashcard from '@/components/Flashcard';
 import db from '@/db';
 
 export default async function Home() {
-  const cards = await db.query.cards.findMany();
-
-  const text = JSON.stringify(cards[0], null, 2);
+  const cardContentWithCards = await db.query.cardContents.findMany({
+    with: {
+      card: true,
+    },
+  });
+  const cardContent = cardContentWithCards[0]!;
 
   return (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-      {text}
+      <Flashcard card={cardContent.card} cardContent={cardContent} />
     </main>
   );
 }
