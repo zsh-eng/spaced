@@ -1,11 +1,11 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 
-const url = process.env.DATABASE_URL;
-const authToken = process.env.DATABASE_AUTH_TOKEN;
+const url = process.env.TURSO_DATABASE_URL;
+const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url || !authToken) {
-  throw new Error('DATABASE_URL and DATABASE_AUTH_TOKEN must be set');
+  throw new Error('Database URL and auth token must be provided.');
 }
 
 const client = createClient({
