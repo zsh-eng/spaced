@@ -9,7 +9,7 @@ import {
   reviewLogs,
   states,
 } from '@/schema';
-import { success } from '@/utils/format';
+import { success } from '@/lib/format';
 import { faker } from '@faker-js/faker';
 import { Card, CardContent, ReviewLog } from './schema';
 
