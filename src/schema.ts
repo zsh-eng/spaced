@@ -12,7 +12,10 @@ import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 // Parameters
 
 export const states = ['New', 'Learning', 'Review', 'Relearning'] as const;
+export type State = (typeof states)[number];
+
 export const ratings = ['Manual', 'Again', 'Hard', 'Good', 'Easy'] as const;
+export type Rating = (typeof ratings)[number];
 
 export const reviewLogs = sqliteTable('review_logs', {
   id: text('id').primaryKey(),
@@ -30,6 +33,9 @@ export const reviewLogs = sqliteTable('review_logs', {
   duration: integer('duration').notNull().default(0),
   deleted: integer('deleted', { mode: 'boolean' }).notNull().default(false),
 });
+
+export type ReviewLog = typeof reviewLogs.$inferSelect;
+export type NewReviewLog = typeof reviewLogs.$inferInsert;
 
 // * For now we just copy the schema from the ts-fsrs-demo example
 export const cards = sqliteTable('cards', {
@@ -52,6 +58,9 @@ export const cards = sqliteTable('cards', {
   deleted: integer('deleted', { mode: 'boolean' }).notNull().default(false),
 });
 
+export type Card = typeof cards.$inferSelect;
+export type NewCard = typeof cards.$inferInsert;
+
 export const cardContents = sqliteTable('card_contents', {
   id: text('id').primaryKey(),
   // card
@@ -64,6 +73,9 @@ export const cardContents = sqliteTable('card_contents', {
   extend: text('extend', { mode: 'json' }),
   deleted: integer('deleted', { mode: 'boolean' }).notNull().default(false),
 });
+
+export type CardContent = typeof cardContents.$inferSelect;
+export type NewCardContent = typeof cardContents.$inferInsert;
 
 export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
   card: one(cards, {
