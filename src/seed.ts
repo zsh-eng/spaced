@@ -1,4 +1,5 @@
 import db from '@/db';
+import { success } from '@/lib/format';
 import {
   NewCard,
   NewCardContent,
@@ -9,12 +10,15 @@ import {
   reviewLogs,
   states,
 } from '@/schema';
-import { success } from '@/lib/format';
 import { faker } from '@faker-js/faker';
 import { Card, CardContent, ReviewLog } from './schema';
 
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/
+
+function generateSqliteTimestamp(): number {
+  return faker.date.recent().getTime() / 1000;
+}
 
 function generateNewCard(newCard?: Partial<NewCard>): NewCard {
   return {

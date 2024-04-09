@@ -42,7 +42,7 @@ export const cards = sqliteTable('cards', {
   id: text('id').primaryKey(),
   due: integer('due', { mode: 'timestamp' })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(unixepoch())`), // https://orm.drizzle.team/learn/guides/timestamp-default-value
   stability: real('stability').notNull(),
   difficulty: real('difficulty').notNull(),
   elapsed_days: integer('elapsed_days').notNull(),
