@@ -1,8 +1,8 @@
 import { Context } from '@/server/context';
+import type { AppRouter } from '@/server/routers/_app';
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
 import { initTRPC } from '@trpc/server';
-import type { AppRouter } from '../server/routers/_app';
 
 // See https://trpc.io/docs/quickstart#1-create-a-router-instance
 
@@ -10,7 +10,8 @@ import type { AppRouter } from '../server/routers/_app';
  * Initialization of tRPC backend
  * Should be done only once per backend!
  */
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({});
+
 /**
  * Export reusable router and procedure helpers
  * that can be used throughout the router
@@ -57,6 +58,7 @@ export const trpc = createTRPCNext<AppRouter>({
       ],
     };
   },
+
   /**
    * @link https://trpc.io/docs/v11/ssr
    **/

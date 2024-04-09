@@ -1,11 +1,12 @@
 import { createContext } from '@/server/context';
-import { appRouter } from '@/server/routers/_app';
+import { AppRouter, appRouter } from '@/server/routers/_app';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
-// See https://trpc.io/docs/server/adapters/nextjs#route-handlers
+export const dynamic = 'force-dynamic';
 
+// See https://trpc.io/docs/server/adapters/nextjs#route-handlers
 const handler = (req: Request) =>
-  fetchRequestHandler({
+  fetchRequestHandler<AppRouter>({
     endpoint: '/api/trpc',
     req,
     router: appRouter,

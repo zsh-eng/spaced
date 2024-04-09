@@ -9,19 +9,19 @@ import {
   UiCardHeader,
   UiCardTitle,
 } from '@/components/ui/card';
-import useKeypressRating from '@/hooks/use-keypress-rating';
-import { getReviewDayForEachRating } from '@/utils/fsrs';
-import { CardContent, Rating, ratings, type Card } from '@/schema';
-import { intlFormatDistance } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import useKeypressRating from '@/hooks/use-keypress-rating';
+import { CardContent, Rating, ratings, type Card } from '@/schema';
+import { StringifyDate } from '@/utils/fsrs';
+import { intlFormatDistance } from 'date-fns';
 
 type Props = {
-  card: Card;
+  card: Card | StringifyDate<Card>;
   cardContent: CardContent;
   onRating: (rating: Rating) => void;
   open: boolean;

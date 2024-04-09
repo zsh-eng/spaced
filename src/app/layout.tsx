@@ -11,6 +11,7 @@ import { trpc } from '@/utils/trpc';
 // See https://ui.shadcn.com/docs/installation/next
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
+// TODO handle metadata with tRPC and Next.js
 // export const metadata: Metadata = {
 //   title: 'Spaced',
 //   description: 'A better way of learning.',
