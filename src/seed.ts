@@ -26,6 +26,16 @@ function generateNewCard(newCard?: Partial<NewCard>): NewCard {
     reps: faker.number.int({ min: 0, max: 100 }),
     lapses: faker.number.int({ min: 0, max: 100 }),
     state: faker.helpers.arrayElement(states),
+    // Last review date is necesary in `f.repeat`
+    // as the `elapsed_days` for the `SchedulingCard` is calculated based on the last review date.
+    last_review: new Date(
+      faker.date
+        .between({
+          from: new Date('2024-01-01'),
+          to: new Date(),
+        })
+        .getTime()
+    ),
     ...newCard,
   };
 }
