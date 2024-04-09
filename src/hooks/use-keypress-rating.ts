@@ -27,6 +27,7 @@ export default function useKeypressRating(
           onRating(ratings[2]);
           break;
         case '4':
+        case ' ':
           onRating(ratings[3]);
           break;
         case '5':

@@ -10,7 +10,15 @@ import {
   UiCardTitle,
 } from '@/components/ui/card';
 import useKeypressRating from '@/hooks/use-keypress-rating';
+import { getReviewDayForEachRating } from '@/lib/fsrs';
 import { CardContent, Rating, ratings, type Card } from '@/schema';
+import { intlFormatDistance } from 'date-fns';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Props = {
   card: Card;
@@ -26,6 +34,8 @@ type Props = {
 const Flashcard = ({ card, cardContent, onRating, open, onOpen }: Props) => {
   useKeypressRating(onRating, open, onOpen);
 
+  const schemaRatingToReviewDay = getReviewDayForEachRating(card);
+
   return (
     <UiCard className='max-w-xl min-w-xl'>
       <UiCardHeader>
@@ -39,21 +49,36 @@ const Flashcard = ({ card, cardContent, onRating, open, onOpen }: Props) => {
       </UiCardContent>
       <UiCardFooter>
         {open ? (
-          <div className='grid grid-cols-5 gap-x-2 w-full'>
+          <div className='grid grid-cols-3 gap-x-2 gap-y-2 w-full'>
             {ratings.map((rating) => {
               return (
-                <Button
-                  variant='outline'
-                  key={rating}
-                  onClick={() => onRating(rating)}
-                >
-                  {rating}
-                </Button>
+                <TooltipProvider key={rating}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant='outline'
+                        onClick={() => onRating(rating)}
+                      >
+                        <p>{rating}</p>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {intlFormatDistance(
+                          schemaRatingToReviewDay[rating],
+                          new Date()
+                        )}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               );
             })}
           </div>
         ) : (
-          <Button variant='outline'>Press space to open</Button>
+          <Button variant='outline' onClick={() => onOpen()}>
+            Press space to open
+          </Button>
         )}
       </UiCardFooter>
     </UiCard>
