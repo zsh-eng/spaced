@@ -1,7 +1,7 @@
 'use client';
 
 import Flashcard from '@/components/flashcard/flashcard';
-import { getReviewDayForEachRating } from '@/lib/fsrs';
+import { getReviewDayForEachRating } from '@/utils/fsrs';
 import { Card, CardContent, type Rating } from '@/schema';
 import { intlFormatDistance } from 'date-fns';
 import { useState } from 'react';

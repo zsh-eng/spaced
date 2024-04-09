@@ -1,5 +1,5 @@
 import db from '@/db';
-import { success } from '@/lib/format';
+import { success } from '@/utils/format';
 import {
   NewCard,
   NewCardContent,

@@ -10,7 +10,7 @@ import {
   UiCardTitle,
 } from '@/components/ui/card';
 import useKeypressRating from '@/hooks/use-keypress-rating';
-import { getReviewDayForEachRating } from '@/lib/fsrs';
+import { getReviewDayForEachRating } from '@/utils/fsrs';
 import { CardContent, Rating, ratings, type Card } from '@/schema';
 import { intlFormatDistance } from 'date-fns';
 import {
