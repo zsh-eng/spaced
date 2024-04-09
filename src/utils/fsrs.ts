@@ -38,8 +38,6 @@ export function getReviewDayForEachRating(
   card: Card
 ): Record<SchemaRating, Date> {
   const now = new Date();
-  console.log(JSON.stringify(card, null, 2));
-  console.log(JSON.stringify(createEmptyCard(), null, 2));
   const recordLog = f.repeat(card, now);
 
   const schemaRatingtoReviewDate = Object.fromEntries(

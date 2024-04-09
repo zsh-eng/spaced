@@ -16,6 +16,11 @@
     "@libsql/client": "^0.6.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@tanstack/react-query": "^5.29.0",
+    "@trpc/client": "11.0.0-rc.332",
+    "@trpc/next": "11.0.0-rc.332",
+    "@trpc/react-query": "11.0.0-rc.332",
+    "@trpc/server": "11.0.0-rc.332",
     "@types/better-sqlite3": "^7.6.9",
     "better-sqlite3": "^9.4.5",
     "class-variance-authority": "^0.7.0",
@@ -31,7 +36,8 @@
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "ts-fsrs": "^3.5.3"
+    "ts-fsrs": "^3.5.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",

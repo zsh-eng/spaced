@@ -4,8 +4,9 @@ import Flashcard from '@/components/flashcard/flashcard';
 import { getReviewDayForEachRating } from '@/utils/fsrs';
 import { Card, CardContent, type Rating } from '@/schema';
 import { intlFormatDistance } from 'date-fns';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { trpc } from '@/utils/trpc';
 
 type Props = {
   cardContentWithCards: Array<
@@ -23,6 +24,14 @@ export default function FlashcardBox({ cardContentWithCards }: Props) {
   const isCard = !!cardContentWithCard;
 
   const schemaRatingToReviewDay = getReviewDayForEachRating(card);
+
+  const hello = trpc.hello.useQuery('john');
+
+  useEffect(() => {
+    if (!hello.isLoading) {
+      console.log(hello.data);
+    }
+  }, [hello]);
 
   // TODO implement ts-fsrs-logic
   const onRating = (rating: Rating) => {
