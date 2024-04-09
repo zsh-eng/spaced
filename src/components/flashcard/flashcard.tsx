@@ -1,4 +1,6 @@
-import { CardContent, type Card } from '@/schema';
+'use client';
+
+import { CardContent, type Card, Rating } from '@/schema';
 import {
   UiCard,
   UiCardContent,
@@ -7,18 +9,25 @@ import {
   UiCardHeader,
   UiCardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ratings } from '@/schema';
+import { useEffect } from 'react';
+import useKeypressRating from '@/hooks/use-keypress-rating';
 
 type Props = {
   card: Card;
   cardContent: CardContent;
+  onRating: (rating: Rating) => void;
 };
 
 /**
  * Flashcard is the component that displays a {@link Card}
  */
-const Flashcard = ({ card, cardContent }: Props) => {
+const Flashcard = ({ card, cardContent, onRating }: Props) => {
+  useKeypressRating(onRating);
+
   return (
-    <UiCard>
+    <UiCard className='max-w-xl min-w-xl'>
       <UiCardHeader>
         <UiCardTitle>Question</UiCardTitle>
         <UiCardDescription>{card.state}</UiCardDescription>
@@ -29,7 +38,19 @@ const Flashcard = ({ card, cardContent }: Props) => {
         <p>Answer: {cardContent.answer}</p>
       </UiCardContent>
       <UiCardFooter>
-        <p>Source: {cardContent.source}</p>
+        <div className='grid grid-cols-5 gap-x-2 w-full'>
+          {ratings.map((rating) => {
+            return (
+              <Button
+                variant='outline'
+                key={rating}
+                onClick={() => onRating(rating)}
+              >
+                {rating}
+              </Button>
+            );
+          })}
+        </div>
       </UiCardFooter>
     </UiCard>
   );

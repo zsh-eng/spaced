@@ -1,4 +1,5 @@
-import Flashcard from '@/components/Flashcard';
+import Flashcard from '@/components/flashcard/flashcard';
+import FlashcardBox from '@/components/flashcard/flashcard-box';
 import db from '@/db';
 
 export default async function Home() {
@@ -7,11 +8,9 @@ export default async function Home() {
       card: true,
     },
   });
-  const cardContent = cardContentWithCards[0]!;
-
   return (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-      <Flashcard card={cardContent.card} cardContent={cardContent} />
+      <FlashcardBox cardContentWithCards={cardContentWithCards} />
     </main>
   );
 }
