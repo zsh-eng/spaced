@@ -26,15 +26,21 @@ type Props = {
   onRating: (rating: Rating) => void;
   open: boolean;
   onOpen: () => void;
+  schemaRatingToReviewDay: Record<Rating, Date>;
 };
 
 /**
  * Flashcard is the component that displays a {@link Card}
  */
-const Flashcard = ({ card, cardContent, onRating, open, onOpen }: Props) => {
+const Flashcard = ({
+  card,
+  cardContent,
+  onRating,
+  open,
+  onOpen,
+  schemaRatingToReviewDay,
+}: Props) => {
   useKeypressRating(onRating, open, onOpen);
-
-  const schemaRatingToReviewDay = getReviewDayForEachRating(card);
 
   return (
     <UiCard className='max-w-xl min-w-xl'>
@@ -76,7 +82,7 @@ const Flashcard = ({ card, cardContent, onRating, open, onOpen }: Props) => {
             })}
           </div>
         ) : (
-          <Button variant='outline' onClick={() => onOpen()}>
+          <Button variant='outline' className='w-full' onClick={() => onOpen()}>
             Press space to open
           </Button>
         )}
