@@ -1,6 +1,6 @@
 'use client';
 
-import { CardContent, type Card, Rating } from '@/schema';
+import { Button } from '@/components/ui/button';
 import {
   UiCard,
   UiCardContent,
@@ -9,22 +9,22 @@ import {
   UiCardHeader,
   UiCardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ratings } from '@/schema';
-import { useEffect } from 'react';
 import useKeypressRating from '@/hooks/use-keypress-rating';
+import { CardContent, Rating, ratings, type Card } from '@/schema';
 
 type Props = {
   card: Card;
   cardContent: CardContent;
   onRating: (rating: Rating) => void;
+  open: boolean;
+  onOpen: () => void;
 };
 
 /**
  * Flashcard is the component that displays a {@link Card}
  */
-const Flashcard = ({ card, cardContent, onRating }: Props) => {
-  useKeypressRating(onRating);
+const Flashcard = ({ card, cardContent, onRating, open, onOpen }: Props) => {
+  useKeypressRating(onRating, open, onOpen);
 
   return (
     <UiCard className='max-w-xl min-w-xl'>
@@ -35,22 +35,26 @@ const Flashcard = ({ card, cardContent, onRating }: Props) => {
       </UiCardHeader>
       <UiCardContent className='flex flex-col gap-y-2'>
         <p>Question: {cardContent.question}</p>
-        <p>Answer: {cardContent.answer}</p>
+        {open && <p>Answer: {cardContent.answer}</p>}
       </UiCardContent>
       <UiCardFooter>
-        <div className='grid grid-cols-5 gap-x-2 w-full'>
-          {ratings.map((rating) => {
-            return (
-              <Button
-                variant='outline'
-                key={rating}
-                onClick={() => onRating(rating)}
-              >
-                {rating}
-              </Button>
-            );
-          })}
-        </div>
+        {open ? (
+          <div className='grid grid-cols-5 gap-x-2 w-full'>
+            {ratings.map((rating) => {
+              return (
+                <Button
+                  variant='outline'
+                  key={rating}
+                  onClick={() => onRating(rating)}
+                >
+                  {rating}
+                </Button>
+              );
+            })}
+          </div>
+        ) : (
+          <Button variant='outline'>Press space to open</Button>
+        )}
       </UiCardFooter>
     </UiCard>
   );

@@ -14,6 +14,7 @@ type Props = {
 
 export default function FlashcardBox({ cardContentWithCards }: Props) {
   const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState(false);
   const card = cardContentWithCards[index];
   const isCard = !!card;
 
@@ -21,11 +22,18 @@ export default function FlashcardBox({ cardContentWithCards }: Props) {
   const onRating = (rating: Rating) => {
     console.log(`Rating: ${rating}, ${index}`);
     setIndex((index) => index + 1);
+    setOpen(false);
   };
 
   return (
     isCard && (
-      <Flashcard card={card.card} cardContent={card} onRating={onRating} />
+      <Flashcard
+        card={card.card}
+        cardContent={card}
+        onRating={onRating}
+        open={open}
+        onOpen={() => setOpen(true)}
+      />
     )
   );
 }

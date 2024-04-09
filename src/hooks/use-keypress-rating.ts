@@ -4,9 +4,18 @@ import { useEffect } from 'react';
 /**
  * useKeypressRating is a hook that listens for keypresses and calls the `onRating`.
  */
-export default function useKeypressRating(onRating: (rating: Rating) => void) {
+export default function useKeypressRating(
+  onRating: (rating: Rating) => void,
+  open: boolean,
+  onOpen: () => void
+) {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      if (!open) {
+        onOpen();
+        return;
+      }
+
       switch (event.key) {
         case '1':
           onRating(ratings[0]);
@@ -30,5 +39,5 @@ export default function useKeypressRating(onRating: (rating: Rating) => void) {
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [onRating]);
+  }, [onRating, open, onOpen]);
 }
