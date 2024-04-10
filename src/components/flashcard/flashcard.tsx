@@ -1,5 +1,6 @@
 'use client';
 
+import AnswerButtons from '@/components/flashcard/answer-buttons';
 import { Button } from '@/components/ui/button';
 import {
   UiCard,
@@ -9,16 +10,9 @@ import {
   UiCardHeader,
   UiCardTitle,
 } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import useKeypressRating from '@/hooks/use-keypress-rating';
-import { CardContent, Rating, ratings, type Card } from '@/schema';
+import { CardContent, Rating, type Card } from '@/schema';
 import { AllowDateString } from '@/utils/fsrs';
-import { intlFormatDistance } from 'date-fns';
 
 type Props = {
   card: AllowDateString<Card>;
@@ -53,34 +47,13 @@ const Flashcard = ({
         <p>Question: {cardContent.question}</p>
         {open && <p>Answer: {cardContent.answer}</p>}
       </UiCardContent>
+
       <UiCardFooter>
         {open ? (
-          <div className='grid grid-cols-3 gap-x-2 gap-y-2 w-full'>
-            {ratings.map((rating) => {
-              return (
-                <TooltipProvider key={rating}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant='outline'
-                        onClick={() => onRating(rating)}
-                      >
-                        <p>{rating}</p>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {intlFormatDistance(
-                          schemaRatingToReviewDay[rating],
-                          new Date()
-                        )}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              );
-            })}
-          </div>
+          <AnswerButtons
+            schemaRatingToReviewDay={schemaRatingToReviewDay}
+            onRating={onRating}
+          />
         ) : (
           <Button variant='outline' className='w-full' onClick={() => onOpen()}>
             Press space to open
