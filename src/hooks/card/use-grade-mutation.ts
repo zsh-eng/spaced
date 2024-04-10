@@ -1,7 +1,9 @@
 import { getReviewDateForEachRating } from '@/utils/fsrs';
 import { ReactQueryOptions, trpc } from '@/utils/trpc';
+import { TRPCClientError } from '@trpc/client';
 import { endOfDay, isBefore } from 'date-fns';
 import { produce } from 'immer';
+import { toast } from 'sonner';
 
 type GradeMutationOptions = ReactQueryOptions['card']['grade'];
 type GradeMutation = ReturnType<typeof trpc.card.grade.useMutation>;
@@ -51,6 +53,17 @@ export function useGradeMutation(
       });
 
       utils.card.all.setData(undefined, nextCards);
+
+      return { previousCards: allCards };
+    },
+
+    async onError(err, _variables, context) {
+      console.error(err.message);
+      toast.error(err.message);
+
+      if (context?.previousCards) {
+        utils.card.all.setData(undefined, context.previousCards);
+      }
     },
   });
 }

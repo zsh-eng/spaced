@@ -13,7 +13,6 @@ import { toast } from 'sonner';
 type Props = {};
 
 export default function FlashcardBox({}: Props) {
-  const [open, setOpen] = useState(false);
   const { data: cardsWithContent = [], isLoading } = trpc.card.all.useQuery();
   const gradeMutation = useGradeMutation();
 
@@ -42,7 +41,6 @@ export default function FlashcardBox({}: Props) {
         new Date()
       )}`,
     });
-    setOpen(false);
   };
 
   return (
@@ -53,8 +51,6 @@ export default function FlashcardBox({}: Props) {
           card={card}
           cardContent={cardContent as CardContent}
           onRating={onRating}
-          open={open}
-          onOpen={() => setOpen(true)}
           schemaRatingToReviewDay={schemaRatingToReviewDay}
         />
       )}
