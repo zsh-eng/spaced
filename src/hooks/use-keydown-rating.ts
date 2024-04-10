@@ -2,15 +2,15 @@ import { Rating, ratings } from '@/schema';
 import { useEffect } from 'react';
 
 /**
- * useKeypressRating is a hook that listens for keypresses and calls the `onRating`.
+ * useKeydown is a hook that listens for keystrokes and calls the `onRating`.
  */
-export default function useKeypressRating(
+export default function useKeydownRating(
   onRating: (rating: Rating) => void,
   open: boolean,
   onOpen: () => void
 ) {
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (!open) {
         onOpen();
         return;
@@ -36,9 +36,9 @@ export default function useKeypressRating(
       }
     };
 
-    window.addEventListener('keypress', handleKeyPress);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('keypress', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [onRating, open, onOpen]);
 }
