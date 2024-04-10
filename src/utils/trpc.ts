@@ -1,6 +1,8 @@
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/routers/_app';
+import { inferReactQueryProcedureOptions } from '@trpc/react-query';
+import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
 function getBaseUrl() {
   if (typeof window !== 'undefined')
@@ -18,6 +20,11 @@ function getBaseUrl() {
   // assume localhost
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
+
+// See https://trpc.io/docs/client/react/infer-types#infer-react-query-options-based-on-your-router
+export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export const trpc = createTRPCNext<AppRouter>({
   config(opts) {
