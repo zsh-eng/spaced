@@ -18,7 +18,7 @@ import useKeydownRating from '@/hooks/use-keydown-rating';
 import { CardContent, Rating, type Card } from '@/schema';
 import { AllowDateString } from '@/utils/fsrs';
 import { FilePenIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Props = {
   card: AllowDateString<Card>;
@@ -32,7 +32,7 @@ type Props = {
  */
 export default function Flashcard({
   card,
-  cardContent,
+  cardContent: initialCardContent,
   onRating,
   schemaRatingToReviewDay,
 }: Props) {
@@ -40,49 +40,50 @@ export default function Flashcard({
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const initialQuestion = cardContent.question;
-  const initialAnswer = cardContent.answer;
   const [content, setContent] = useState({
-    question: initialQuestion,
-    answer: initialAnswer,
+    question: initialCardContent.question,
+    answer: initialCardContent.answer,
+    id: initialCardContent.id,
   });
-  const { question, answer } = content;
-  const isSame = initialQuestion === question && initialAnswer === answer;
+  const { id, question, answer } = content;
 
   const editCardMutation = useEditCard();
-  const handleEdit = useCallback(() => {
-    if (isSame) return;
+  const handleEdit = () => {
+    const hasCardChanged = content.id !== initialCardContent.id;
+    if (hasCardChanged) return;
+    const isQuestionAnswerSame =
+      content.question === initialCardContent.question &&
+      content.answer === initialCardContent.answer;
+    if (isQuestionAnswerSame) return;
+
+    setEditing(false);
     editCardMutation.mutate({
-      cardContentId: cardContent.id,
+      cardContentId: id,
       question,
       answer,
     });
-  }, [isSame, editCardMutation, question, answer, cardContent.id]);
+  };
 
   useKeydownRating(onRating, open, () => setOpen(!open));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
-    callback: () => setEditing(false),
+    callback: () => {
+      setEditing(false);
+      handleEdit();
+    },
   });
 
   useEffect(() => {
-    setContent({
-      question: cardContent.question,
-      answer: cardContent.answer,
-    });
-  }, [cardContent.question, cardContent.answer]);
+    setContent(initialCardContent);
+  }, [initialCardContent]);
 
   useEffect(() => {
     setOpen(false);
   }, [card.id]);
 
-  useEffect(() => {
-    if (!editing) handleEdit();
-  }, [editing, handleEdit]);
-
   return (
-    <UiCard className='w-full lg:w-[36rem]'>
+    <UiCard className='w-full md:w-[36rem]' ref={cardRef}>
       <UiCardHeader>
         <UiCardTitle>
           <div className='flex justify-between'>
@@ -90,7 +91,10 @@ export default function Flashcard({
             <Toggle
               aria-label='toggle edit'
               pressed={editing}
-              onPressedChange={(pressed) => setEditing(pressed)}
+              onPressedChange={(isEditing) => {
+                setEditing(isEditing);
+                if (!isEditing) handleEdit();
+              }}
             >
               <FilePenIcon className='h-4 w-4' strokeWidth={1.5} />
             </Toggle>
@@ -99,7 +103,7 @@ export default function Flashcard({
         <UiCardDescription>{card.state}</UiCardDescription>
         {/* <UiCardDescription>{cardContent.question}</UiCardDescription> */}
       </UiCardHeader>
-      <UiCardContent className='flex flex-col gap-y-2 h-96' ref={cardRef}>
+      <UiCardContent className='flex flex-col gap-y-4 h-96'>
         <EditableTextarea
           className='resize-none'
           spellCheck='false'
@@ -113,18 +117,22 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
         />
 
-        <EditableTextarea
-          className='resize-none'
-          spellCheck='false'
-          editing={editing}
-          setEditing={setEditing}
-          placeholder='Answer'
-          value={answer}
-          onChange={(e) => {
-            setContent((prev) => ({ ...prev, answer: e.target.value }));
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        />
+        <hr />
+
+        {open && (
+          <EditableTextarea
+            className='resize-none'
+            spellCheck='false'
+            editing={editing}
+            setEditing={setEditing}
+            placeholder='Answer'
+            value={answer}
+            onChange={(e) => {
+              setContent((prev) => ({ ...prev, answer: e.target.value }));
+            }}
+            onKeyDown={(e) => e.stopPropagation()}
+          />
+        )}
       </UiCardContent>
 
       <UiCardFooter>

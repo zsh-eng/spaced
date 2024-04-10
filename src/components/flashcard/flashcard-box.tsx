@@ -44,7 +44,7 @@ export default function FlashcardBox({}: Props) {
   };
 
   return (
-    <div className='py-16 flex flex-col gap-y-2'>
+    <div className='py-16 flex flex-col gap-y-2 w-full items-center'>
       <CardCountBadge />
       {isCard && (
         <Flashcard
