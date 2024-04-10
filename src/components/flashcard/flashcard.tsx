@@ -17,11 +17,11 @@ import {
 } from '@/components/ui/tooltip';
 import useKeypressRating from '@/hooks/use-keypress-rating';
 import { CardContent, Rating, ratings, type Card } from '@/schema';
-import { StringifyDate } from '@/utils/fsrs';
+import { AllowDateString } from '@/utils/fsrs';
 import { intlFormatDistance } from 'date-fns';
 
 type Props = {
-  card: Card | StringifyDate<Card>;
+  card: AllowDateString<Card>;
   cardContent: CardContent;
   onRating: (rating: Rating) => void;
   open: boolean;

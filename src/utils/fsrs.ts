@@ -21,6 +21,11 @@ import {
 const params = generatorParameters({ enable_fuzz: true });
 const f = fsrs(params);
 
+/**
+ * Helper type to convert a {@link Date} or `Date | null` to a {@link string}.
+ * JSON serialises {@link Date} objects to strings.
+ * ts-fsrs accepts strings for date inputs, so it's ok to take in date strings.
+ */
 export type StringifyDate<T> = {
   [K in keyof T]: T[K] extends Date
     ? string
@@ -28,7 +33,7 @@ export type StringifyDate<T> = {
     ? string | null
     : T[K];
 };
-
+export type AllowDateString<T> = T | StringifyDate<T>;
 
 // TODO use "FSRSRating" instead
 function ratingToFSRSGrade(rating: Rating): FSRSGrade {
@@ -58,8 +63,11 @@ export function getNextCard(card: Card, schemaRating: Rating) {
   return nextCard;
 }
 
+/**
+ * Give a {@link Card}, returns the review {@link Date} for each {@link Rating}.
+ */
 export function getReviewDayForEachRating(
-  card: Card | StringifyDate<Card>
+  card: AllowDateString<Card>
 ): Record<Rating, Date> {
   const now = new Date();
   const recordLog = f.repeat(card, now);
