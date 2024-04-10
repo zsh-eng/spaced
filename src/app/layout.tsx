@@ -31,7 +31,7 @@ function RootLayout({
         )}
       >
         {children}
-        <Toaster position='top-center' />
+        <Toaster />
       </body>
     </html>
   );

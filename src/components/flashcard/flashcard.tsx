@@ -37,7 +37,7 @@ const Flashcard = ({
   useKeypressRating(onRating, open, onOpen);
 
   return (
-    <UiCard className='max-w-xl min-w-xl'>
+    <UiCard className='w-full lg:w-[36rem]'>
       <UiCardHeader>
         <UiCardTitle>Question</UiCardTitle>
         <UiCardDescription>{card.state}</UiCardDescription>
