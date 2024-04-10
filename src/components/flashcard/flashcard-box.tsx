@@ -1,5 +1,6 @@
 'use client';
 
+import CardCountBadge from '@/components/flashcard/card-count-badge';
 import Flashcard from '@/components/flashcard/flashcard';
 import { useGradeMutation } from '@/hooks/card/use-grade-mutation';
 import { CardContent, type Rating } from '@/schema';
@@ -45,7 +46,8 @@ export default function FlashcardBox({}: Props) {
   };
 
   return (
-    <div className='py-16'>
+    <div className='py-16 flex flex-col gap-y-2'>
+      <CardCountBadge />
       {isCard && (
         <Flashcard
           card={card}
