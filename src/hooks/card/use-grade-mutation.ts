@@ -1,4 +1,4 @@
-import { getReviewDayForEachRating } from '@/utils/fsrs';
+import { getReviewDateForEachRating } from '@/utils/fsrs';
 import { ReactQueryOptions, trpc } from '@/utils/trpc';
 import { endOfDay, isBefore } from 'date-fns';
 import { produce } from 'immer';
@@ -28,7 +28,7 @@ export function useGradeMutation(
       if (!card) {
         return;
       }
-      const reviewDay = getReviewDayForEachRating(card.cards);
+      const reviewDay = getReviewDateForEachRating(card.cards);
       const day = reviewDay[grade];
 
       const cardToBeReviewedToday = isBefore(day, endOfDay(new Date()));

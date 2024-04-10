@@ -3,7 +3,7 @@
 import Flashcard from '@/components/flashcard/flashcard';
 import { useGradeMutation } from '@/hooks/card/use-grade-mutation';
 import { CardContent, type Rating } from '@/schema';
-import { getReviewDayForEachRating } from '@/utils/fsrs';
+import { getReviewDateForEachRating } from '@/utils/fsrs';
 import { trpc } from '@/utils/trpc';
 import { intlFormatDistance } from 'date-fns';
 import { useState } from 'react';
@@ -21,19 +21,16 @@ export default function FlashcardBox({}: Props) {
   }
 
   const { cards: card, card_contents: cardContent } = cardsWithContent[0]!;
-  const schemaRatingToReviewDay = getReviewDayForEachRating(card);
+  const schemaRatingToReviewDay = getReviewDateForEachRating(card);
   const isCard = card && cardContent;
 
   const onRating = (rating: Rating) => {
     const reviewDay = schemaRatingToReviewDay[rating];
-
-    console.log(`Current card: ${card.id}`);
-    console.log(`Next Card: ${cardsWithContent[1]?.cards.id}`);
-
     gradeMutation.mutate({
       grade: rating,
       id: card.id,
     });
+
     toast(`Card marked as ${rating}.`, {
       action: {
         label: 'Undo',
@@ -44,7 +41,6 @@ export default function FlashcardBox({}: Props) {
         new Date()
       )}`,
     });
-    console.log(`Rating: ${rating}`);
     setOpen(false);
   };
 

@@ -1,6 +1,5 @@
 import {
   Card,
-  CardContent,
   NewCard,
   NewCardContent,
   Rating,
@@ -13,9 +12,9 @@ import {
   createEmptyCard,
   fsrs,
   generatorParameters,
+  type Card as FSRSCard,
   type Grade as FSRSGrade,
   type State as FSRSState,
-  type Card as FSRSCard,
 } from 'ts-fsrs';
 
 const params = generatorParameters({ enable_fuzz: true });
@@ -35,7 +34,6 @@ export type StringifyDate<T> = {
 };
 export type AllowDateString<T> = T | StringifyDate<T>;
 
-// TODO use "FSRSRating" instead
 function ratingToFSRSGrade(rating: Rating): FSRSGrade {
   const index = ratings.indexOf(rating);
   if (index === -1) {
@@ -66,7 +64,7 @@ export function getNextCard(card: Card, schemaRating: Rating) {
 /**
  * Give a {@link Card}, returns the review {@link Date} for each {@link Rating}.
  */
-export function getReviewDayForEachRating(
+export function getReviewDateForEachRating(
   card: AllowDateString<Card>
 ): Record<Rating, Date> {
   const now = new Date();
