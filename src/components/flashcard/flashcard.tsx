@@ -1,24 +1,7 @@
-'use client';
+"use client";
 
-import AnswerButtons from '@/components/flashcard/answer-buttons';
-import { Button } from '@/components/ui/button';
-import {
-  UiCard,
-  UiCardContent,
-  UiCardDescription,
-  UiCardFooter,
-  UiCardHeader,
-  UiCardTitle,
-} from '@/components/ui/card';
-import EditableTextarea from '@/components/ui/editable-textarea';
-import { Toggle } from '@/components/ui/toggle';
-import { useEditCard } from '@/hooks/card/use-edit-card';
-import { useClickOutside } from '@/hooks/use-click-outside';
-import useKeydownRating from '@/hooks/use-keydown-rating';
-import { CardContent, Rating, type Card } from '@/schema';
-import { AllowDateString } from '@/utils/fsrs';
-import { FilePenIcon, TrashIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import AnswerButtons from "@/components/flashcard/answer-buttons";
+import FlashcardState from "@/components/flashcard/flashcard-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,8 +12,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useDeleteCard } from '@/hooks/card/use-delete-card';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  UiCard,
+  UiCardContent,
+  UiCardDescription,
+  UiCardFooter,
+  UiCardHeader,
+  UiCardTitle,
+} from "@/components/ui/card";
+import EditableTextarea from "@/components/ui/editable-textarea";
+import { Toggle } from "@/components/ui/toggle";
+import { useDeleteCard } from "@/hooks/card/use-delete-card";
+import { useEditCard } from "@/hooks/card/use-edit-card";
+import { useClickOutside } from "@/hooks/use-click-outside";
+import useKeydownRating from "@/hooks/use-keydown-rating";
+import { CardContent, Rating, type Card } from "@/schema";
+import { AllowDateString } from "@/utils/fsrs";
+import { cn } from "@/utils/ui";
+import { EyeIcon, FilePenIcon, TrashIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   card: AllowDateString<Card>;
@@ -96,26 +98,26 @@ export default function Flashcard({
   }, [card.id]);
 
   return (
-    <UiCard className='w-full md:w-[36rem]' ref={cardRef}>
+    <UiCard className="w-full md:w-[36rem]" ref={cardRef}>
       <UiCardHeader>
         <UiCardTitle>
-          <div className='flex justify-between'>
-            Question
-            <div className='flex gap-x-2'>
+          <div className="flex justify-between">
+            <p className="">Flashcard</p>
+            <div className="flex justify-end gap-x-2">
               <Toggle
-                aria-label='toggle edit'
+                aria-label="toggle edit"
                 pressed={editing}
                 onPressedChange={(isEditing) => {
                   setEditing(isEditing);
                   if (!isEditing) handleEdit();
                 }}
               >
-                <FilePenIcon className='h-4 w-4' strokeWidth={1.5} />
+                <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
               </Toggle>
               <AlertDialog>
                 <AlertDialogTrigger>
-                  <Button variant='outline' size='icon'>
-                    <TrashIcon className='h-4 w-4' strokeWidth={1.5} />
+                  <Button variant="outline" size="icon">
+                    <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -128,7 +130,7 @@ export default function Flashcard({
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      variant='destructive'
+                      variant="destructive"
                       onClick={() => deleteCard.mutate(card.id)}
                     >
                       Continue
@@ -139,16 +141,19 @@ export default function Flashcard({
             </div>
           </div>
         </UiCardTitle>
-        <UiCardDescription>{card.state}</UiCardDescription>
+        <UiCardDescription>
+          <FlashcardState state={card.state} />
+        </UiCardDescription>
         {/* <UiCardDescription>{cardContent.question}</UiCardDescription> */}
       </UiCardHeader>
-      <UiCardContent className='flex flex-col gap-y-4 h-96'>
+
+      <UiCardContent className="flex min-h-96 flex-col gap-y-4">
         <EditableTextarea
-          className='resize-none'
-          spellCheck='false'
+          className="h-40 resize-none"
+          spellCheck="false"
           editing={editing}
           setEditing={setEditing}
-          placeholder='Question'
+          placeholder="Question"
           value={question}
           onChange={(e) => {
             setContent((prev) => ({ ...prev, question: e.target.value }));
@@ -156,42 +161,49 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
         />
 
-        <hr />
 
-        {open && (
-          <EditableTextarea
-            className='resize-none'
-            spellCheck='false'
-            editing={editing}
-            setEditing={setEditing}
-            placeholder='Answer'
-            value={answer}
-            onChange={(e) => {
-              setContent((prev) => ({ ...prev, answer: e.target.value }));
-            }}
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-        )}
+        <hr className="mx-auto w-8" />
+
+        <div className="relative w-full">
+          <div
+            className={cn(
+              "group absolute -bottom-8 h-48 w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-150 slide-in-from-top-20 hover:bg-background/30 hover:backdrop-blur-sm",
+              open ? "hidden" : "",
+            )}
+            onClick={() => setOpen(true)}
+          >
+            <div className="flex h-full w-full items-center justify-center">
+              <EyeIcon className="h-8 w-8 text-muted-foreground/20 transition-all duration-300 group-hover:opacity-0" />
+            </div>
+          </div>
+
+          {
+            <EditableTextarea
+              className="h-40 resize-none"
+              spellCheck="false"
+              editing={editing}
+              setEditing={setEditing}
+              placeholder="Answer"
+              value={answer}
+              onChange={(e) => {
+                setContent((prev) => ({ ...prev, answer: e.target.value }));
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+            />
+          }
+        </div>
       </UiCardContent>
 
-      <UiCardFooter>
-        {open ? (
+      <UiCardFooter className="h-24">
+        {open && (
           <AnswerButtons
             schemaRatingToReviewDay={schemaRatingToReviewDay}
             onRating={onRating}
           />
-        ) : (
-          <Button
-            variant='outline'
-            className='w-full'
-            onClick={() => setOpen(true)}
-          >
-            Press space to open
-          </Button>
         )}
       </UiCardFooter>
     </UiCard>
   );
 }
 
-Flashcard.displayName = 'Flashcard';
+Flashcard.displayName = "Flashcard";
