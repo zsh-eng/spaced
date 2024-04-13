@@ -1,17 +1,17 @@
-import db from '@/db';
-import { Card, CardContent, cardContents, cards, ratings } from '@/schema';
-import { publicProcedure, router } from '@/server/trpc';
-import { success } from '@/utils/format';
-import { gradeCard, newCardWithContent } from '@/utils/fsrs';
-import { TRPCError } from '@trpc/server';
-import { endOfDay } from 'date-fns';
-import { and, asc, eq, lte } from 'drizzle-orm';
-import { z } from 'zod';
+import db from "@/db";
+import { Card, CardContent, cardContents, cards, ratings } from "@/schema";
+import { publicProcedure, router } from "@/server/trpc";
+import { success } from "@/utils/format";
+import { gradeCard, newCardWithContent } from "@/utils/fsrs";
+import { TRPCError } from "@trpc/server";
+import { endOfDay } from "date-fns";
+import { and, asc, eq, lte } from "drizzle-orm";
+import { z } from "zod";
 
 export const cardRouter = router({
   // Get all cards with their contents
   all: publicProcedure.query(async ({ ctx }) => {
-    console.log('Fetching cards');
+    console.log("Fetching cards");
     const now = endOfDay(new Date());
 
     const cardWithContents = await db
@@ -22,8 +22,8 @@ export const cardRouter = router({
         and(
           eq(cardContents.deleted, false),
           eq(cards.deleted, false),
-          lte(cards.due, now)
-        )
+          lte(cards.due, now),
+        ),
       )
       .orderBy(asc(cards.due));
     console.log(success`Fetched ${cardWithContents.length} cards`);
@@ -34,15 +34,15 @@ export const cardRouter = router({
   }),
 
   // Create a new card with content
-  add: publicProcedure
+  create: publicProcedure
     .input(
       z.object({
         question: z.string(),
         answer: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log('Adding card');
+      console.log("Adding card");
       const { question, answer } = input;
       const { card, cardContent } = newCardWithContent(question, answer);
 
@@ -58,7 +58,7 @@ export const cardRouter = router({
   delete: publicProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
-      console.log('Deleting card');
+      console.log("Deleting card");
       await db.transaction(async (tx) => {
         await tx
           .update(cards)
@@ -80,10 +80,10 @@ export const cardRouter = router({
         cardContentId: z.string(),
         question: z.string(),
         answer: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log('Editing card content');
+      console.log("Editing card content");
       const { cardContentId: id, question, answer } = input;
       await db
         .update(cardContents)
@@ -102,23 +102,23 @@ export const cardRouter = router({
       z.object({
         id: z.string(),
         grade: z.enum(ratings),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log('Grading card');
+      console.log("Grading card");
       const card = await db.query.cards.findFirst({
         where: eq(cards.id, input.id),
       });
 
       if (!card) {
         throw new TRPCError({
-          message: 'Card not found',
-          code: 'BAD_REQUEST',
+          message: "Card not found",
+          code: "BAD_REQUEST",
         });
       }
 
       const nextCard =
-        input.grade === 'Manual' ? card : gradeCard(card, input.grade);
+        input.grade === "Manual" ? card : gradeCard(card, input.grade);
       await db.update(cards).set(nextCard).where(eq(cards.id, input.id));
       console.log(success`Graded card: ${input.id}`);
     }),

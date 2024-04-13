@@ -1,8 +1,8 @@
-import { ReactQueryOptions, trpc } from '@/utils/trpc';
-import { produce } from 'immer';
-import { toast } from 'sonner';
+import { ReactQueryOptions, trpc } from "@/utils/trpc";
+import { produce } from "immer";
+import { toast } from "sonner";
 
-type DeleteMutationOptions = ReactQueryOptions['card']['delete'];
+type DeleteMutationOptions = ReactQueryOptions["card"]["delete"];
 type DeleteMutation = ReturnType<typeof trpc.card.delete.useMutation>;
 
 /**
@@ -25,14 +25,14 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
       });
       utils.card.all.setData(undefined, nextCards);
 
-      toast.success('Card deleted.');
+      toast.success("Card deleted.");
 
       return { previousCards: allCards };
     },
 
-    onError: (error, variables, context) => {
+    onError: (error, _variables, context) => {
       console.error(error.message);
-      toast.error('Failed to delete card');
+      toast.error("Failed to delete card");
 
       if (context?.previousCards) {
         utils.card.all.setData(undefined, context.previousCards);

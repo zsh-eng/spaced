@@ -1,12 +1,13 @@
 import {
   Card,
+  CardContent,
   NewCard,
   NewCardContent,
   Rating,
   State,
   ratings,
   states,
-} from '@/schema';
+} from "@/schema";
 import {
   Grades as FSRSGrades,
   createEmptyCard,
@@ -15,7 +16,7 @@ import {
   type Card as FSRSCard,
   type Grade as FSRSGrade,
   type State as FSRSState,
-} from 'ts-fsrs';
+} from "ts-fsrs";
 
 const params = generatorParameters({ enable_fuzz: true });
 const f = fsrs(params);
@@ -29,8 +30,8 @@ export type StringifyDate<T> = {
   [K in keyof T]: T[K] extends Date
     ? string
     : T[K] extends Date | null
-    ? string | null
-    : T[K];
+      ? string | null
+      : T[K];
 };
 export type AllowDateString<T> = T | StringifyDate<T>;
 
@@ -65,13 +66,13 @@ export function getNextCard(card: Card, schemaRating: Rating) {
  * Give a {@link Card}, returns the review {@link Date} for each {@link Rating}.
  */
 export function getReviewDateForEachRating(
-  card: AllowDateString<Card>
+  card: AllowDateString<Card>,
 ): Record<Rating, Date> {
   const now = new Date();
   const recordLog = f.repeat(card, now);
 
   const schemaRatingtoReviewDate = Object.fromEntries(
-    ratings.map((rating) => [rating, new Date()])
+    ratings.map((rating) => [rating, new Date()]),
   ) as Record<Rating, Date>;
 
   for (const grade of FSRSGrades) {
@@ -127,22 +128,56 @@ export function newCard(): NewCard {
   };
 }
 
+export function newCardContent(
+  cardId: string,
+  question: string,
+  answer: string,
+): NewCardContent {
+  const id = crypto.randomUUID();
+  return {
+    id,
+    cardId,
+    question,
+    answer,
+  };
+}
+
 export function newCardWithContent(
   question?: string,
-  answer?: string
+  answer?: string,
 ): {
-  card: NewCard;
-  cardContent: NewCardContent;
+  card: Card;
+  cardContent: CardContent;
 } {
   const card = newCard();
-  const cardContentId = crypto.randomUUID();
+  const cardContent = newCardContent(card.id, question ?? "", answer ?? "");
   return {
-    card,
-    cardContent: {
-      id: cardContentId,
-      cardId: card.id,
-      question,
-      answer,
-    },
+    card: newCardToCard(card),
+    cardContent: newCardContentToCardContent(cardContent),
+  };
+}
+
+export function newCardToCard(newCard: NewCard): Card {
+  if (!newCard.due) throw new Error("Due date is required");
+  return {
+    ...newCard,
+    due: newCard.due,
+    last_review: null,
+    suspended: false,
+    deleted: false,
+  };
+}
+
+export function newCardContentToCardContent(
+  newCardContent: NewCardContent,
+): CardContent {
+  return {
+    ...newCardContent,
+    deleted: false,
+    question: newCardContent.question ?? "",
+    answer: newCardContent.answer ?? "",
+    source: newCardContent.source ?? "",
+    sourceId: null,
+    extend: newCardContent.extend ?? {},
   };
 }
