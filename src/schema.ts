@@ -83,6 +83,8 @@ export const decks = sqliteTable("decks", {
   name: text("name").notNull(),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 });
+export type Deck = typeof decks.$inferSelect;
+export type NewDeck = typeof decks.$inferInsert;
 
 export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
   card: one(cards, {
