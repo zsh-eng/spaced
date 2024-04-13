@@ -1,6 +1,10 @@
-import { getReviewDateForEachRating } from '@/utils/fsrs';
+import {
+  getReviewDateForEachRating,
+  gradeCard,
+  parseCardDate,
+  stringifyCardDate,
+} from '@/utils/fsrs';
 import { ReactQueryOptions, trpc } from '@/utils/trpc';
-import { TRPCClientError } from '@trpc/client';
 import { endOfDay, isBefore } from 'date-fns';
 import { produce } from 'immer';
 import { toast } from 'sonner';
@@ -41,8 +45,14 @@ export function useGradeMutation(
         if (cardNotFound) return;
 
         if (cardToBeReviewedToday) {
-          // We update the due date of the card
-          draft[cardIndex].cards.due = day.toISOString();
+          const nextCard = stringifyCardDate(
+            gradeCard(parseCardDate(card.cards), grade)
+          );
+          draft[cardIndex].cards = {
+            ...draft[cardIndex].cards,
+            ...nextCard,
+          };
+
           draft.sort((a, b) => (isBefore(a.cards.due, b.cards.due) ? -1 : 1));
           return;
         }
