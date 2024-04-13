@@ -118,6 +118,33 @@ export const cardRouter = router({
       console.log(success`Deleted card: ${input}`);
     }),
 
+  undoDelete: publicProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const card = await db.query.cards.findFirst({
+        where: eq(cards.id, input),
+      });
+      if (!card) {
+        throw new TRPCError({
+          message: "Card not found",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      console.log("Undoing delete card");
+      await db.transaction(async (tx) => {
+        await tx
+          .update(cards)
+          .set({ deleted: false })
+          .where(eq(cards.id, input));
+        await tx
+          .update(cardContents)
+          .set({ deleted: false })
+          .where(eq(cardContents.cardId, input));
+      });
+      console.log(success`Undo delete card: ${input}`);
+    }),
+
   // Edit card content
   edit: publicProcedure
     .input(

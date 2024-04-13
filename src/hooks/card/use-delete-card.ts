@@ -10,6 +10,8 @@ type DeleteMutation = ReturnType<typeof trpc.card.delete.useMutation>;
  */
 export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
   const utils = trpc.useUtils();
+  const undo = trpc.card.undoDelete.useMutation();
+
   return trpc.card.delete.useMutation({
     ...options,
     onMutate: async (id: string) => {
@@ -27,9 +29,7 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
         return draft.filter((card) => card.cards.id !== id);
       });
       utils.card.all.setData(undefined, nextCards);
-      toast.success("Card deleted.");
 
-      // TODO update stats
       const stats = utils.card.stats.getData();
       if (!stats) {
         return { previousCards: allCards };
@@ -52,6 +52,20 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
       });
       utils.card.stats.setData(undefined, nextStats);
 
+      // Currently, I place this undo functionality here because
+      // The previous values are readily available
+      // I'm not sure what the best approach is, especially if we click on an older toast
+      toast.success("Card deleted.", {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            undo.mutate(id);
+            utils.card.all.setData(undefined, allCards);
+            utils.card.stats.setData(undefined, stats);
+          },
+        },
+      });
+
       return { previousCards: allCards, previousStats: stats };
     },
 
@@ -62,7 +76,6 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
 
     onError: (error, _variables, context) => {
       console.error(error.message);
-      toast.error("Failed to delete card");
 
       if (context?.previousCards) {
         utils.card.all.setData(undefined, context.previousCards);
