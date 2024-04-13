@@ -1,12 +1,5 @@
 import db from "@/db";
-import {
-  Card,
-  CardContent,
-  cardContents,
-  cards,
-  ratings,
-  states,
-} from "@/schema";
+import { Card, CardContent, cardContents, cards, ratings } from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { gradeCard, newCardWithContent } from "@/utils/fsrs";
@@ -14,6 +7,8 @@ import { TRPCError } from "@trpc/server";
 import { endOfDay } from "date-fns";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
+
+const MAX_CARDS_TO_FETCH = 50;
 
 export const cardRouter = router({
   // Get all cards with their contents
@@ -32,7 +27,9 @@ export const cardRouter = router({
           lte(cards.due, now),
         ),
       )
-      .orderBy(asc(cards.due));
+      .orderBy(asc(cards.due))
+      .limit(MAX_CARDS_TO_FETCH);
+
     console.log(success`Fetched ${cardWithContents.length} cards`);
     return cardWithContents as {
       cards: Card;

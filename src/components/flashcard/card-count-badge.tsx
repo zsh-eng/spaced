@@ -23,8 +23,6 @@ export default function CardCountBadge() {
     return null;
   }
 
-  console.log(JSON.stringify(stats, null, 2));
-
   return (
     <div className="flex w-full justify-center gap-x-2">
       <TooltipProvider>
