@@ -123,3 +123,5 @@ export default function CreateFlashcardForm() {
     </UiCard>
   );
 }
+
+CreateFlashcardForm.displayName = "CreateFlashcardForm";
