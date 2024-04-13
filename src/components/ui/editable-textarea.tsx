@@ -1,6 +1,6 @@
-import { Textarea, TextareaProps } from '@/components/ui/textarea';
-import { cn } from '@/utils/ui';
-import { forwardRef } from 'react';
+import { Textarea, TextareaProps } from "@/components/ui/textarea";
+import { cn } from "@/utils/ui";
+import { forwardRef } from "react";
 
 export interface EditableTextareaProps extends TextareaProps {
   editing: boolean;
@@ -9,14 +9,23 @@ export interface EditableTextareaProps extends TextareaProps {
 
 const EditableTextarea = forwardRef<HTMLTextAreaElement, EditableTextareaProps>(
   (
-    { editing, className, setEditing, onDoubleClick, readOnly, ...props },
-    ref
+    {
+      editing,
+      className,
+      setEditing,
+      onDoubleClick,
+      readOnly,
+      rows = 4,
+      ...props
+    },
+    ref,
   ) => {
     return (
       <Textarea
         readOnly={!editing || readOnly}
-        className={cn(editing ? '' : 'border-0', className)}
+        className={cn(editing ? "" : "border-0", className)}
         ref={ref}
+        rows={rows}
         onDoubleClick={(e) => {
           if (!editing) {
             setEditing(true);
@@ -26,9 +35,9 @@ const EditableTextarea = forwardRef<HTMLTextAreaElement, EditableTextareaProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
-EditableTextarea.displayName = 'EditableTextarea';
+EditableTextarea.displayName = "EditableTextarea";
 
 export default EditableTextarea;

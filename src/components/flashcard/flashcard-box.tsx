@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import CardCountBadge from '@/components/flashcard/card-count-badge';
-import Flashcard from '@/components/flashcard/flashcard';
-import { useGradeCard } from '@/hooks/card/use-grade-card';
-import { CardContent, type Rating } from '@/schema';
-import { getReviewDateForEachRating } from '@/utils/fsrs';
-import { trpc } from '@/utils/trpc';
-import { intlFormatDistance } from 'date-fns';
-import { toast } from 'sonner';
+import CardCountBadge from "@/components/flashcard/card-count-badge";
+import Flashcard from "@/components/flashcard/flashcard";
+import { useGradeCard } from "@/hooks/card/use-grade-card";
+import { CardContent, type Rating } from "@/schema";
+import { getReviewDateForEachRating } from "@/utils/fsrs";
+import { trpc } from "@/utils/trpc";
+import { intlFormatDistance } from "date-fns";
+import { toast } from "sonner";
 
 type Props = {};
 
@@ -32,18 +32,18 @@ export default function FlashcardBox({}: Props) {
 
     toast(`Card marked as ${rating}.`, {
       action: {
-        label: 'Undo',
+        label: "Undo",
         onClick: () => {},
       },
       description: `You'll see this again ${intlFormatDistance(
         reviewDay,
-        new Date()
+        new Date(),
       )}`,
     });
   };
 
   return (
-    <div className='py-16 flex flex-col gap-y-2 w-full items-center'>
+    <div className="flex w-full flex-col items-center gap-y-2 ">
       <CardCountBadge />
       {isCard && (
         <Flashcard
