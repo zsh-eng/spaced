@@ -1,12 +1,21 @@
 import db from "@/db";
-import { Card, CardContent, cardContents, cards, ratings } from "@/schema";
+import {
+  Card,
+  CardContent,
+  cardContents,
+  cards,
+  ratings,
+  reviewLogs,
+} from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
-import { gradeCard, newCardWithContent } from "@/utils/fsrs";
+import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { TRPCError } from "@trpc/server";
 import { endOfDay } from "date-fns";
-import { and, asc, eq, lte } from "drizzle-orm";
+import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
+
+const MAX_CARDS_TO_FETCH = 50;
 
 export const cardRouter = router({
   // Get all cards with their contents
@@ -25,12 +34,39 @@ export const cardRouter = router({
           lte(cards.due, now),
         ),
       )
-      .orderBy(asc(cards.due));
+      .orderBy(asc(cards.due))
+      .limit(MAX_CARDS_TO_FETCH);
+
     console.log(success`Fetched ${cardWithContents.length} cards`);
     return cardWithContents as {
       cards: Card;
       card_contents: CardContent;
     }[];
+  }),
+
+  // Get the stats for each state of card for the day
+  stats: publicProcedure.query(async ({ ctx }) => {
+    console.log("Fetching stats");
+    const now = endOfDay(new Date());
+
+    const stats = await db
+      .select({
+        total: sql<number>`cast(count(*) as int)`,
+        new: sql<number>`cast(count(
+          case when ${cards.state} = 'New' then 1 else null end
+        ) as int)`,
+        learning: sql<number>`cast(count(
+          case when ${cards.state} = 'Learning' OR ${cards.state} = 'Relearning' then 1 else null end
+        ) as int)`,
+        review: sql<number>`cast(count(
+          case when ${cards.state} = 'Review' then 1 else null end
+        ) as int)`,
+      })
+      .from(cards)
+      .where(and(eq(cards.deleted, false), lte(cards.due, now)));
+
+    console.log(success`Fetched stats`);
+    return stats[0];
   }),
 
   // Create a new card with content
@@ -46,12 +82,21 @@ export const cardRouter = router({
       const { question, answer } = input;
       const { card, cardContent } = newCardWithContent(question, answer);
 
-      await db.transaction(async (tx) => {
-        await tx.insert(cards).values(card);
-        await tx.insert(cardContents).values(cardContent);
+      const res = await db.transaction(async (tx) => {
+        const insertedCard = await tx.insert(cards).values(card).returning();
+        const insertedCardContent = await tx
+          .insert(cardContents)
+          .values(cardContent)
+          .returning();
+        return {
+          cards: insertedCard[0],
+          card_contents: insertedCardContent[0],
+        };
       });
 
       console.log(success`Added card: ${card.id}`);
+
+      return res;
     }),
 
   // Delete a card
@@ -71,6 +116,33 @@ export const cardRouter = router({
       });
 
       console.log(success`Deleted card: ${input}`);
+    }),
+
+  undoDelete: publicProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const card = await db.query.cards.findFirst({
+        where: eq(cards.id, input),
+      });
+      if (!card) {
+        throw new TRPCError({
+          message: "Card not found",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      console.log("Undoing delete card");
+      await db.transaction(async (tx) => {
+        await tx
+          .update(cards)
+          .set({ deleted: false })
+          .where(eq(cards.id, input));
+        await tx
+          .update(cardContents)
+          .set({ deleted: false })
+          .where(eq(cardContents.cardId, input));
+      });
+      console.log(success`Undo delete card: ${input}`);
     }),
 
   // Edit card content
@@ -119,6 +191,13 @@ export const cardRouter = router({
 
       const nextCard =
         input.grade === "Manual" ? card : gradeCard(card, input.grade);
+      const reviewLog = cardToReviewLog(card, input.grade);
+
+      await db.transaction(async (tx) => {
+        await tx.update(cards).set(nextCard).where(eq(cards.id, input.id));
+        await tx.insert(reviewLogs).values(reviewLog);
+      });
+
       await db.update(cards).set(nextCard).where(eq(cards.id, input.id));
       console.log(success`Graded card: ${input.id}`);
     }),

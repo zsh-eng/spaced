@@ -2,12 +2,12 @@
 
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import Flashcard from "@/components/flashcard/flashcard";
-import Loader from "@/components/ui/loader";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { CardContent, type Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Props = {};
@@ -18,8 +18,8 @@ export default function FlashcardBox({}: Props) {
 
   if (isLoading || cardsWithContent.length === 0) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader />
+      <div className="flex h-96 w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-accentblue" />
       </div>
     );
   }

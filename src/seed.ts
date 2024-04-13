@@ -1,5 +1,5 @@
-import db from '@/db';
-import { success } from '@/utils/format';
+import db from "@/db";
+import { success } from "@/utils/format";
 import {
   NewCard,
   NewCardContent,
@@ -9,9 +9,9 @@ import {
   ratings,
   reviewLogs,
   states,
-} from '@/schema';
-import { faker } from '@faker-js/faker';
-import { Card, CardContent, ReviewLog } from './schema';
+} from "@/schema";
+import { faker } from "@faker-js/faker";
+import { Card, CardContent, ReviewLog } from "./schema";
 
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/
@@ -31,10 +31,10 @@ function generateNewCard(newCard?: Partial<NewCard>): NewCard {
     last_review: new Date(
       faker.date
         .between({
-          from: new Date('2024-01-01'),
+          from: new Date("2024-01-01"),
           to: new Date(),
         })
-        .getTime()
+        .getTime(),
     ),
     ...newCard,
   };
@@ -42,13 +42,13 @@ function generateNewCard(newCard?: Partial<NewCard>): NewCard {
 
 function generateNewCardContent(
   cardId: string,
-  newCardContent?: Partial<NewCardContent>
+  newCardContent?: Partial<NewCardContent>,
 ): NewCardContent {
   return {
     id: crypto.randomUUID(),
     cardId,
-    question: faker.lorem.sentence(),
-    answer: faker.lorem.paragraph(),
+    question: faker.lorem.paragraph(),
+    answer: faker.lorem.paragraph({ min: 1, max: 5 }),
     source: faker.lorem.sentence(),
     sourceId: faker.lorem.sentence(),
     ...newCardContent,
@@ -57,7 +57,7 @@ function generateNewCardContent(
 
 function generateNewReviewLog(
   cardId: string,
-  newReviewLog?: Partial<NewReviewLog>
+  newReviewLog?: Partial<NewReviewLog>,
 ): NewReviewLog {
   return {
     id: crypto.randomUUID(),
@@ -86,24 +86,39 @@ function generateNewReviewLog(
  *
  */
 async function main() {
-  console.log('Deleting all data from the database');
+  console.log("Deleting all data from the database");
   await db.delete(reviewLogs).all();
   await db.delete(cardContents).all();
   await db.delete(cards).all();
   console.log(success`Deleted all data from the database`);
 
-  const itemsToCreate = 100;
-  console.log('Seeding database with', itemsToCreate, 'items');
+  const itemsToCreate = 10000;
+  // Seeding too many items will cause error with Turso for too many SQL variables
+  const skip = 2000;
+  console.log("Seeding database with", itemsToCreate, "items");
 
-  for (let i = 0; i < itemsToCreate; i++) {
-    const card = generateNewCard();
-    const cardContent = generateNewCardContent(card.id);
-    const reviewLog = generateNewReviewLog(card.id);
+  for (let i = 0; i < itemsToCreate; i += skip) {
+    const cardsToInsert: NewCard[] = [];
+    const cardContentsToInsert: NewCardContent[] = [];
+    const reviewLogsToInsert: NewReviewLog[] = [];
 
-    await db.insert(cards).values(card);
-    await db.insert(cardContents).values(cardContent);
-    await db.insert(reviewLogs).values(reviewLog);
+    for (let j = 0; j < skip; j++) {
+      const card = generateNewCard();
+      const cardContent = generateNewCardContent(card.id);
+      const reviewLog = generateNewReviewLog(card.id);
+
+      cardsToInsert.push(card);
+      cardContentsToInsert.push(cardContent);
+      reviewLogsToInsert.push(reviewLog);
+    }
+
+    await db.insert(cards).values(cardsToInsert);
+    await db.insert(cardContents).values(cardContentsToInsert);
+    await db.insert(reviewLogs).values(reviewLogsToInsert);
+
+    console.log(success`Seeded item ${i + 1}-${i + skip}`);
   }
+
   console.log(success`Seeded database with ${itemsToCreate} items`);
 }
 

@@ -63,6 +63,7 @@ export default function Flashcard({
 
   const editCardMutation = useEditCard();
   const deleteCard = useDeleteCard();
+
   const handleEdit = () => {
     const hasCardChanged = content.id !== initialCardContent.id;
     if (hasCardChanged) return;
