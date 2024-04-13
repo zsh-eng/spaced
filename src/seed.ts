@@ -47,8 +47,8 @@ function generateNewCardContent(
   return {
     id: crypto.randomUUID(),
     cardId,
-    question: faker.lorem.sentence(),
-    answer: faker.lorem.paragraph(),
+    question: faker.lorem.paragraph(),
+    answer: faker.lorem.paragraph({ min: 1, max: 5 }),
     source: faker.lorem.sentence(),
     sourceId: faker.lorem.sentence(),
     ...newCardContent,
@@ -92,26 +92,32 @@ async function main() {
   await db.delete(cards).all();
   console.log(success`Deleted all data from the database`);
 
-  const itemsToCreate = 100;
+  const itemsToCreate = 10000;
+  // Seeding too many items will cause error with Turso for too many SQL variables
+  const skip = 2000;
   console.log("Seeding database with", itemsToCreate, "items");
 
-  const cardsToInsert: NewCard[] = [];
-  const cardContentsToInsert: NewCardContent[] = [];
-  const reviewLogsToInsert: NewReviewLog[] = [];
+  for (let i = 0; i < itemsToCreate; i += skip) {
+    const cardsToInsert: NewCard[] = [];
+    const cardContentsToInsert: NewCardContent[] = [];
+    const reviewLogsToInsert: NewReviewLog[] = [];
 
-  for (let i = 0; i < itemsToCreate; i++) {
-    const card = generateNewCard();
-    const cardContent = generateNewCardContent(card.id);
-    const reviewLog = generateNewReviewLog(card.id);
+    for (let j = 0; j < skip; j++) {
+      const card = generateNewCard();
+      const cardContent = generateNewCardContent(card.id);
+      const reviewLog = generateNewReviewLog(card.id);
 
-    cardsToInsert.push(card);
-    cardContentsToInsert.push(cardContent);
-    reviewLogsToInsert.push(reviewLog);
+      cardsToInsert.push(card);
+      cardContentsToInsert.push(cardContent);
+      reviewLogsToInsert.push(reviewLog);
+    }
+
+    await db.insert(cards).values(cardsToInsert);
+    await db.insert(cardContents).values(cardContentsToInsert);
+    await db.insert(reviewLogs).values(reviewLogsToInsert);
+
+    console.log(success`Seeded item ${i + 1}-${i + skip}`);
   }
-
-  await db.insert(cards).values(cardsToInsert);
-  await db.insert(cardContents).values(cardContentsToInsert);
-  await db.insert(reviewLogs).values(reviewLogsToInsert);
 
   console.log(success`Seeded database with ${itemsToCreate} items`);
 }
