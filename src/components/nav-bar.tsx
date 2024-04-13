@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
+import * as React from "react";
 
-import { cn } from "@/utils/ui";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,52 +13,15 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Github, GithubIcon, SquareLibraryIcon } from "lucide-react";
-
-const components: { title: string; href: string; description: string }[] = [
-  {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
-    description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
-  },
-  {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
-    description:
-      "For sighted users to preview content available behind a link.",
-  },
-  {
-    title: "Progress",
-    href: "/docs/primitives/progress",
-    description:
-      "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
-  },
-  {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
-  },
-  {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-  },
-  {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
-  },
-];
+import { cn } from "@/utils/ui";
+import { Github } from "lucide-react";
 
 export function NavigationBar() {
   return (
-    <NavigationMenu className="w-full max-w-7xl px-2 py-2 sm:px-6 lg:px-8">
+    <NavigationMenu className="w-full px-2 py-2 sm:px-6 lg:px-8">
       <NavigationMenuList>
         {/* <NavigationMenuItem>
-          <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Home</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
               <li className="row-span-3">
@@ -99,11 +61,17 @@ export function NavigationBar() {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Link href="/cards/create" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Create
-            </NavigationMenuLink>
-          </Link>
+          <NavigationMenuTrigger>Create</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid w-full gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+              <ListItem href="/cards/create" title="Create">
+                Create a new flashcard with a question and answer.
+              </ListItem>
+              <ListItem href="/cards/create-many" title="Bulk Create">
+                Create many flashcards at once.
+              </ListItem>
+            </ul>
+          </NavigationMenuContent>
         </NavigationMenuItem>
 
         <NavigationMenuItem>
