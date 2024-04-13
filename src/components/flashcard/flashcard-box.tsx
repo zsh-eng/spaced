@@ -2,6 +2,8 @@
 
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import Flashcard from "@/components/flashcard/flashcard";
+import Loader from "@/components/ui/loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { CardContent, type Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
@@ -16,7 +18,11 @@ export default function FlashcardBox({}: Props) {
   const gradeMutation = useGradeCard();
 
   if (isLoading || cardsWithContent.length === 0) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-[80vh] w-full items-center justify-center">
+        <Loader />
+      </div>
+    );
   }
 
   const { cards: card, card_contents: cardContent } = cardsWithContent[0]!;

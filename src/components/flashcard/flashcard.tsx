@@ -161,6 +161,7 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
         />
 
+
         <hr className="mx-auto w-8" />
 
         <div className="relative w-full">
