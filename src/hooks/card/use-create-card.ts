@@ -1,4 +1,3 @@
-import { newCardWithContent, stringifyCardDate } from "@/utils/fsrs";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 
@@ -13,7 +12,7 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
 
   return trpc.card.create.useMutation({
     ...options,
-    onMutate: async ({ question, answer }) => {
+    onSuccess: async (data) => {
       await utils.card.all.cancel();
 
       const allCards = utils.card.all.getData();
@@ -21,25 +20,17 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
         return;
       }
 
-      const newCard = newCardWithContent(question, answer);
-      const newCardWithDateString = {
-        cards: stringifyCardDate(newCard.card),
-        card_contents: newCard.cardContent,
-      };
-      const nextCards = [...allCards, newCardWithDateString];
+      // Put the new card at the end of the deck
+      const nextCards = [...allCards, data];
       utils.card.all.setData(undefined, nextCards);
       toast.success("Card created.");
 
       return { previousCards: allCards };
     },
 
-    onError: (error, _variables, context) => {
+    onError: (error) => {
       console.error(error.message);
       toast.error("Failed to create card");
-
-      if (context?.previousCards) {
-        utils.card.all.setData(undefined, context.previousCards);
-      }
     },
   });
 }

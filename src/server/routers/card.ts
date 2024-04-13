@@ -46,12 +46,21 @@ export const cardRouter = router({
       const { question, answer } = input;
       const { card, cardContent } = newCardWithContent(question, answer);
 
-      await db.transaction(async (tx) => {
-        await tx.insert(cards).values(card);
-        await tx.insert(cardContents).values(cardContent);
+      const res = await db.transaction(async (tx) => {
+        const insertedCard = await tx.insert(cards).values(card).returning();
+        const insertedCardContent = await tx
+          .insert(cardContents)
+          .values(cardContent)
+          .returning();
+        return {
+          cards: insertedCard[0],
+          card_contents: insertedCardContent[0],
+        };
       });
 
       console.log(success`Added card: ${card.id}`);
+
+      return res;
     }),
 
   // Delete a card
