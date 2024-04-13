@@ -14,7 +14,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
-import { Github } from "lucide-react";
+import { Github, Telescope } from "lucide-react";
 
 export function NavigationBar() {
   return (
@@ -51,6 +51,17 @@ export function NavigationBar() {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem> */}
+
+        <NavigationMenuItem>
+          <Link href="/" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <Telescope className="xs:mr-2 h-6 w-6" strokeWidth={1.5} />
+              <span className="xs:block hidden text-lg font-semibold">
+                spaced
+              </span>
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
 
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
