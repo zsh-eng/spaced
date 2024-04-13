@@ -83,6 +83,22 @@ export function getReviewDateForEachRating(
   return schemaRatingtoReviewDate;
 }
 
+export function stringifyCardDate(card: Card): StringifyDate<Card> {
+  return {
+    ...card,
+    due: card.due.toISOString(),
+    last_review: card.last_review?.toISOString() ?? null,
+  };
+}
+
+export function parseCardDate(card: AllowDateString<Card>): Card {
+  return {
+    ...card,
+    due: new Date(card.due),
+    last_review: card.last_review ? new Date(card.last_review) : null,
+  };
+}
+
 export function gradeCard(card: Card, schemaRating: Rating): Card {
   const now = new Date();
   const recordLog = f.repeat(card, now);
