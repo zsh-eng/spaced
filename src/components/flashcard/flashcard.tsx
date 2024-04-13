@@ -161,7 +161,6 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
         />
 
-
         <hr className="mx-auto w-8" />
 
         <div className="relative w-full">
@@ -177,20 +176,18 @@ export default function Flashcard({
             </div>
           </div>
 
-          {
-            <EditableTextarea
-              className="h-40 resize-none"
-              spellCheck="false"
-              editing={editing}
-              setEditing={setEditing}
-              placeholder="Answer"
-              value={answer}
-              onChange={(e) => {
-                setContent((prev) => ({ ...prev, answer: e.target.value }));
-              }}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-          }
+          <EditableTextarea
+            className="h-40 resize-none"
+            spellCheck="false"
+            editing={editing}
+            setEditing={setEditing}
+            placeholder="Answer"
+            value={answer}
+            onChange={(e) => {
+              setContent((prev) => ({ ...prev, answer: e.target.value }));
+            }}
+            onKeyDown={(e) => e.stopPropagation()}
+          />
         </div>
       </UiCardContent>
 

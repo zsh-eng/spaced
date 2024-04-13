@@ -1,15 +1,16 @@
-'use client';
+"use client";
 // See https://stackoverflow.com/questions/74992326/does-use-client-in-next-js-13-root-layout-make-whole-routes-client-component
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { cn } from '@/utils/ui';
-import { Toaster } from '@/components/ui/sonner';
-import { trpc } from '@/utils/trpc';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/utils/ui";
+import { Toaster } from "@/components/ui/sonner";
+import { trpc } from "@/utils/trpc";
+import { NavigationBar } from "@/components/nav-bar";
 
 // See https://ui.shadcn.com/docs/installation/next
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 // TODO handle metadata with tRPC and Next.js
 // export const metadata: Metadata = {
@@ -23,13 +24,14 @@ function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang="en">
       <body
         className={cn(
-          'min-h-screen bg-background font-sans antialiased',
-          inter.variable
+          "min-h-screen bg-background font-sans antialiased",
+          inter.variable,
         )}
       >
+        <NavigationBar />
         {children}
         <Toaster />
       </body>
