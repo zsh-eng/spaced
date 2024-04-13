@@ -72,13 +72,9 @@ export default function CreateFlashcardForm() {
   return (
     <UiCard className="w-full md:w-[36rem]" ref={cardRef}>
       <UiCardHeader>
-        <UiCardTitle>
-          <div className="flex justify-between">
-            <p className="">Create</p>
-          </div>
-        </UiCardTitle>
+        <UiCardTitle>Create</UiCardTitle>
         <UiCardDescription>
-          <p>Fill in the question and answer to your flashcard.</p>
+          Fill in the question and answer to your flashcard.
         </UiCardDescription>
       </UiCardHeader>
 
