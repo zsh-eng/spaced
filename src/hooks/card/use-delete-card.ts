@@ -15,8 +15,9 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
     onMutate: async (id: string) => {
       await utils.card.all.cancel();
       const allCards = utils.card.all.getData();
+      const card = allCards?.find((card) => card.cards.id === id);
 
-      if (!allCards) {
+      if (!allCards || !card) {
         return;
       }
 
@@ -25,9 +26,15 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
       });
       utils.card.all.setData(undefined, nextCards);
 
-      toast.success("Card deleted.");
+      // TODO update stats
 
+      toast.success("Card deleted.");
       return { previousCards: allCards };
+    },
+
+    onSuccess: () => {
+      utils.card.all.refetch();
+      utils.card.stats.refetch();
     },
 
     onError: (error, _variables, context) => {

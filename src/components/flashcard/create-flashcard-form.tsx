@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCard } from "@/hooks/card/use-create-card";
+import { useDeleteCard } from "@/hooks/card/use-delete-card";
+import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +24,9 @@ export default function CreateFlashcardForm() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const createCardMutation = useCreateCard();
+  const deleteCardMutation = useDeleteCard();
+  const isLoading =
+    createCardMutation.isPending || deleteCardMutation.isPending;
 
   const onCreate = async () => {
     if (!question || !answer) {
@@ -39,13 +44,29 @@ export default function CreateFlashcardForm() {
       return;
     }
 
-    await createCardMutation.mutateAsync({
-      question,
-      answer,
-    });
+    try {
+      const card = await createCardMutation.mutateAsync({
+        question,
+        answer,
+      });
 
-    setQuestion("");
-    setAnswer("");
+      const rollback = () => {
+        deleteCardMutation.mutate(card.cards.id);
+        setQuestion(card.card_contents.question);
+        setAnswer(card.card_contents.answer);
+      };
+
+      toast.success("Card created.", {
+        action: {
+          label: "Undo",
+          onClick: rollback,
+        },
+      });
+      setQuestion("");
+      setAnswer("");
+    } catch (err) {
+      toast.error("Failed to create card");
+    }
   };
 
   return (
@@ -64,6 +85,7 @@ export default function CreateFlashcardForm() {
       <UiCardContent className="flex min-h-96 flex-col gap-y-4">
         <Textarea
           className="h-40 resize-none border-0"
+          disabled={isLoading}
           spellCheck="false"
           placeholder="Question"
           value={question}
@@ -77,6 +99,7 @@ export default function CreateFlashcardForm() {
 
         <Textarea
           className="h-40 resize-none border-0"
+          disabled={isLoading}
           spellCheck="false"
           placeholder="Answer"
           value={answer}
@@ -90,10 +113,14 @@ export default function CreateFlashcardForm() {
       <UiCardContent className="h-24">
         <Button
           className="mt-4 w-full"
+          disabled={isLoading || !question || !answer}
           size="lg"
           variant="outline"
           onClick={() => onCreate()}
         >
+          {createCardMutation.isPending && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
           Create
         </Button>
       </UiCardContent>

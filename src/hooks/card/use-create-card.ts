@@ -13,24 +13,11 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
   return trpc.card.create.useMutation({
     ...options,
     onSuccess: async (data) => {
-      await utils.card.all.cancel();
-
-      const allCards = utils.card.all.getData();
-      if (!allCards) {
-        return;
-      }
-
-      // Put the new card at the end of the deck
-      const nextCards = [...allCards, data];
-      utils.card.all.setData(undefined, nextCards);
-      toast.success("Card created.");
-
-      return { previousCards: allCards };
+      await utils.card.all.refetch();
     },
 
     onError: (error) => {
       console.error(error.message);
-      toast.error("Failed to create card");
     },
   });
 }
