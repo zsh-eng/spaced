@@ -2,6 +2,7 @@
 
 import CreateFlashcardSimpleForm from "@/components/flashcard/create-flashcard-simple-form";
 import { Button } from "@/components/ui/button";
+import { useCreateManyCard } from "@/hooks/card/use-create-many-card";
 import { cn } from "@/utils/ui";
 import { Plus, SendHorizonal, TrashIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -22,9 +23,10 @@ function newFormValues(): FormValues {
 }
 
 export default function CreateManyFlashcardForm() {
-  // We keep track of form state using uuids
   const [forms, setForms] = useState<FormValues[]>([newFormValues()]);
   const [isPressed, setIsPressed] = useState(false);
+  const createManyMutation = useCreateManyCard();
+  const isPending = createManyMutation.isPending;
 
   const handleAddForm = () => {
     setIsPressed(true);
@@ -52,11 +54,23 @@ export default function CreateManyFlashcardForm() {
     setForms([]);
   };
 
+  const handleSubmit = () => {
+    toast.promise(createManyMutation.mutateAsync(forms), {
+      loading: "Creating flashcards...",
+      success: () => {
+        setForms([]);
+        return "Flashcards created.";
+      },
+      error: "Failed to create flashcards.",
+    });
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === " ") {
-        handleAddForm();
+      if (e.key !== " ") {
+        return;
       }
+      handleAddForm();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -70,17 +84,26 @@ export default function CreateManyFlashcardForm() {
           onClick={() => handleAddForm()}
           variant="outline"
           className={cn("transition", isPressed ? "scale-105" : "")}
+          disabled={isPending}
         >
           <Plus className="mr-2 h-4 w-4" />
           {"Press 'space' to Add"}
         </Button>
 
-        <Button variant="outline" disabled={forms.length === 0}>
+        <Button
+          variant="outline"
+          disabled={forms.length === 0 || isPending}
+          onClick={() => handleSubmit()}
+        >
           <SendHorizonal className="mr-2 h-4 w-4" />
           Create All
         </Button>
 
-        <Button variant="outline" onClick={() => handleDeleteAll()}>
+        <Button
+          variant="outline"
+          onClick={() => handleDeleteAll()}
+          disabled={isPending}
+        >
           <TrashIcon className="mr-2 h-4 w-4" />
           Delete All
         </Button>
@@ -89,6 +112,7 @@ export default function CreateManyFlashcardForm() {
       <section className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
         {forms.map(({ id, ...values }) => (
           <CreateFlashcardSimpleForm
+            isPending={isPending}
             key={id}
             values={values}
             onChange={(values) => handleEdit({ id, ...values })}

@@ -13,17 +13,20 @@ type Props = {
   values: Values;
   onChange: (values: Values) => void;
   onDelete: () => void;
+  isPending?: boolean;
 };
 
 export default function CreateFlashcardSimpleForm({
   values,
   onChange,
   onDelete,
+  isPending = false,
 }: Props) {
   return (
     <div className={cn(UiCardClasses, "flex w-96 flex-col px-4 py-2")}>
       <Textarea
         className="h-40 resize-none border-0"
+        disabled={isPending}
         spellCheck="false"
         placeholder="Question"
         value={values.question}
@@ -40,6 +43,7 @@ export default function CreateFlashcardSimpleForm({
 
       <Textarea
         className="h-40 resize-none border-0"
+        disabled={isPending}
         spellCheck="false"
         placeholder="Answer"
         value={values.answer}
@@ -53,6 +57,7 @@ export default function CreateFlashcardSimpleForm({
       />
 
       <Button
+        disabled={isPending}
         className="mt-2"
         size="icon"
         variant="outline"
