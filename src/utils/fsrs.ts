@@ -3,6 +3,7 @@ import {
   CardContent,
   NewCard,
   NewCardContent,
+  NewReviewLog,
   Rating,
   State,
   ratings,
@@ -179,5 +180,16 @@ export function newCardContentToCardContent(
     source: newCardContent.source ?? "",
     sourceId: null,
     extend: newCardContent.extend ?? {},
+  };
+}
+
+export function cardToReviewLog(card: Card, grade: Rating): NewReviewLog {
+  return {
+    ...card,
+    id: crypto.randomUUID(),
+    cardId: card.id,
+    last_elapsed_days: card.elapsed_days,
+    review: new Date(),
+    grade,
   };
 }

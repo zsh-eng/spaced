@@ -1,8 +1,15 @@
 import db from "@/db";
-import { Card, CardContent, cardContents, cards, ratings } from "@/schema";
+import {
+  Card,
+  CardContent,
+  cardContents,
+  cards,
+  ratings,
+  reviewLogs,
+} from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
-import { gradeCard, newCardWithContent } from "@/utils/fsrs";
+import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { TRPCError } from "@trpc/server";
 import { endOfDay } from "date-fns";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
@@ -157,6 +164,13 @@ export const cardRouter = router({
 
       const nextCard =
         input.grade === "Manual" ? card : gradeCard(card, input.grade);
+      const reviewLog = cardToReviewLog(card, input.grade);
+
+      await db.transaction(async (tx) => {
+        await tx.update(cards).set(nextCard).where(eq(cards.id, input.id));
+        await tx.insert(reviewLogs).values(reviewLog);
+      });
+
       await db.update(cards).set(nextCard).where(eq(cards.id, input.id));
       console.log(success`Graded card: ${input.id}`);
     }),
