@@ -17,8 +17,20 @@ import { useClickOutside } from '@/hooks/use-click-outside';
 import useKeydownRating from '@/hooks/use-keydown-rating';
 import { CardContent, Rating, type Card } from '@/schema';
 import { AllowDateString } from '@/utils/fsrs';
-import { FilePenIcon } from 'lucide-react';
+import { FilePenIcon, TrashIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useDeleteCard } from '@/hooks/card/use-delete-card';
 
 type Props = {
   card: AllowDateString<Card>;
@@ -48,6 +60,7 @@ export default function Flashcard({
   const { id, question, answer } = content;
 
   const editCardMutation = useEditCard();
+  const deleteCard = useDeleteCard();
   const handleEdit = () => {
     const hasCardChanged = content.id !== initialCardContent.id;
     if (hasCardChanged) return;
@@ -88,16 +101,42 @@ export default function Flashcard({
         <UiCardTitle>
           <div className='flex justify-between'>
             Question
-            <Toggle
-              aria-label='toggle edit'
-              pressed={editing}
-              onPressedChange={(isEditing) => {
-                setEditing(isEditing);
-                if (!isEditing) handleEdit();
-              }}
-            >
-              <FilePenIcon className='h-4 w-4' strokeWidth={1.5} />
-            </Toggle>
+            <div className='flex gap-x-2'>
+              <Toggle
+                aria-label='toggle edit'
+                pressed={editing}
+                onPressedChange={(isEditing) => {
+                  setEditing(isEditing);
+                  if (!isEditing) handleEdit();
+                }}
+              >
+                <FilePenIcon className='h-4 w-4' strokeWidth={1.5} />
+              </Toggle>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <Button variant='outline' size='icon'>
+                    <TrashIcon className='h-4 w-4' strokeWidth={1.5} />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmation</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this card?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant='destructive'
+                      onClick={() => deleteCard.mutate(card.id)}
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </UiCardTitle>
         <UiCardDescription>{card.state}</UiCardDescription>

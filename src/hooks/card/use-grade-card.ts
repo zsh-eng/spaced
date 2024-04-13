@@ -15,9 +15,7 @@ type GradeMutation = ReturnType<typeof trpc.card.grade.useMutation>;
 /**
  * Hook to grade a card.
  */
-export function useGradeMutation(
-  options?: GradeMutationOptions
-): GradeMutation {
+export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
   const utils = trpc.useUtils();
 
   return trpc.card.grade.useMutation({
