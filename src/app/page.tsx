@@ -1,11 +1,8 @@
-import FlashcardBox from '@/components/flashcard/flashcard-box';
-
-// Prevent Next.js from caching the page in development
-export const dynamic = 'force-dynamic';
+import FlashcardBox from "@/components/flashcard/flashcard-box";
 
 export default async function Home() {
   return (
-    <main className='flex min-h-screen flex-col items-center justify-center lg:justify-between py-24 px-2'>
+    <main className="flex flex-col items-center justify-center px-2 py-24 lg:justify-between">
       <FlashcardBox />
     </main>
   );
