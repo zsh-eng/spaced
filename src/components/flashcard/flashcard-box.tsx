@@ -2,19 +2,18 @@
 
 import CardCountBadge from '@/components/flashcard/card-count-badge';
 import Flashcard from '@/components/flashcard/flashcard';
-import { useGradeMutation } from '@/hooks/card/use-grade-mutation';
+import { useGradeCard } from '@/hooks/card/use-grade-card';
 import { CardContent, type Rating } from '@/schema';
 import { getReviewDateForEachRating } from '@/utils/fsrs';
 import { trpc } from '@/utils/trpc';
 import { intlFormatDistance } from 'date-fns';
-import { useState } from 'react';
 import { toast } from 'sonner';
 
 type Props = {};
 
 export default function FlashcardBox({}: Props) {
   const { data: cardsWithContent = [], isLoading } = trpc.card.all.useQuery();
-  const gradeMutation = useGradeMutation();
+  const gradeMutation = useGradeCard();
 
   if (isLoading || cardsWithContent.length === 0) {
     return <div>Loading...</div>;
