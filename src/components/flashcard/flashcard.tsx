@@ -186,7 +186,7 @@ export default function Flashcard({
             className='w-full'
             onClick={() => setOpen(true)}
           >
-            Press space to open
+            Reveal Answer
           </Button>
         )}
       </UiCardFooter>
