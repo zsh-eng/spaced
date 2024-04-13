@@ -12,7 +12,7 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
 
   return trpc.card.create.useMutation({
     ...options,
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       await utils.card.all.refetch();
     },
 

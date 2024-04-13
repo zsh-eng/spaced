@@ -14,6 +14,8 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
     ...options,
     onMutate: async (id: string) => {
       await utils.card.all.cancel();
+      await utils.card.stats.cancel();
+
       const allCards = utils.card.all.getData();
       const card = allCards?.find((card) => card.cards.id === id);
 
@@ -25,11 +27,32 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
         return draft.filter((card) => card.cards.id !== id);
       });
       utils.card.all.setData(undefined, nextCards);
+      toast.success("Card deleted.");
 
       // TODO update stats
+      const stats = utils.card.stats.getData();
+      if (!stats) {
+        return { previousCards: allCards };
+      }
 
-      toast.success("Card deleted.");
-      return { previousCards: allCards };
+      const nextStats = produce(stats, (draft) => {
+        switch (card.cards.state) {
+          case "New":
+            draft.new--;
+            break;
+          case "Learning":
+          case "Relearning":
+            draft.learning--;
+            break;
+          case "Review":
+            draft.review--;
+            break;
+        }
+        draft.total--;
+      });
+      utils.card.stats.setData(undefined, nextStats);
+
+      return { previousCards: allCards, previousStats: stats };
     },
 
     onSuccess: () => {
@@ -43,6 +66,10 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
 
       if (context?.previousCards) {
         utils.card.all.setData(undefined, context.previousCards);
+      }
+
+      if (context?.previousStats) {
+        utils.card.stats.setData(undefined, context.previousStats);
       }
     },
   });

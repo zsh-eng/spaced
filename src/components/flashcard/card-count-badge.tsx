@@ -1,12 +1,12 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { type State } from '@/schema';
-import { trpc } from '@/utils/trpc';
+} from "@/components/ui/tooltip";
+import { type State } from "@/schema";
+import { trpc } from "@/utils/trpc";
 
 // Helper function to count the number of cards in a given state
 function count<T>(arr: Array<T>, predicate: (item: T) => boolean) {
@@ -17,32 +17,20 @@ function count<T>(arr: Array<T>, predicate: (item: T) => boolean) {
  * Displays the number of cards in each {@link State}
  */
 export default function CardCountBadge() {
-  const { data: cardsWithContent = [], isLoading } = trpc.card.all.useQuery();
+  const { data: stats, isLoading: isLoadingStats } = trpc.card.stats.useQuery();
 
-  if (isLoading) {
+  if (!stats || isLoadingStats) {
     return null;
   }
 
-  const newCount = count(
-    cardsWithContent,
-    (card) => card.cards.state === 'New'
-  );
-  const learningCount = count(
-    cardsWithContent,
-    (card) =>
-      card.cards.state === 'Learning' || card.cards.state === 'Relearning'
-  );
-  const reviewCount = count(
-    cardsWithContent,
-    (card) => card.cards.state === 'Review'
-  );
+  console.log(JSON.stringify(stats, null, 2));
 
   return (
-    <div className='flex gap-x-2 w-full justify-center'>
+    <div className="flex w-full justify-center gap-x-2">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className='cursor-text'>
-            <Badge variant='accentblue'>{newCount}</Badge>
+          <TooltipTrigger className="cursor-text">
+            <Badge variant="accentblue">{stats.new}</Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>New</p>
@@ -52,8 +40,8 @@ export default function CardCountBadge() {
 
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className='cursor-text'>
-            <Badge variant='destructive'>{learningCount} </Badge>
+          <TooltipTrigger className="cursor-text">
+            <Badge variant="destructive">{stats.learning} </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>Learning</p>
@@ -63,8 +51,8 @@ export default function CardCountBadge() {
 
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className='cursor-text'>
-            <Badge variant='success'>{reviewCount} </Badge>
+          <TooltipTrigger className="cursor-text">
+            <Badge variant="success">{stats.review} </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>Review</p>
@@ -75,4 +63,4 @@ export default function CardCountBadge() {
   );
 }
 
-CardCountBadge.displayName = 'CardCountBadge';
+CardCountBadge.displayName = "CardCountBadge";

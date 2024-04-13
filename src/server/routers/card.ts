@@ -1,11 +1,18 @@
 import db from "@/db";
-import { Card, CardContent, cardContents, cards, ratings } from "@/schema";
+import {
+  Card,
+  CardContent,
+  cardContents,
+  cards,
+  ratings,
+  states,
+} from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { TRPCError } from "@trpc/server";
 import { endOfDay } from "date-fns";
-import { and, asc, eq, lte } from "drizzle-orm";
+import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const cardRouter = router({
@@ -31,6 +38,31 @@ export const cardRouter = router({
       cards: Card;
       card_contents: CardContent;
     }[];
+  }),
+
+  // Get the stats for each state of card for the day
+  stats: publicProcedure.query(async ({ ctx }) => {
+    console.log("Fetching stats");
+    const now = endOfDay(new Date());
+
+    const stats = await db
+      .select({
+        total: sql<number>`cast(count(*) as int)`,
+        new: sql<number>`cast(count(
+          case when ${cards.state} = 'New' then 1 else null end
+        ) as int)`,
+        learning: sql<number>`cast(count(
+          case when ${cards.state} = 'Learning' OR ${cards.state} = 'Relearning' then 1 else null end
+        ) as int)`,
+        review: sql<number>`cast(count(
+          case when ${cards.state} = 'Review' then 1 else null end
+        ) as int)`,
+      })
+      .from(cards)
+      .where(and(eq(cards.deleted, false), lte(cards.due, now)));
+
+    console.log(success`Fetched stats`);
+    return stats[0];
   }),
 
   // Create a new card with content
