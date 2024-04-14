@@ -15,6 +15,7 @@ export const deckRouter = router({
         name: decks.name,
         description: decks.description,
         cardCount: sql`count(${cardsToDecks.cardId})`.mapWith(Number),
+        createdAt: decks.createdAt,
       })
       .from(decks)
       .leftJoin(cardsToDecks, eq(cardsToDecks.deckId, decks.id))

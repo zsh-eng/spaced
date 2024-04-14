@@ -39,7 +39,7 @@ export const reviewLogs = sqliteTable("review_logs", {
   duration: integer("duration").notNull().default(0),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
-  created_at: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
@@ -67,7 +67,7 @@ export const cards = sqliteTable("cards", {
   // revlogs logs
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
-  created_at: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
@@ -90,7 +90,7 @@ export const cardContents = sqliteTable("card_contents", {
   extend: text("extend", { mode: "json" }),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
-  created_at: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
@@ -103,7 +103,7 @@ export const decks = sqliteTable("decks", {
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
-  created_at: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
@@ -118,7 +118,7 @@ export const cardsToDecks = sqliteTable(
   {
     cardId: text("card_id").notNull(),
     deckId: text("deck_id").notNull(),
-    created_at: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
   },
