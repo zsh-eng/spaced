@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { UiCard, UiCardDescription, UiCardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RouterOutputs } from "@/utils/trpc";
 
 type Deck = RouterOutputs["deck"]["all"][0];
@@ -7,6 +8,10 @@ type Deck = RouterOutputs["deck"]["all"][0];
 type Props = {
   deck: Deck;
 };
+
+export function DeckSkeleton() {
+  return <Skeleton className="h-48 w-[36rem]" />;
+}
 
 export default function Deck({ deck }: Props) {
   return (
