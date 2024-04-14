@@ -38,6 +38,10 @@ export const reviewLogs = sqliteTable("review_logs", {
   review: integer("review", { mode: "timestamp" }).notNull(),
   duration: integer("duration").notNull().default(0),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+
+  created_at: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export type ReviewLog = typeof reviewLogs.$inferSelect;
@@ -62,6 +66,10 @@ export const cards = sqliteTable("cards", {
 
   // revlogs logs
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+
+  created_at: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export type Card = typeof cards.$inferSelect;
@@ -81,6 +89,10 @@ export const cardContents = sqliteTable("card_contents", {
   sourceId: text("sourceId"),
   extend: text("extend", { mode: "json" }),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+
+  created_at: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export type CardContent = typeof cardContents.$inferSelect;
@@ -91,7 +103,11 @@ export const decks = sqliteTable("decks", {
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+  created_at: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
+
 export type Deck = typeof decks.$inferSelect;
 export type NewDeck = typeof decks.$inferInsert;
 
@@ -102,6 +118,9 @@ export const cardsToDecks = sqliteTable(
   {
     cardId: text("card_id").notNull(),
     deckId: text("deck_id").notNull(),
+    created_at: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.cardId, t.deckId] }),
