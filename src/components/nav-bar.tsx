@@ -55,8 +55,8 @@ export function NavigationBar() {
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <Telescope className="xs:mr-2 h-6 w-6" strokeWidth={1.5} />
-              <span className="xs:block hidden text-lg font-semibold">
+              <Telescope className="h-6 w-6 xs:mr-2" strokeWidth={1.5} />
+              <span className="hidden text-lg font-semibold xs:block">
                 spaced
               </span>
             </NavigationMenuLink>
@@ -67,6 +67,14 @@ export function NavigationBar() {
           <Link href="/" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Review
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <Link href="/decks" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              Decks
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

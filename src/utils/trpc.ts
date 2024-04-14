@@ -1,13 +1,13 @@
-import { httpBatchLink } from '@trpc/client';
-import { createTRPCNext } from '@trpc/next';
-import type { AppRouter } from '../server/routers/_app';
-import { inferReactQueryProcedureOptions } from '@trpc/react-query';
-import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import { httpBatchLink } from "@trpc/client";
+import { createTRPCNext } from "@trpc/next";
+import type { AppRouter } from "../server/routers/_app";
+import { inferReactQueryProcedureOptions } from "@trpc/react-query";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 function getBaseUrl() {
-  if (typeof window !== 'undefined')
+  if (typeof window !== "undefined")
     // browser should use relative path
-    return '';
+    return "";
 
   if (process.env.VERCEL_URL)
     // reference for vercel.com
@@ -28,6 +28,18 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export const trpc = createTRPCNext<AppRouter>({
   config(opts) {
+    const { ctx } = opts;
+    if (typeof window !== "undefined") {
+      // during client requests
+      return {
+        links: [
+          httpBatchLink({
+            url: "/api/trpc",
+          }),
+        ],
+      };
+    }
+
     return {
       links: [
         httpBatchLink({
@@ -39,8 +51,13 @@ export const trpc = createTRPCNext<AppRouter>({
 
           // You can pass any HTTP headers you wish here
           async headers() {
+            if (!ctx?.req?.headers) {
+              return {};
+            }
+            // To use SSR properly, you need to forward client headers to the server
+            // This is so you can pass through things like cookies when we're server-side rendering
             return {
-              // authorization: getAuthCookie(),
+              cookie: ctx.req.headers.cookie,
             };
           },
         }),
