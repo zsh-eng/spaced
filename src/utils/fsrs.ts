@@ -130,7 +130,7 @@ export function newCardToCard(newCard: NewCard): Card {
   if (!newCard.due) throw new Error("Due date is required");
   return {
     ...newCard,
-    created_at: new Date(),
+    createdAt: new Date(),
     due: newCard.due,
     last_review: null,
     suspended: false,
@@ -143,7 +143,7 @@ export function newCardContentToCardContent(
 ): CardContent {
   return {
     ...newCardContent,
-    created_at: new Date(),
+    createdAt: new Date(),
     deleted: false,
     question: newCardContent.question ?? "",
     answer: newCardContent.answer ?? "",
