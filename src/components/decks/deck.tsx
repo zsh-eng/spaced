@@ -18,7 +18,7 @@ export function DeckSkeleton() {
 export default function Deck({ deck }: Props) {
   return (
     <Link href={`/decks/${deck.id}`}>
-      <UiCard className="flex max-w-xl cursor-pointer flex-col gap-y-2 px-6 py-6">
+      <UiCard className="flex h-full max-w-xl cursor-pointer flex-col gap-y-2 px-6 py-6">
         <UiCardTitle>{deck.name}</UiCardTitle>
         <UiCardDescription>{deck.description}</UiCardDescription>
         <div className="mt-auto flex items-end">
