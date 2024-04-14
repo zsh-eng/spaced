@@ -1,10 +1,5 @@
-import {
-  getReviewDateForEachRating,
-  gradeCard,
-  parseCardDate,
-  stringifyCardDate,
-} from "@/utils/fsrs";
-import { ReactQueryOptions, RouterOutputs, trpc } from "@/utils/trpc";
+import { getReviewDateForEachRating, gradeCard } from "@/utils/fsrs";
+import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { endOfDay, isBefore } from "date-fns";
 import { produce } from "immer";
 import { toast } from "sonner";
@@ -38,9 +33,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       const reviewDay = getReviewDateForEachRating(card.cards);
       const day = reviewDay[grade];
       const isCardToBeReviewedAgainToday = isBefore(day, endOfDay(new Date()));
-      const nextCard = stringifyCardDate(
-        gradeCard(parseCardDate(card.cards), grade),
-      );
+      const nextCard = gradeCard(card.cards, grade);
 
       // Update the cards in the cache
       const nextCards = produce(allCards, (draft) => {

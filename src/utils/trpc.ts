@@ -1,8 +1,10 @@
+import type { AppRouter } from "@/server/routers/_app";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
-import type { AppRouter } from "../server/routers/_app";
 import { inferReactQueryProcedureOptions } from "@trpc/react-query";
 import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { uneval } from "devalue";
+import superjson from "superjson";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -26,7 +28,17 @@ export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+export const transformer = {
+  input: superjson,
+  output: {
+    serialize: (object: unknown) => uneval(object),
+    // This `eval` only ever happens on the **client**
+    deserialize: (object: unknown) => eval(`(${object})`),
+  },
+};
+
 export const trpc = createTRPCNext<AppRouter>({
+  transformer,
   config(opts) {
     const { ctx } = opts;
     if (typeof window !== "undefined") {
@@ -35,6 +47,7 @@ export const trpc = createTRPCNext<AppRouter>({
         links: [
           httpBatchLink({
             url: "/api/trpc",
+            transformer,
           }),
         ],
       };
@@ -48,6 +61,7 @@ export const trpc = createTRPCNext<AppRouter>({
            * @link https://trpc.io/docs/v11/ssr
            **/
           url: `${getBaseUrl()}/api/trpc`,
+          transformer,
 
           // You can pass any HTTP headers you wish here
           async headers() {
