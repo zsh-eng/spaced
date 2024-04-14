@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 
 // See https://ui.shadcn.com/docs/installation/next
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -16,16 +17,23 @@ function ClientLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <body
-      className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        inter.variable,
-      )}
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
     >
-      <NavigationBar />
-      {children}
-      <Toaster />
-    </body>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.variable,
+        )}
+      >
+        <NavigationBar />
+        {children}
+        <Toaster />
+      </body>
+    </ThemeProvider>
   );
 }
 
