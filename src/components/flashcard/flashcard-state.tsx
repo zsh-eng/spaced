@@ -1,15 +1,22 @@
 import { State } from "@/schema";
+import { cn } from "@/utils/ui";
 
-export default function FlashcardState({ state }: { state: State }) {
+export default function FlashcardState({
+  state,
+  className,
+}: {
+  state: State;
+  className?: string;
+}) {
   switch (state) {
     case "New":
-      return <span className="text-accentblue">{state}</span>;
+      return <span className={cn("text-accentblue", className)}>{state}</span>;
     case "Learning":
-      return <span className="text-destructive">{state}</span>;
+      return <span className={cn("text-destructive", className)}>{state}</span>;
     case "Relearning":
-      return <span className="text-destructive">{state}</span>;
+      return <span className={cn("text-destructive", className)}>{state}</span>;
     case "Review":
-      return <span className="text-success">{state}</span>;
+      return <span className={cn("text-success", className)}>{state}</span>;
     default:
       return <span>{state}</span>;
   }
