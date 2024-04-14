@@ -3,6 +3,13 @@
 import Link from "next/link";
 import * as React from "react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,44 +21,96 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
-import { Github, Telescope } from "lucide-react";
+import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
+
+// TODO This nav menu is a bit of a mess, we should extract the links
+// And refactor it
+
+// For mobile navigation
+function MenuDrawer() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Drawer
+      direction="left"
+      open={open}
+      onOpenChange={(opened) => setOpen(opened)}
+    >
+      <DrawerTrigger className="md:hidden">
+        <MenuIcon className="h-6 w-6" />
+      </DrawerTrigger>
+      <DrawerContent className="h-full w-60 py-8" direction="left">
+        <DrawerClose className="absolute right-4 top-6">
+          <XIcon className="h-4 w-4 text-muted-foreground" />
+        </DrawerClose>
+
+        <Link href="/" className="flex items-center px-4">
+          <Telescope className="mr-2 h-5 w-5" strokeWidth={1.5} />
+          <div className="text-md font-semibold">spaced</div>
+        </Link>
+
+        <div className="mt-6 flex flex-col gap-y-5 pl-11">
+          <div className="flex flex-col gap-y-3">
+            <Link href="/" className="text-md" onClick={() => setOpen(false)}>
+              Review
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-y-3">
+            <Link
+              href="/decks"
+              className="text-md"
+              onClick={() => setOpen(false)}
+            >
+              Decks
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-y-3 text-muted-foreground">
+            <div className="text-md font-semibold text-primary">Create</div>
+            <Link
+              href="/decks/create"
+              className="text-md"
+              onClick={() => setOpen(false)}
+            >
+              Deck
+            </Link>
+            <Link
+              href="/cards/create"
+              className="text-md"
+              onClick={() => setOpen(false)}
+            >
+              Card
+            </Link>
+            <Link
+              href="/cards/create-many"
+              className="text-md"
+              onClick={() => setOpen(false)}
+            >
+              Many cards
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-y-4">
+            <a
+              href="https://github.com/zsh-eng/spaced"
+              target="_blank"
+              onClick={() => setOpen(false)}
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
 
 export function NavigationBar() {
   return (
     <NavigationMenu className="w-full px-2 py-2 sm:px-6 lg:px-8">
-      <NavigationMenuList>
-        {/* <NavigationMenuItem>
-          <NavigationMenuTrigger>Home</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-              <li className="row-span-3">
-                <NavigationMenuLink asChild>
-                  <a
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                    href="/"
-                  >
-                    <SquareLibraryIcon className="h-6 w-6" />
-                    <div className="mb-2 mt-4 text-lg font-medium">spaced</div>
-                    <p className="text-sm leading-tight text-muted-foreground">
-                      A modern flashcard app that helps you learn faster. Uses
-                      spaced repetition to help you remember more.
-                    </p>
-                  </a>
-                </NavigationMenuLink>
-              </li>
-              <ListItem href="/docs" title="Introduction">
-                Re-usable components built using Radix UI and Tailwind CSS.
-              </ListItem>
-              <ListItem href="/docs/installation" title="Installation">
-                How to install dependencies and structure your app.
-              </ListItem>
-              <ListItem href="/docs/primitives/typography" title="Typography">
-                Styles for headings, paragraphs, lists...etc
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem> */}
+      <MenuDrawer />
 
+      <NavigationMenuList className="hidden md:flex">
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -106,9 +165,9 @@ export function NavigationBar() {
             </div>
           </a>
         </NavigationMenuItem>
-
         <NavigationMenuIndicator />
       </NavigationMenuList>
+      <ThemeToggle />
     </NavigationMenu>
   );
 }
