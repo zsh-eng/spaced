@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   UiCard,
   UiCardContent,
@@ -29,13 +29,12 @@ import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
 import { CardContent, Rating, type Card } from "@/schema";
-import { AllowDateString } from "@/utils/fsrs";
 import { cn } from "@/utils/ui";
 import { EyeIcon, FilePenIcon, TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
-  card: AllowDateString<Card>;
+  card: Card;
   cardContent: CardContent;
   onRating: (rating: Rating) => void;
   schemaRatingToReviewDay: Record<Rating, Date>;
@@ -116,10 +115,12 @@ export default function Flashcard({
                 <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
               </Toggle>
               <AlertDialog>
-                <AlertDialogTrigger>
-                  <Button variant="outline" size="icon">
-                    <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
-                  </Button>
+                <AlertDialogTrigger
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "icon" }),
+                  )}
+                >
+                  <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>

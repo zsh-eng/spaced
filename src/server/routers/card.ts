@@ -139,6 +139,7 @@ export const cardRouter = router({
       console.log(success`Added ${input.length} cards`);
       return res;
     }),
+
   // Delete a card
   delete: publicProcedure
     .input(z.string().uuid())

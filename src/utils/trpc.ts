@@ -1,13 +1,15 @@
-import { httpBatchLink } from '@trpc/client';
-import { createTRPCNext } from '@trpc/next';
-import type { AppRouter } from '../server/routers/_app';
-import { inferReactQueryProcedureOptions } from '@trpc/react-query';
-import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import type { AppRouter } from "@/server/routers/_app";
+import { httpBatchLink } from "@trpc/client";
+import { createTRPCNext } from "@trpc/next";
+import { inferReactQueryProcedureOptions } from "@trpc/react-query";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { uneval } from "devalue";
+import superjson from "superjson";
 
 function getBaseUrl() {
-  if (typeof window !== 'undefined')
+  if (typeof window !== "undefined")
     // browser should use relative path
-    return '';
+    return "";
 
   if (process.env.VERCEL_URL)
     // reference for vercel.com
@@ -26,8 +28,31 @@ export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+export const transformer = {
+  input: superjson,
+  output: {
+    serialize: (object: unknown) => uneval(object),
+    // This `eval` only ever happens on the **client**
+    deserialize: (object: unknown) => eval(`(${object})`),
+  },
+};
+
 export const trpc = createTRPCNext<AppRouter>({
+  transformer,
   config(opts) {
+    const { ctx } = opts;
+    if (typeof window !== "undefined") {
+      // during client requests
+      return {
+        links: [
+          httpBatchLink({
+            url: "/api/trpc",
+            transformer,
+          }),
+        ],
+      };
+    }
+
     return {
       links: [
         httpBatchLink({
@@ -36,11 +61,17 @@ export const trpc = createTRPCNext<AppRouter>({
            * @link https://trpc.io/docs/v11/ssr
            **/
           url: `${getBaseUrl()}/api/trpc`,
+          transformer,
 
           // You can pass any HTTP headers you wish here
           async headers() {
+            if (!ctx?.req?.headers) {
+              return {};
+            }
+            // To use SSR properly, you need to forward client headers to the server
+            // This is so you can pass through things like cookies when we're server-side rendering
             return {
-              // authorization: getAuthCookie(),
+              cookie: ctx.req.headers.cookie,
             };
           },
         }),

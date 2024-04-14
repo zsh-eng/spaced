@@ -3,7 +3,7 @@
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import Flashcard from "@/components/flashcard/flashcard";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
-import { CardContent, type Rating } from "@/schema";
+import { type Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
@@ -53,7 +53,7 @@ export default function FlashcardBox({}: Props) {
       {isCard && (
         <Flashcard
           card={card}
-          cardContent={cardContent as CardContent}
+          cardContent={cardContent}
           onRating={onRating}
           schemaRatingToReviewDay={schemaRatingToReviewDay}
         />

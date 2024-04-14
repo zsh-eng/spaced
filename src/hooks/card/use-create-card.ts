@@ -1,10 +1,11 @@
+import { type Card } from "@/schema";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 
 type CreateMutationOptions = ReactQueryOptions["card"]["create"];
 type CreateMutation = ReturnType<typeof trpc.card.create.useMutation>;
 
 /**
- * Hook to create a card.
+ * Hook to create a {@link Card}.
  */
 export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
   const utils = trpc.useUtils();
@@ -12,8 +13,8 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
   return trpc.card.create.useMutation({
     ...options,
     onSuccess: async () => {
-      await utils.card.all.refetch();
-      await utils.card.stats.refetch();
+      await utils.card.all.invalidate();
+      await utils.card.stats.invalidate();
     },
 
     onError: (error) => {

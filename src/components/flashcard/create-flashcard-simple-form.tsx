@@ -2,7 +2,7 @@
 
 import { FormValues } from "@/components/flashcard/create-many-flashcard-form";
 import { Button } from "@/components/ui/button";
-import { UiCardClasses } from "@/components/ui/card";
+import { UiCard, UiCardClasses } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/ui";
 import { Trash } from "lucide-react";
@@ -23,7 +23,7 @@ export default function CreateFlashcardSimpleForm({
   isPending = false,
 }: Props) {
   return (
-    <div className={cn(UiCardClasses, "flex w-96 flex-col px-4 py-2")}>
+    <UiCard className={cn("flex w-96 flex-col px-4 py-4")}>
       <Textarea
         className="h-40 resize-none border-0"
         disabled={isPending}
@@ -65,7 +65,7 @@ export default function CreateFlashcardSimpleForm({
       >
         <Trash className="h-4 w-4" />
       </Button>
-    </div>
+    </UiCard>
   );
 }
 

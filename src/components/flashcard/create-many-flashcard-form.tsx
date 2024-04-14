@@ -102,7 +102,7 @@ export default function CreateManyFlashcardForm() {
         <Button
           variant="outline"
           onClick={() => handleDeleteAll()}
-          disabled={isPending}
+          disabled={forms.length === 0 || isPending}
         >
           <TrashIcon className="mr-2 h-4 w-4" />
           Delete All

@@ -22,20 +22,6 @@ import {
 const params = generatorParameters({ enable_fuzz: true });
 const f = fsrs(params);
 
-/**
- * Helper type to convert a {@link Date} or `Date | null` to a {@link string}.
- * JSON serialises {@link Date} objects to strings.
- * ts-fsrs accepts strings for date inputs, so it's ok to take in date strings.
- */
-export type StringifyDate<T> = {
-  [K in keyof T]: T[K] extends Date
-    ? string
-    : T[K] extends Date | null
-      ? string | null
-      : T[K];
-};
-export type AllowDateString<T> = T | StringifyDate<T>;
-
 function ratingToFSRSGrade(rating: Rating): FSRSGrade {
   const index = ratings.indexOf(rating);
   if (index === -1) {
@@ -66,9 +52,7 @@ export function getNextCard(card: Card, schemaRating: Rating) {
 /**
  * Give a {@link Card}, returns the review {@link Date} for each {@link Rating}.
  */
-export function getReviewDateForEachRating(
-  card: AllowDateString<Card>,
-): Record<Rating, Date> {
+export function getReviewDateForEachRating(card: Card): Record<Rating, Date> {
   const now = new Date();
   const recordLog = f.repeat(card, now);
 
@@ -83,22 +67,6 @@ export function getReviewDateForEachRating(
   }
 
   return schemaRatingtoReviewDate;
-}
-
-export function stringifyCardDate(card: Card): StringifyDate<Card> {
-  return {
-    ...card,
-    due: card.due.toISOString(),
-    last_review: card.last_review?.toISOString() ?? null,
-  };
-}
-
-export function parseCardDate(card: AllowDateString<Card>): Card {
-  return {
-    ...card,
-    due: new Date(card.due),
-    last_review: card.last_review ? new Date(card.last_review) : null,
-  };
 }
 
 export function gradeCard(card: Card, schemaRating: Rating): Card {
@@ -162,6 +130,7 @@ export function newCardToCard(newCard: NewCard): Card {
   if (!newCard.due) throw new Error("Due date is required");
   return {
     ...newCard,
+    created_at: new Date(),
     due: newCard.due,
     last_review: null,
     suspended: false,
@@ -174,6 +143,7 @@ export function newCardContentToCardContent(
 ): CardContent {
   return {
     ...newCardContent,
+    created_at: new Date(),
     deleted: false,
     question: newCardContent.question ?? "",
     answer: newCardContent.answer ?? "",

@@ -3,9 +3,13 @@ import { success } from "@/utils/format";
 import {
   NewCard,
   NewCardContent,
+  NewCardsToDecks,
+  NewDeck,
   NewReviewLog,
   cardContents,
   cards,
+  cardsToDecks,
+  decks,
   ratings,
   reviewLogs,
   states,
@@ -48,7 +52,7 @@ function generateNewCardContent(
     id: crypto.randomUUID(),
     cardId,
     question: faker.lorem.paragraph(),
-    answer: faker.lorem.paragraph({ min: 1, max: 5 }),
+    answer: faker.lorem.paragraphs({ min: 1, max: 3 }),
     source: faker.lorem.sentence(),
     sourceId: faker.lorem.sentence(),
     ...newCardContent,
@@ -76,6 +80,17 @@ function generateNewReviewLog(
   };
 }
 
+function generateNewDeck(newDeck?: Partial<NewDeck>): NewDeck {
+  return {
+    id: crypto.randomUUID(),
+    name: faker.lorem.word({
+      length: { min: 1, max: 5 },
+    }),
+    description: faker.lorem.paragraph(),
+    ...newDeck,
+  };
+}
+
 /**
  * Seed the database with some random data.
  * Note that this script can take a while to run since we're inserting data into the Turso database.
@@ -92,18 +107,32 @@ async function main() {
   await db.delete(cards).all();
   console.log(success`Deleted all data from the database`);
 
-  const itemsToCreate = 10000;
+  console.log("Seeding database with 10 decks");
+  const decksToCreate = 10;
+  const decksToInsert = Array.from({ length: decksToCreate }, () =>
+    generateNewDeck(),
+  );
+  await db.insert(decks).values(decksToInsert);
+  console.log(success`Seeded database with ${decksToCreate} decks`);
+  const deckIds = decksToInsert.map((deck) => deck.id);
+
+  const itemsToCreate = 2000;
   // Seeding too many items will cause error with Turso for too many SQL variables
   const skip = 2000;
-  console.log("Seeding database with", itemsToCreate, "items");
+  const cardIds = Array.from({ length: itemsToCreate }, () =>
+    crypto.randomUUID(),
+  );
 
+  console.log("Seeding database with", itemsToCreate, "items");
   for (let i = 0; i < itemsToCreate; i += skip) {
     const cardsToInsert: NewCard[] = [];
     const cardContentsToInsert: NewCardContent[] = [];
     const reviewLogsToInsert: NewReviewLog[] = [];
 
-    for (let j = 0; j < skip; j++) {
-      const card = generateNewCard();
+    for (let j = 0; j < Math.min(skip, itemsToCreate); j++) {
+      const card = generateNewCard({
+        id: cardIds[i + j],
+      });
       const cardContent = generateNewCardContent(card.id);
       const reviewLog = generateNewReviewLog(card.id);
 
@@ -118,8 +147,22 @@ async function main() {
 
     console.log(success`Seeded item ${i + 1}-${i + skip}`);
   }
-
   console.log(success`Seeded database with ${itemsToCreate} items`);
+
+  console.log("Seeding mapping between cards and decks");
+  const cardsToDecksToInsert: NewCardsToDecks[] = [];
+  for (const id of cardIds) {
+    const numDecksToBeAddedTo = faker.number.int({ min: 0, max: 4 });
+    const decksToAddCardTo = faker.helpers
+      .shuffle(deckIds)
+      .slice(0, numDecksToBeAddedTo)
+      .map((deckId) => ({ cardId: id, deckId }));
+    cardsToDecksToInsert.push(...decksToAddCardTo);
+  }
+  await db.insert(cardsToDecks).values(cardsToDecksToInsert);
+  console.log(
+    success`Seeded ${cardsToDecksToInsert.length} mappings between cards and decks`,
+  );
 }
 
 main();
