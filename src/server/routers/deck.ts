@@ -1,19 +1,32 @@
 import { publicProcedure, router } from "@/server/trpc";
 import db from "@/db";
-import { decks } from "@/schema";
+import { cardsToDecks, decks } from "@/schema";
 import { z } from "zod";
 import { newDeck } from "@/utils/deck";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export const deckRouter = router({
-  all: publicProcedure.query(async ({ ctx }) => {
-    return db.select().from(decks);
+  all: publicProcedure.query(async ({}) => {
+    const rows = await db
+      .select({
+        id: decks.id,
+        name: decks.name,
+        description: decks.description,
+        cardCount: sql`count(${cardsToDecks.cardId})`.mapWith(Number),
+      })
+      .from(decks)
+      .leftJoin(cardsToDecks, eq(cardsToDecks.deckId, decks.id))
+      .groupBy(decks.id)
+      .all();
+
+    return rows;
   }),
 
   create: publicProcedure
     .input(
       z.object({
         name: z.string(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -30,6 +43,7 @@ export const deckRouter = router({
       z.object({
         id: z.string(),
         name: z.string(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -37,6 +51,7 @@ export const deckRouter = router({
         .update(decks)
         .set({
           name: input.name,
+          description: input.description ?? "",
         })
         .where(eq(decks.id, input.id));
     }),
