@@ -99,6 +99,46 @@ export const cardRouter = router({
       return res;
     }),
 
+  // Create many cards
+  createMany: publicProcedure
+    .input(
+      z.array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      console.log(`Adding ${input.length} cards`);
+      const cardWithContents = input.map(({ question, answer }) =>
+        newCardWithContent(question, answer),
+      );
+
+      const cardsToInsert = cardWithContents.map(({ card }) => card);
+      const cardContentsToInsert = cardWithContents.map(
+        ({ cardContent }) => cardContent,
+      );
+
+      const res = await db.transaction(async (tx) => {
+        const insertedCards = await tx
+          .insert(cards)
+          .values(cardsToInsert)
+          .returning();
+        const insertedCardContents = await tx
+          .insert(cardContents)
+          .values(cardContentsToInsert)
+          .returning();
+
+        return insertedCards.map((card, index) => ({
+          cards: card,
+          card_contents: insertedCardContents[index],
+        }));
+      });
+
+      console.log(success`Added ${input.length} cards`);
+      return res;
+    }),
   // Delete a card
   delete: publicProcedure
     .input(z.string().uuid())

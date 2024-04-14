@@ -1,7 +1,8 @@
-import { cardRouter } from '@/server/routers/card';
-import { router, publicProcedure } from '@/server/trpc';
-import { success } from '@/utils/format';
-import { z } from 'zod';
+import { cardRouter } from "@/server/routers/card";
+import { deckRouter } from "@/server/routers/deck";
+import { router, publicProcedure } from "@/server/trpc";
+import { success } from "@/utils/format";
+import { z } from "zod";
 
 // See https://trpc.io/docs/quickstart#1-create-a-router-instance
 
@@ -12,6 +13,7 @@ export const appRouter = router({
     return `Hello, ${input}!`;
   }),
   card: cardRouter,
+  deck: deckRouter,
 });
 // Export type router type signature,
 // NOT the router itself.
