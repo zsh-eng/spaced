@@ -1,5 +1,11 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 // This file contains the schema for the database.
 // Note that timestamp, boolean, and enum are not supported in SQLite.
@@ -65,7 +71,9 @@ export type NewCard = typeof cards.$inferInsert;
 export const cardContents = sqliteTable("card_contents", {
   id: text("id").primaryKey(),
   // card
-  cardId: text("card_id").notNull(),
+  cardId: text("card_id")
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
 
   question: text("question").notNull().default(""),
   answer: text("answer").notNull().default(""),
@@ -81,10 +89,23 @@ export type NewCardContent = typeof cardContents.$inferInsert;
 export const decks = sqliteTable("decks", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  description: text("description").notNull().default(""),
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 });
 export type Deck = typeof decks.$inferSelect;
 export type NewDeck = typeof decks.$inferInsert;
+
+// https://orm.drizzle.team/docs/rqb#many-to-many
+export const cardsToDecks = sqliteTable(
+  "cards_to_decks",
+  {
+    cardId: text("card_id").notNull(),
+    deckId: text("deck_id").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.cardId, t.deckId] }),
+  }),
+);
 
 export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
   card: one(cards, {
@@ -95,7 +116,7 @@ export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
 
 export const cardsRelations = relations(cards, ({ one, many }) => ({
   reviewLogs: many(reviewLogs),
-  decks: many(decks),
+  cardsToDecks: many(cardsToDecks),
 }));
 
 export const cardContentsRelations = relations(cardContents, ({ one }) => ({
@@ -106,5 +127,16 @@ export const cardContentsRelations = relations(cardContents, ({ one }) => ({
 }));
 
 export const decksRelations = relations(decks, ({ many }) => ({
-  cards: many(cards),
+  cardsToDecks: many(cardsToDecks),
+}));
+
+export const cardsToDecksRelations = relations(cardsToDecks, ({ one }) => ({
+  card: one(cards, {
+    fields: [cardsToDecks.cardId],
+    references: [cards.id],
+  }),
+  deck: one(decks, {
+    fields: [cardsToDecks.deckId],
+    references: [decks.id],
+  }),
 }));
