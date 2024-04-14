@@ -1,3 +1,4 @@
+import { type Card } from "@/schema";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { produce } from "immer";
 import { toast } from "sonner";
@@ -6,7 +7,7 @@ type DeleteMutationOptions = ReactQueryOptions["card"]["delete"];
 type DeleteMutation = ReturnType<typeof trpc.card.delete.useMutation>;
 
 /**
- * Hook to delete a card.
+ * Hook to delete a {@link Card}.
  */
 export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
   const utils = trpc.useUtils();
@@ -70,8 +71,8 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
     },
 
     onSuccess: () => {
-      utils.card.all.refetch();
-      utils.card.stats.refetch();
+      utils.card.all.invalidate();
+      utils.card.stats.invalidate();
     },
 
     onError: (error, _variables, context) => {

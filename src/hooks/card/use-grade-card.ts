@@ -111,7 +111,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       // As we grade cards, new cards will be returned from the server
       if (!cards || cards.length > THRESHOLD_FOR_REFETCH) return;
 
-      await utils.card.all.refetch();
+      await utils.card.all.invalidate();
     },
 
     async onError(err, _variables, context) {

@@ -96,6 +96,7 @@ export type Deck = typeof decks.$inferSelect;
 export type NewDeck = typeof decks.$inferInsert;
 
 // https://orm.drizzle.team/docs/rqb#many-to-many
+// TODO: check behaviour of deletes on this many-to-many table
 export const cardsToDecks = sqliteTable(
   "cards_to_decks",
   {
