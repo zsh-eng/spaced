@@ -108,6 +108,9 @@ export const cardsToDecks = sqliteTable(
   }),
 );
 
+export type CardsToDecks = typeof cardsToDecks.$inferSelect;
+export type NewCardsToDecks = typeof cardsToDecks.$inferInsert;
+
 export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
   card: one(cards, {
     fields: [reviewLogs.cardId],
