@@ -1,13 +1,18 @@
 // See https://stackoverflow.com/questions/74992326/does-use-client-in-next-js-13-root-layout-make-whole-routes-client-component
 
 import ClientLayout from "@/components/client-layout";
+import { cn } from "@/utils/ui";
 import { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Spaced",
   description: "A better way of learning.",
 };
+
+// See https://ui.shadcn.com/docs/installation/next
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 function RootLayout({
   children,
@@ -16,7 +21,14 @@ function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ClientLayout>{children}</ClientLayout>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.variable,
+        )}
+      >
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }

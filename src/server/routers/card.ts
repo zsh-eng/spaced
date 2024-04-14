@@ -15,7 +15,7 @@ import { endOfDay } from "date-fns";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 
-const MAX_CARDS_TO_FETCH = 50;
+export const MAX_CARDS_TO_FETCH = 50;
 
 export const cardRouter = router({
   // Get all cards with their contents

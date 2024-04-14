@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
 // And refactor it
@@ -157,16 +158,18 @@ export function NavigationBar() {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <a href="https://github.com/zsh-eng/spaced" target="_blank">
-            <div className="rounded-md p-2 hover:bg-muted">
-              <Github className="h-4 w-4" />
-            </div>
-          </a>
-        </NavigationMenuItem>
         <NavigationMenuIndicator />
       </NavigationMenuList>
+
+      <Button size="icon" variant="link" asChild>
+        <a
+          className="ml-auto"
+          href="https://github.com/zsh-eng/spaced"
+          target="_blank"
+        >
+          <Github className="h-5 w-5" />
+        </a>
+      </Button>
       <ThemeToggle />
     </NavigationMenu>
   );
