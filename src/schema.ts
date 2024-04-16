@@ -48,6 +48,8 @@ export type ReviewLog = typeof reviewLogs.$inferSelect;
 export type NewReviewLog = typeof reviewLogs.$inferInsert;
 
 // * For now we just copy the schema from the ts-fsrs-demo example
+// Note that some fields use snake case here for compatiblity with the ts-fsrs library
+// TODO standardise to using camelCase and write a converter
 export const cards = sqliteTable("cards", {
   id: text("id").primaryKey(),
   due: integer("due", { mode: "timestamp" })
@@ -71,6 +73,8 @@ export const cards = sqliteTable("cards", {
     .notNull()
     .default(sql`(unixepoch())`),
 });
+// Benchmark performance to check if we should use indexes for difficulty and due
+// columns.
 
 export type Card = typeof cards.$inferSelect;
 export type NewCard = typeof cards.$inferInsert;

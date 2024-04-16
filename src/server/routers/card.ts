@@ -10,12 +10,16 @@ import {
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
+import Sorts from "@/utils/sort";
 import { TRPCError } from "@trpc/server";
 import { endOfDay } from "date-fns";
-import { and, asc, eq, lte, sql } from "drizzle-orm";
+import { and, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const MAX_CARDS_TO_FETCH = 50;
+
+// Sort orders
+// See discussion here: https://github.com/ishiko732/ts-fsrs-demo/issues/17
 
 export const cardRouter = router({
   // Get all cards with their contents
@@ -34,7 +38,7 @@ export const cardRouter = router({
           lte(cards.due, now),
         ),
       )
-      .orderBy(asc(cards.due))
+      .orderBy(Sorts.DIFFICULTY_ASC.db)
       .limit(MAX_CARDS_TO_FETCH);
 
     console.log(success`Fetched ${cardWithContents.length} cards`);
@@ -230,10 +234,7 @@ export const cardRouter = router({
         });
       }
 
-      const nextCard =
-        input.grade === "Manual" ? card : gradeCard(card, input.grade);
-      const reviewLog = cardToReviewLog(card, input.grade);
-
+      const { nextCard, reviewLog } = gradeCard(card, input.grade);
       await db.transaction(async (tx) => {
         await tx.update(cards).set(nextCard).where(eq(cards.id, input.id));
         await tx.insert(reviewLogs).values(reviewLog);

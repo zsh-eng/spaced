@@ -1,5 +1,4 @@
 import db from "@/db";
-import { success } from "@/utils/format";
 import {
   NewCard,
   NewCardContent,
@@ -14,7 +13,11 @@ import {
   reviewLogs,
   states,
 } from "@/schema";
+import { success } from "@/utils/format";
+import { gradeCard, mergeFsrsCard, newCard, newCardToCard } from "@/utils/fsrs";
 import { faker } from "@faker-js/faker";
+import { add, isBefore, sub } from "date-fns";
+import { createEmptyCard } from "ts-fsrs";
 import { Card, CardContent, ReviewLog } from "./schema";
 
 // Data generated using the faker-js library.
@@ -92,6 +95,54 @@ function generateNewDeck(newDeck?: Partial<NewDeck>): NewDeck {
 }
 
 /**
+ * Simulates the card and the reviews for the card.
+ * @returns A tuple of the card and the review logs for the card.
+ *
+ */
+function simulateNewCardAndReviews(id: string): [Card, NewReviewLog[]] {
+  const seedCard: Card = newCardToCard(newCard());
+  const cardCreatedDate = faker.date.past({ years: 1 });
+  seedCard.createdAt = cardCreatedDate;
+  seedCard.id = id;
+
+  const fsrsCard = createEmptyCard(cardCreatedDate);
+  const card = mergeFsrsCard(fsrsCard, seedCard);
+
+  let currentCard = card;
+  const now = new Date();
+  const twentyDaysAgo = sub(now, { days: 20 });
+  const validRatings = ratings.filter(
+    (rating) => rating !== "Manual" && rating !== "Again",
+  );
+  const logs: NewReviewLog[] = [];
+
+  while (isBefore(currentCard.due, twentyDaysAgo)) {
+    // 50% of reviewing the card on due date, rest is within the next 10 days
+    const reviewDate =
+      Math.random() > 0.5
+        ? currentCard.due
+        : faker.date.between({
+            from: currentCard.due,
+            to: add(currentCard.due, { days: 10 }),
+          });
+
+    // Randomly choose a grade - we're excluding "Manual" and "Again" ratings
+    const { nextCard, reviewLog } = gradeCard(
+      currentCard,
+      faker.helpers.arrayElement(validRatings),
+      reviewDate,
+    );
+    currentCard = nextCard;
+    logs.push(reviewLog);
+    // console.log(
+    //   success`Simulated review log ${logs.length} for card ${currentCard.id}. Next date is ${currentCard.due}`,
+    // );
+  }
+
+  return [currentCard, logs];
+}
+
+/**
  * Seed the database with some random data.
  * Note that this script can take a while to run since we're inserting data into the Turso database.
  *
@@ -118,7 +169,7 @@ async function main() {
 
   const itemsToCreate = 2000;
   // Seeding too many items will cause error with Turso for too many SQL variables
-  const skip = 2000;
+  const skip = 500;
   const cardIds = Array.from({ length: itemsToCreate }, () =>
     crypto.randomUUID(),
   );
@@ -130,15 +181,14 @@ async function main() {
     const reviewLogsToInsert: NewReviewLog[] = [];
 
     for (let j = 0; j < Math.min(skip, itemsToCreate); j++) {
-      const card = generateNewCard({
-        id: cardIds[i + j],
-      });
+      const id = cardIds[i + j];
+      const [card, reviewLogs] = simulateNewCardAndReviews(id);
       const cardContent = generateNewCardContent(card.id);
-      const reviewLog = generateNewReviewLog(card.id);
 
       cardsToInsert.push(card);
       cardContentsToInsert.push(cardContent);
-      reviewLogsToInsert.push(reviewLog);
+      reviewLogsToInsert.push(...reviewLogs);
+      // console.log(success`Seeded item ${i + j + 1}`);
     }
 
     await db.insert(cards).values(cardsToInsert);

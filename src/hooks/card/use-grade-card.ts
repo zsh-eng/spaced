@@ -1,4 +1,5 @@
 import { getReviewDateForEachRating, gradeCard } from "@/utils/fsrs";
+import Sorts from "@/utils/sort";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { endOfDay, isBefore } from "date-fns";
 import { produce } from "immer";
@@ -33,34 +34,30 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       const reviewDay = getReviewDateForEachRating(card.cards);
       const day = reviewDay[grade];
       const isCardToBeReviewedAgainToday = isBefore(day, endOfDay(new Date()));
-      const nextCard = gradeCard(card.cards, grade);
+      const { nextCard } = gradeCard(card.cards, grade);
 
       // Update the cards in the cache
-      const nextCards = produce(allCards, (draft) => {
-        const cardIndex = draft.findIndex((card) => card.cards.id === id);
-        const cardNotFound = cardIndex === -1;
-        if (cardNotFound) return;
-        if (!isCardToBeReviewedAgainToday) {
-          // We're allowed to return in Immer
-          // https://immerjs.github.io/immer/return
-          return draft.filter((card) => card.cards.id !== id);
-        }
-
-        draft[cardIndex].cards = {
-          ...draft[cardIndex].cards,
-          ...nextCard,
-        };
-        draft.sort((a, b) => (isBefore(a.cards.due, b.cards.due) ? -1 : 1));
-        return;
-      });
+      const allCardsWithoutGradedCard = allCards.filter(
+        (card) => card.cards.id !== id,
+      );
+      const nextCards = isCardToBeReviewedAgainToday
+        ? [
+            ...allCardsWithoutGradedCard,
+            {
+              cards: nextCard,
+              card_contents: card.card_contents,
+            },
+          ]
+        : allCardsWithoutGradedCard;
+      nextCards.sort((a, b) => Sorts.DIFFICULTY_ASC.fn(a.cards, b.cards));
       utils.card.all.setData(undefined, nextCards);
 
+      // Update the stats in the cache
       const stats = utils.card.stats.getData();
       if (!stats) {
         return { previousCards: allCards };
       }
 
-      // Update the stats in the cache
       const nextStats = produce(stats, (draft) => {
         switch (card.cards.state) {
           case "New":

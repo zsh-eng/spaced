@@ -19,7 +19,10 @@ import {
   type State as FSRSState,
 } from "ts-fsrs";
 
-const params = generatorParameters({ enable_fuzz: true });
+const params = generatorParameters({
+  enable_fuzz: true,
+  maximum_interval: 100,
+});
 const f = fsrs(params);
 
 function ratingToFSRSGrade(rating: Rating): FSRSGrade {
@@ -37,16 +40,6 @@ function fsrsGradeToRating(grade: FSRSGrade): Rating {
 
 function fsrsStateToState(state: FSRSState): State {
   return states[state];
-}
-
-export function getNextCard(card: Card, schemaRating: Rating) {
-  const now = new Date();
-  const recordLog = f.repeat(card, now);
-  const grade = ratingToFSRSGrade(schemaRating);
-  const recordLogItem = recordLog[grade];
-  const nextCard = recordLogItem.card;
-
-  return nextCard;
 }
 
 /**
@@ -69,17 +62,35 @@ export function getReviewDateForEachRating(card: Card): Record<Rating, Date> {
   return schemaRatingtoReviewDate;
 }
 
-export function gradeCard(card: Card, schemaRating: Rating): Card {
-  const now = new Date();
-  const recordLog = f.repeat(card, now);
-  const grade = ratingToFSRSGrade(schemaRating);
-  const recordLogItem = recordLog[grade];
-  const nextCard = mergeFsrsCard(recordLogItem.card, card);
+export function gradeCard(
+  card: Card,
+  schemaRating: Rating,
+  now = new Date(),
+): {
+  nextCard: Card;
+  reviewLog: NewReviewLog;
+} {
+  const recordLog = f.repeat(card, now, (recordLog) => {
+    const grade = ratingToFSRSGrade(schemaRating);
+    const recordLogItem = recordLog[grade];
+    const nextCard = mergeFsrsCard(recordLogItem.card, card);
+    const reviewLog: NewReviewLog = {
+      ...recordLogItem.log,
+      id: crypto.randomUUID(),
+      cardId: card.id,
+      grade: schemaRating,
+      state: fsrsStateToState(recordLogItem.log.state),
+    };
+    return {
+      nextCard,
+      reviewLog,
+    };
+  });
 
-  return nextCard;
+  return recordLog;
 }
 
-function mergeFsrsCard(fsrsCard: FSRSCard, card: Card): Card {
+export function mergeFsrsCard(fsrsCard: FSRSCard, card: Card): Card {
   return {
     ...card,
     ...fsrsCard,
