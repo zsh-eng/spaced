@@ -66,7 +66,7 @@ Here's my ideal syntax:
 #### Dynamic and Static Binding
 
 **Dynamic Binding (Late Binding)**: A mechanism where _method calls_ in code are resolved at **runtime** rather than at compile time.
-Override methods are resolved using **dynamic binding**.
+Overriden methods are resolved using **dynamic binding**.
 
 <!-- id:<some-card-id-here, where flashcards are stored separately> -->
 
@@ -75,6 +75,14 @@ Overloaded methods are resolved using **static binding**.
 
 <!-- id:<some-card-id-here, where flashcards are stored separately> -->
 ```
+
+### Why not just use local storage? Why not keep it all in Obsidian?
+
+1. I don't always have access to my Obsidian vault - I want to be able to review flashcards on the go.
+2. I want to be able to easily share flashcards with others.
+3. I want to create a UI/UX that _I_ personally enjoy using.
+   One of the big criticisms that I have of `obsidian-spaced-repetition` is that it doesn't store the history of your reviews.
+   You also cannot undo a review, which is annoying if you accidentally mark something as "easy".
 
 ## Resources
 
