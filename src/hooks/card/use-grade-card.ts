@@ -34,7 +34,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       const reviewDay = getReviewDateForEachRating(card.cards);
       const day = reviewDay[grade];
       const isCardToBeReviewedAgainToday = isBefore(day, endOfDay(new Date()));
-      const nextCard = gradeCard(card.cards, grade);
+      const { nextCard } = gradeCard(card.cards, grade);
 
       // Update the cards in the cache
       const allCardsWithoutGradedCard = allCards.filter(

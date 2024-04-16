@@ -234,10 +234,7 @@ export const cardRouter = router({
         });
       }
 
-      const nextCard =
-        input.grade === "Manual" ? card : gradeCard(card, input.grade);
-      const reviewLog = cardToReviewLog(card, input.grade);
-
+      const { nextCard, reviewLog } = gradeCard(card, input.grade);
       await db.transaction(async (tx) => {
         await tx.update(cards).set(nextCard).where(eq(cards.id, input.id));
         await tx.insert(reviewLogs).values(reviewLog);
