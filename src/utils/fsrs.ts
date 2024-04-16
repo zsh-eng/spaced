@@ -39,16 +39,6 @@ function fsrsStateToState(state: FSRSState): State {
   return states[state];
 }
 
-export function getNextCard(card: Card, schemaRating: Rating) {
-  const now = new Date();
-  const recordLog = f.repeat(card, now);
-  const grade = ratingToFSRSGrade(schemaRating);
-  const recordLogItem = recordLog[grade];
-  const nextCard = recordLogItem.card;
-
-  return nextCard;
-}
-
 /**
  * Give a {@link Card}, returns the review {@link Date} for each {@link Rating}.
  */
