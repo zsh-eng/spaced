@@ -22,6 +22,14 @@ import {
   UiCardHeader,
   UiCardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import EditableTextarea from "@/components/ui/editable-textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
@@ -30,7 +38,8 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
 import { CardContent, Rating, type Card } from "@/schema";
 import { cn } from "@/utils/ui";
-import { EyeIcon, FilePenIcon, TrashIcon } from "lucide-react";
+import _ from "lodash";
+import { EyeIcon, FilePenIcon, Info, TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -114,6 +123,29 @@ export default function Flashcard({
               >
                 <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
               </Toggle>
+
+              <Dialog>
+                <DialogTrigger
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                  )}
+                >
+                  <Info className="h-4 w-4" />
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Stats</DialogTitle>
+                    {Object.entries(card).map(([k, v]) => {
+                      return (
+                        <DialogDescription key={k}>
+                          {_.upperFirst(k)}: {v?.toString()}
+                        </DialogDescription>
+                      );
+                    })}
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+
               <AlertDialog>
                 <AlertDialogTrigger
                   className={cn(
