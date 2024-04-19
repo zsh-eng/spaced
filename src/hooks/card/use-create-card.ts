@@ -14,7 +14,6 @@ export function useCreateCard(options?: CreateMutationOptions): CreateMutation {
     ...options,
     onSuccess: async () => {
       await utils.card.sessionData.invalidate();
-      await utils.card.stats.invalidate();
     },
 
     onError: (error) => {

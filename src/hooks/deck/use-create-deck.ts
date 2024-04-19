@@ -13,8 +13,7 @@ export function useCreateDeck(options?: CreateMutationOptions): CreateMutation {
   return trpc.deck.create.useMutation({
     ...options,
     onSuccess: async () => {
-      await utils.card.sessionData.refetch();
-      await utils.card.stats.refetch();
+      await utils.card.sessionData.invalidate();
     },
 
     onError: (error) => {
