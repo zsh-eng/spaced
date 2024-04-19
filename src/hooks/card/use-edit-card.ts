@@ -11,28 +11,42 @@ export function useEditCard(options?: EditCardMutationOptions): EditMutation {
     ...options,
     async onMutate({ cardContentId, question, answer }) {
       await utils.card.sessionData.cancel();
-      const allCards = utils.card.sessionData.getData();
-      if (!allCards) return;
+      const sessionData = utils.card.sessionData.getData();
+      if (!sessionData) return;
 
-      const nextCards = produce(allCards, (draft) => {
-        const index = draft.findIndex(
+      const nextCards = produce(sessionData, (draft) => {
+        let index = draft.newCards.findIndex(
           (card) => card.card_contents.id === cardContentId,
         );
-        draft[index].card_contents.question = question;
-        draft[index].card_contents.answer = answer;
+
+        if (index !== -1) {
+          draft.newCards[index].card_contents.question = question;
+          draft.newCards[index].card_contents.answer = answer;
+        }
+
+        index = draft.reviewCards.findIndex(
+          (card) => card.card_contents.id === cardContentId,
+        );
+        if (index === -1) {
+          throw new Error("Card content not found.");
+        }
+
+        draft.reviewCards[index].card_contents.question = question;
+        draft.reviewCards[index].card_contents.answer = answer;
       });
 
       utils.card.sessionData.setData(undefined, nextCards);
       toast.success("Card updated.");
-      return { previousCards: allCards };
+
+      return { previousSession: sessionData };
     },
 
     async onError(err, _variables, context) {
       console.error(err.message);
       toast.error(err.message);
 
-      if (context?.previousCards) {
-        utils.card.sessionData.setData(undefined, context.previousCards);
+      if (context?.previousSession) {
+        utils.card.sessionData.setData(undefined, context.previousSession);
       }
     },
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import AnswerButtons from "@/components/flashcard/answer-buttons";
+import CardCountBadge from "@/components/flashcard/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
 import {
   AlertDialog,
@@ -14,14 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  UiCard,
-  UiCardContent,
-  UiCardDescription,
-  UiCardFooter,
-  UiCardHeader,
-  UiCardTitle,
-} from "@/components/ui/card";
+import { UiCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,16 +31,17 @@ import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
 import { Rating, type Card } from "@/schema";
-import { SessionCard } from "@/utils/session";
+import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import _ from "lodash";
-import { EyeIcon, FilePenIcon, Info, TrashIcon } from "lucide-react";
+import { FilePenIcon, Info, TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
   card: SessionCard;
   onRating: (rating: Rating) => void;
   schemaRatingToReviewDay: Record<Rating, Date>;
+  stats: SessionStats;
 };
 
 /**
@@ -54,6 +49,7 @@ type Props = {
  */
 export default function Flashcard({
   card: sessionCard,
+  stats,
   onRating,
   schemaRatingToReviewDay,
 }: Props) {
@@ -80,7 +76,6 @@ export default function Flashcard({
       content.answer === initialCardContent.answer;
     if (isQuestionAnswerSame) return;
 
-    setEditing(false);
     editCardMutation.mutate({
       cardContentId: id,
       question,
@@ -104,136 +99,132 @@ export default function Flashcard({
 
   useEffect(() => {
     setOpen(false);
+    setEditing(false);
   }, [sessionCard.cards.id]);
 
   return (
-    <UiCard className="w-full md:w-[36rem]" ref={cardRef}>
-      <UiCardHeader>
-        <UiCardTitle>
-          <div className="flex justify-between">
-            <p className="">Flashcard</p>
-            <div className="flex justify-end gap-x-2">
-              <Toggle
-                aria-label="toggle edit"
-                pressed={editing}
-                onPressedChange={(isEditing) => {
-                  setEditing(isEditing);
-                  if (!isEditing) handleEdit();
-                }}
-              >
-                <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
-              </Toggle>
-
-              <Dialog>
-                <DialogTrigger
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "icon" }),
-                  )}
-                >
-                  <Info className="h-4 w-4" />
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Stats</DialogTitle>
-                    {Object.entries(sessionCard.cards).map(([k, v]) => {
-                      return (
-                        <DialogDescription key={k}>
-                          {_.upperFirst(k)}: {v?.toString()}
-                        </DialogDescription>
-                      );
-                    })}
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-
-              <AlertDialog>
-                <AlertDialogTrigger
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "icon" }),
-                  )}
-                >
-                  <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmation</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this card?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      variant="destructive"
-                      onClick={() => deleteCard.mutate(sessionCard.cards.id)}
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        </UiCardTitle>
-        <UiCardDescription>
-          <FlashcardState state={sessionCard.cards.state} />
-        </UiCardDescription>
-        {/* <UiCardDescription>{cardContent.question}</UiCardDescription> */}
-      </UiCardHeader>
-
-      <UiCardContent className="flex min-h-96 flex-col gap-y-4">
-        <EditableTextarea
-          className="h-40 resize-none"
-          spellCheck="false"
-          editing={editing}
-          setEditing={setEditing}
-          placeholder="Question"
-          value={question}
-          onChange={(e) => {
-            setContent((prev) => ({ ...prev, question: e.target.value }));
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
+    <div className="flex w-full flex-col gap-y-2 md:w-[36rem]" ref={cardRef}>
+      <div className="flex justify-end gap-x-2">
+        <CardCountBadge stats={stats} />
+        <FlashcardState
+          state={sessionCard.cards.state}
+          className="hidden rounded-sm md:flex"
         />
+        <div className="mr-auto"></div>
+        <Toggle
+          aria-label="toggle edit"
+          pressed={editing}
+          onPressedChange={(isEditing) => {
+            if (!isEditing) {
+              handleEdit();
+            }
+            setEditing(isEditing);
+          }}
+        >
+          <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
+        </Toggle>
 
-        <hr className="mx-auto w-8" />
-
-        <div className="relative w-full">
-          <div
-            className={cn(
-              "group absolute -bottom-8 h-48 w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-150 slide-in-from-top-20 hover:bg-background/30 hover:backdrop-blur-sm",
-              open ? "hidden" : "",
-            )}
-            onClick={() => setOpen(true)}
+        <Dialog>
+          <DialogTrigger
+            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
           >
-            <div className="flex h-full w-full items-center justify-center">
-              <EyeIcon className="h-8 w-8 text-muted-foreground/20 transition-all duration-300 group-hover:opacity-0" />
-            </div>
-          </div>
+            <Info className="h-4 w-4" />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Stats</DialogTitle>
+              {Object.entries(sessionCard.cards).map(([k, v]) => {
+                return (
+                  <DialogDescription key={k}>
+                    {_.upperFirst(k)}: {v?.toString()}
+                  </DialogDescription>
+                );
+              })}
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
 
+        <AlertDialog>
+          <AlertDialogTrigger
+            className={cn(buttonVariants({ variant: "outline", size: "icon" }))}
+          >
+            <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmation</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this card?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={() => deleteCard.mutate(sessionCard.cards.id)}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+
+      <div className="flex flex-col gap-y-2">
+        <UiCard className="px-2 py-2">
           <EditableTextarea
-            className="h-40 resize-none"
+            className="resize-none"
             spellCheck="false"
             editing={editing}
             setEditing={setEditing}
-            placeholder="Answer"
-            value={answer}
+            placeholder="Question"
+            value={question}
             onChange={(e) => {
-              setContent((prev) => ({ ...prev, answer: e.target.value }));
+              setContent((prev) => ({ ...prev, question: e.target.value }));
             }}
             onKeyDown={(e) => e.stopPropagation()}
           />
-        </div>
-      </UiCardContent>
+        </UiCard>
 
-      <UiCardFooter className="h-24">
-        {open && (
+        <UiCard className="px-2 py-2">
+          <div className="relative w-full">
+            {/* TODO Add transition for opacity on reveal but not the other way */}
+            <div
+              className={cn(
+                "group absolute -bottom-0 h-full w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-200 slide-in-from-top-20 hover:bg-background/90 hover:backdrop-blur-sm",
+                open ? "hidden" : "",
+              )}
+              onClick={() => setOpen(true)}
+            >
+              <div className="flex h-full w-full items-center justify-center text-muted transition group-hover:opacity-0">
+                Reveal
+              </div>
+            </div>
+
+            <EditableTextarea
+              className="h-60 resize-none"
+              spellCheck="false"
+              editing={editing}
+              setEditing={setEditing}
+              placeholder="Answer"
+              value={answer}
+              onChange={(e) => {
+                setContent((prev) => ({ ...prev, answer: e.target.value }));
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+            />
+          </div>
+        </UiCard>
+      </div>
+      {open && (
+        <UiCard>
           <AnswerButtons
             schemaRatingToReviewDay={schemaRatingToReviewDay}
             onRating={onRating}
           />
-        )}
-      </UiCardFooter>
-    </UiCard>
+        </UiCard>
+      )}
+    </div>
   );
 }
 

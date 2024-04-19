@@ -1,5 +1,5 @@
 const containerClasses =
-  "flex flex-col items-center gap-4 md:items-start md:gap-8 max-w-6xl";
+  "flex flex-col items-center gap-4 md:items-start md:gap-8 max-w-6xl w-full";
 
 function Layout({
   children,
