@@ -22,6 +22,7 @@ export function useEditCard(options?: EditCardMutationOptions): EditMutation {
         if (index !== -1) {
           draft.newCards[index].card_contents.question = question;
           draft.newCards[index].card_contents.answer = answer;
+          return;
         }
 
         index = draft.reviewCards.findIndex(
