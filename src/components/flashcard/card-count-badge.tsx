@@ -6,23 +6,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { type State } from "@/schema";
-import { trpc } from "@/utils/trpc";
+import { SessionStats } from "@/utils/session";
 
-// Helper function to count the number of cards in a given state
-function count<T>(arr: Array<T>, predicate: (item: T) => boolean) {
-  return arr.reduce((count, item) => count + (predicate(item) ? 1 : 0), 0);
-}
+type Props = {
+  stats: SessionStats;
+};
 
 /**
  * Displays the number of cards in each {@link State}
  */
-export default function CardCountBadge() {
-  const { data: stats, isLoading: isLoadingStats } = trpc.card.stats.useQuery();
-
-  if (!stats || isLoadingStats) {
-    return null;
-  }
-
+export default function CardCountBadge({ stats }: Props) {
   return (
     <div className="flex w-full justify-center gap-x-2">
       <TooltipProvider>

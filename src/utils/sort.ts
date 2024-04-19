@@ -6,11 +6,10 @@
 // In future, we can add more sorting options through a settings page.
 
 import { cards, type Card } from "@/schema";
-import { asc, type SQL } from "drizzle-orm";
+import { asc, desc, type SQL } from "drizzle-orm";
 
 export type Sort = {
   /**
-   * Comparator function that compares two cards
    */
   fn: (a: Card, b: Card) => number;
   /**
@@ -28,8 +27,18 @@ const DIFFICULTY_ASC: Sort = {
   db: asc(cards.difficulty),
 };
 
-const Sorts = {
-  DIFFICULTY_ASC,
-} as const;
+const CREATED_AT_ASC: Sort = {
+  fn: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  db: asc(cards.createdAt),
+};
 
-export default Sorts;
+const CREATED_AT_DESC: Sort = {
+  fn: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  db: desc(cards.createdAt),
+};
+
+export const CardSorts = {
+  DIFFICULTY_ASC,
+  CREATED_AT_ASC,
+  CREATED_AT_DESC,
+} as const;

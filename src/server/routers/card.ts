@@ -1,76 +1,135 @@
 import db from "@/db";
-import {
-  Card,
-  CardContent,
-  cardContents,
-  cards,
-  ratings,
-  reviewLogs,
-} from "@/schema";
+import { cardContents, cards, ratings, reviewLogs, states } from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
-import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
-import Sorts from "@/utils/sort";
+import { gradeCard, newCardWithContent } from "@/utils/fsrs";
+import { SessionCard, SessionData, SessionStats } from "@/utils/session";
+import { CardSorts } from "@/utils/sort";
 import { TRPCError } from "@trpc/server";
-import { endOfDay } from "date-fns";
-import { and, eq, lte, sql } from "drizzle-orm";
+import { and, desc, eq, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const MAX_CARDS_TO_FETCH = 50;
+export const MAX_LEARN_PER_DAY = 20;
 
 // Sort orders
 // See discussion here: https://github.com/ishiko732/ts-fsrs-demo/issues/17
 
-export const cardRouter = router({
-  // Get all cards with their contents
-  all: publicProcedure.query(async ({ ctx }) => {
-    console.log("Fetching cards");
-    const now = endOfDay(new Date());
+async function getReviewCards(): Promise<SessionCard[]> {
+  const now = new Date();
 
-    const cardWithContents = await db
-      .select()
-      .from(cardContents)
-      .leftJoin(cards, eq(cardContents.cardId, cards.id))
-      .where(
-        and(
-          eq(cardContents.deleted, false),
-          eq(cards.deleted, false),
-          lte(cards.due, now),
-        ),
-      )
-      .orderBy(Sorts.DIFFICULTY_ASC.db)
-      .limit(MAX_CARDS_TO_FETCH);
+  console.log("Fetching review cards");
+  const cardWithContents = await db
+    .select()
+    .from(cardContents)
+    .leftJoin(cards, eq(cardContents.cardId, cards.id))
+    .where(
+      and(
+        eq(cardContents.deleted, false),
+        eq(cards.deleted, false),
+        ne(cards.state, states[0]),
+        lte(cards.due, now),
+      ),
+    )
+    .orderBy(CardSorts.DIFFICULTY_ASC.db)
+    .limit(MAX_CARDS_TO_FETCH);
+  console.log(success`Fetched ${cardWithContents.length} review cards`);
 
-    console.log(success`Fetched ${cardWithContents.length} cards`);
-    return cardWithContents as {
-      cards: Card;
-      card_contents: CardContent;
-    }[];
-  }),
+  return cardWithContents as SessionCard[];
+}
 
-  // Get the stats for each state of card for the day
-  stats: publicProcedure.query(async ({ ctx }) => {
-    console.log("Fetching stats");
-    const now = endOfDay(new Date());
+/**
+ * Retrieves the new cards that can be learned today.
+ *
+ * New cards have a state of "New" and a difficulty of "0",
+ * so we have to spread them out amongst the reviews.
+ */
+async function getNewCards(): Promise<SessionCard[]> {
+  const now = new Date();
 
-    const stats = await db
-      .select({
-        total: sql<number>`cast(count(*) as int)`,
-        new: sql<number>`cast(count(
+  console.log("Fetching new cards");
+  const numLearnTodayRes = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(reviewLogs)
+    .where(and(lte(reviewLogs.createdAt, now), eq(reviewLogs.state, states[0])))
+    .orderBy(desc(reviewLogs.createdAt))
+    .groupBy(reviewLogs.cardId);
+
+  const numLearnToday = numLearnTodayRes[0].total;
+  if (typeof numLearnToday !== "number") {
+    throw new TRPCError({
+      message: "Failed to get the number of cards learned today",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+
+  if (numLearnToday >= MAX_LEARN_PER_DAY) {
+    console.log(`Already learnt ${numLearnToday} cards today.`);
+    return [];
+  }
+
+  const numLeft = MAX_LEARN_PER_DAY - numLearnToday;
+  const limit = Math.min(numLeft, MAX_CARDS_TO_FETCH);
+
+  console.log(`User can still learn ${numLeft} cards today`);
+  const cardWithContents = await db
+    .select()
+    .from(cardContents)
+    .leftJoin(cards, eq(cardContents.cardId, cards.id))
+    .where(
+      and(
+        eq(cardContents.deleted, false),
+        eq(cards.deleted, false),
+        eq(cards.state, states[0]),
+        lte(cards.due, now),
+      ),
+    )
+    .orderBy(CardSorts.CREATED_AT_ASC.db)
+    .limit(limit);
+  console.log(success`Fetched ${cardWithContents.length} new cards`);
+
+  return cardWithContents as SessionCard[];
+}
+
+async function getStats(): Promise<SessionStats> {
+  console.log("Fetching stats");
+  const now = new Date();
+
+  const stats = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+      new: sql<number>`cast(count(
           case when ${cards.state} = 'New' then 1 else null end
         ) as int)`,
-        learning: sql<number>`cast(count(
+      learning: sql<number>`cast(count(
           case when ${cards.state} = 'Learning' OR ${cards.state} = 'Relearning' then 1 else null end
         ) as int)`,
-        review: sql<number>`cast(count(
+      review: sql<number>`cast(count(
           case when ${cards.state} = 'Review' then 1 else null end
         ) as int)`,
-      })
-      .from(cards)
-      .where(and(eq(cards.deleted, false), lte(cards.due, now)));
+    })
+    .from(cards)
+    .where(and(eq(cards.deleted, false), lte(cards.due, now)));
 
-    console.log(success`Fetched stats`);
-    return stats[0];
+  console.log(success`Fetched stats`);
+  return stats[0];
+}
+
+export const cardRouter = router({
+  // Get all the cards for the session
+  sessionData: publicProcedure.query(async ({ ctx }) => {
+    const [reviewCards, newCards, stats] = await Promise.all([
+      getReviewCards(),
+      getNewCards(),
+      getStats(),
+    ]);
+    return {
+      newCards: newCards,
+      reviewCards: reviewCards,
+      stats: stats,
+    } satisfies SessionData;
   }),
 
   // Create a new card with content

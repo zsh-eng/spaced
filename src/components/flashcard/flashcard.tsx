@@ -36,15 +36,15 @@ import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
-import { CardContent, Rating, type Card } from "@/schema";
+import { Rating, type Card } from "@/schema";
+import { SessionCard } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import _ from "lodash";
 import { EyeIcon, FilePenIcon, Info, TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
-  card: Card;
-  cardContent: CardContent;
+  card: SessionCard;
   onRating: (rating: Rating) => void;
   schemaRatingToReviewDay: Record<Rating, Date>;
 };
@@ -53,11 +53,11 @@ type Props = {
  * Flashcard is the component that displays a {@link Card}
  */
 export default function Flashcard({
-  card,
-  cardContent: initialCardContent,
+  card: sessionCard,
   onRating,
   schemaRatingToReviewDay,
 }: Props) {
+  const { card_contents: initialCardContent } = sessionCard;
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -104,7 +104,7 @@ export default function Flashcard({
 
   useEffect(() => {
     setOpen(false);
-  }, [card.id]);
+  }, [sessionCard.cards.id]);
 
   return (
     <UiCard className="w-full md:w-[36rem]" ref={cardRef}>
@@ -135,7 +135,7 @@ export default function Flashcard({
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Stats</DialogTitle>
-                    {Object.entries(card).map(([k, v]) => {
+                    {Object.entries(sessionCard.cards).map(([k, v]) => {
                       return (
                         <DialogDescription key={k}>
                           {_.upperFirst(k)}: {v?.toString()}
@@ -165,7 +165,7 @@ export default function Flashcard({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       variant="destructive"
-                      onClick={() => deleteCard.mutate(card.id)}
+                      onClick={() => deleteCard.mutate(sessionCard.cards.id)}
                     >
                       Continue
                     </AlertDialogAction>
@@ -176,7 +176,7 @@ export default function Flashcard({
           </div>
         </UiCardTitle>
         <UiCardDescription>
-          <FlashcardState state={card.state} />
+          <FlashcardState state={sessionCard.cards.state} />
         </UiCardDescription>
         {/* <UiCardDescription>{cardContent.question}</UiCardDescription> */}
       </UiCardHeader>
