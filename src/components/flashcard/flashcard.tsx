@@ -3,6 +3,7 @@
 import AnswerButtons from "@/components/flashcard/answer-buttons";
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
+import { MilkdownEditorWrapper } from "@/components/markdown-editor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +36,7 @@ import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import _ from "lodash";
 import { FilePenIcon, Info, TrashIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Props = {
   card: SessionCard;
@@ -71,6 +72,7 @@ export default function Flashcard({
   const handleEdit = () => {
     const hasCardChanged = content.id !== initialCardContent.id;
     if (hasCardChanged) return;
+
     const isQuestionAnswerSame =
       content.question === initialCardContent.question &&
       content.answer === initialCardContent.answer;
@@ -83,13 +85,29 @@ export default function Flashcard({
     });
   };
 
+  // useCallback is necessary to prevent infinite loop
+  // Infinite loop occurs because onSaveContent is used in a
+  // useEffect in MilkdownEditorWrapper
+  const onSaveQuestion = useCallback(
+    (content: string) => {
+      setContent((prev) => ({ ...prev, question: content }));
+    },
+    [setContent],
+  );
+  const onSaveAnswer = useCallback(
+    (content: string) => {
+      setContent((prev) => ({ ...prev, answer: content }));
+    },
+    [setContent],
+  );
+
   useKeydownRating(onRating, open, () => setOpen(!open));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
     callback: () => {
       setEditing(false);
-      handleEdit();
+      setTimeout(handleEdit, 500);
     },
   });
 
@@ -116,7 +134,7 @@ export default function Flashcard({
           pressed={editing}
           onPressedChange={(isEditing) => {
             if (!isEditing) {
-              handleEdit();
+              setTimeout(handleEdit, 500);
             }
             setEditing(isEditing);
           }}
@@ -171,50 +189,29 @@ export default function Flashcard({
       </div>
 
       <div className="flex flex-col gap-y-2">
-        <UiCard className="px-2 py-2">
-          <EditableTextarea
-            className="resize-none"
-            spellCheck="false"
+        <div
+          className={cn("h-60 w-full", editing ? "bg-muted" : "")}
+          onKeyDown={(e) => e.stopPropagation()}
+          onDoubleClick={() => setEditing(true)}
+        >
+          <MilkdownEditorWrapper
+            initialContent={question}
             editing={editing}
-            setEditing={setEditing}
-            placeholder="Question"
-            value={question}
-            onChange={(e) => {
-              setContent((prev) => ({ ...prev, question: e.target.value }));
-            }}
-            onKeyDown={(e) => e.stopPropagation()}
+            onSaveContent={onSaveQuestion}
           />
-        </UiCard>
+        </div>
 
-        <UiCard className="px-2 py-2">
-          <div className="relative w-full">
-            {/* TODO Add transition for opacity on reveal but not the other way */}
-            <div
-              className={cn(
-                "group absolute -bottom-0 h-full w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-200 slide-in-from-top-20 hover:bg-background/90 hover:backdrop-blur-sm",
-                open ? "hidden" : "",
-              )}
-              onClick={() => setOpen(true)}
-            >
-              <div className="flex h-full w-full items-center justify-center text-muted transition group-hover:opacity-0">
-                Reveal
-              </div>
-            </div>
-
-            <EditableTextarea
-              className="h-60 resize-none"
-              spellCheck="false"
-              editing={editing}
-              setEditing={setEditing}
-              placeholder="Answer"
-              value={answer}
-              onChange={(e) => {
-                setContent((prev) => ({ ...prev, answer: e.target.value }));
-              }}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-          </div>
-        </UiCard>
+        <div
+          className={cn("h-60 w-full", editing ? "bg-muted" : "")}
+          onKeyDown={(e) => e.stopPropagation()}
+          onDoubleClick={() => setEditing(true)}
+        >
+          <MilkdownEditorWrapper
+            initialContent={answer}
+            editing={editing}
+            onSaveContent={onSaveAnswer}
+          />
+        </div>
       </div>
       {open && (
         <UiCard>
