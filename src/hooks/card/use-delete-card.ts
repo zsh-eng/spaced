@@ -1,10 +1,12 @@
 import { type Card } from "@/schema";
+import { getNextSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
-import { produce } from "immer";
 import { toast } from "sonner";
 
 type DeleteMutationOptions = ReactQueryOptions["card"]["delete"];
 type DeleteMutation = ReturnType<typeof trpc.card.delete.useMutation>;
+
+const THRESHOLD_FOR_REFETCH = 10;
 
 /**
  * Hook to delete a {@link Card}.
@@ -16,42 +18,16 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
   return trpc.card.delete.useMutation({
     ...options,
     onMutate: async (id: string) => {
-      await utils.card.all.cancel();
-      await utils.card.stats.cancel();
-
-      const allCards = utils.card.all.getData();
-      const card = allCards?.find((card) => card.cards.id === id);
-
-      if (!allCards || !card) {
+      await utils.card.sessionData.cancel();
+      const sessionData = utils.card.sessionData.getData();
+      if (!sessionData) {
         return;
       }
 
-      const nextCards = produce(allCards, (draft) => {
-        return draft.filter((card) => card.cards.id !== id);
-      });
-      utils.card.all.setData(undefined, nextCards);
-
-      const stats = utils.card.stats.getData();
-      if (!stats) {
-        return { previousCards: allCards };
-      }
-
-      const nextStats = produce(stats, (draft) => {
-        switch (card.cards.state) {
-          case "New":
-            draft.new--;
-            break;
-          case "Learning":
-          case "Relearning":
-            draft.learning--;
-            break;
-          case "Review":
-            draft.review--;
-            break;
-        }
-        draft.total--;
-      });
-      utils.card.stats.setData(undefined, nextStats);
+      // It just so happens that getNextSessionData can be used for deletion
+      // If we change the behaviour of grading cards, we may need to create a new function
+      const nextSessionData = getNextSessionData(sessionData, id);
+      utils.card.sessionData.setData(undefined, nextSessionData);
 
       // Currently, I place this undo functionality here because
       // The previous values are readily available
@@ -61,29 +37,35 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
           label: "Undo",
           onClick: () => {
             undo.mutate(id);
-            utils.card.all.setData(undefined, allCards);
-            utils.card.stats.setData(undefined, stats);
+            utils.card.sessionData.setData(undefined, sessionData);
           },
         },
       });
 
-      return { previousCards: allCards, previousStats: stats };
+      return {
+        previousSession: sessionData,
+      };
     },
 
     onSuccess: () => {
-      utils.card.all.invalidate();
-      utils.card.stats.invalidate();
+      const sessionData = utils.card.sessionData.getData();
+      // Refetch periodically to get more cards
+      // We don't use infinite queries here because there is no pagination
+      // As we grade cards, new cards will be returned from the server
+      if (
+        !sessionData ||
+        sessionData.reviewCards.length + sessionData.newCards.length >
+          THRESHOLD_FOR_REFETCH
+      )
+        return;
+      utils.card.sessionData.invalidate();
     },
 
     onError: (error, _variables, context) => {
       console.error(error.message);
 
-      if (context?.previousCards) {
-        utils.card.all.setData(undefined, context.previousCards);
-      }
-
-      if (context?.previousStats) {
-        utils.card.stats.setData(undefined, context.previousStats);
+      if (context?.previousSession) {
+        utils.card.sessionData.setData(undefined, context.previousSession);
       }
     },
   });

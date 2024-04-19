@@ -8,15 +8,33 @@ import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 type Props = {};
 
-export default function FlashcardBox({}: Props) {
-  const { data: cardsWithContent = [], isLoading } = trpc.card.all.useQuery();
-  const gradeMutation = useGradeCard();
+const getNew = () => Math.random() > 0.75;
 
-  if (isLoading || cardsWithContent.length === 0) {
+export default function FlashcardBox({}: Props) {
+  const {
+    data: cardsWithContent = {
+      newCards: [],
+      reviewCards: [],
+      stats: {
+        new: 0,
+        learning: 0,
+        review: 0,
+        total: 0,
+      },
+    },
+    isLoading: isLoading,
+    error: error,
+  } = trpc.card.sessionData.useQuery();
+
+  const gradeMutation = useGradeCard();
+  const [isNextCardNew, setIsNextCardNew] = useState(getNew());
+
+  if (isLoading) {
     return (
       <div className="flex h-96 w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-accentblue" />
@@ -24,15 +42,46 @@ export default function FlashcardBox({}: Props) {
     );
   }
 
-  const { cards: card, card_contents: cardContent } = cardsWithContent[0]!;
-  const schemaRatingToReviewDay = getReviewDateForEachRating(card);
-  const isCard = card && cardContent;
+  if (error) {
+    return (
+      <div className="flex h-96 w-full items-center justify-center">
+        <div>{error.message}</div>
+      </div>
+    );
+  }
+
+  const { newCards, reviewCards, stats } = cardsWithContent;
+
+  if (newCards.length === 0 && reviewCards.length === 0) {
+    return (
+      <div className="flex h-96 w-full items-center justify-center">
+        <div>All done for today!</div>
+      </div>
+    );
+  }
+
+  const getNextCard = () => {
+    if (reviewCards.length === 0) {
+      return newCards[0];
+    }
+
+    if (isNextCardNew) {
+      return newCards[0];
+    }
+
+    return reviewCards[0];
+  };
+
+  const card = getNextCard();
+  const schemaRatingToReviewDay = getReviewDateForEachRating(card.cards);
+  const isCard = card && card.card_contents;
 
   const onRating = (rating: Rating) => {
     const reviewDay = schemaRatingToReviewDay[rating];
+    setIsNextCardNew(getNew());
     gradeMutation.mutate({
       grade: rating,
-      id: card.id,
+      id: card.cards.id,
     });
 
     toast(`Card marked as ${rating}.`, {
@@ -49,11 +98,10 @@ export default function FlashcardBox({}: Props) {
 
   return (
     <div className="flex w-full flex-col items-center gap-y-2 ">
-      <CardCountBadge />
+      <CardCountBadge stats={stats} />
       {isCard && (
         <Flashcard
           card={card}
-          cardContent={cardContent}
           onRating={onRating}
           schemaRatingToReviewDay={schemaRatingToReviewDay}
         />

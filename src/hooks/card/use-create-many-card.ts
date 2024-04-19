@@ -14,7 +14,7 @@ export function useCreateManyCard(
   return trpc.card.createMany.useMutation({
     ...options,
     onSuccess: async () => {
-      await utils.card.all.invalidate();
+      await utils.card.sessionData.invalidate();
       await utils.card.stats.invalidate();
     },
 
