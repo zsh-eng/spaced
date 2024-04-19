@@ -17,11 +17,16 @@ type Props = {
  */
 export default function CardCountBadge({ stats }: Props) {
   return (
-    <div className="flex w-full justify-center gap-x-2">
+    <div className="flex justify-center gap-x-2">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text">
-            <Badge variant="accentblue">{stats.new}</Badge>
+            <Badge
+              variant="dot"
+              className="h-full rounded-sm before:bg-accentblue"
+            >
+              {stats.new}
+            </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>New</p>
@@ -32,7 +37,12 @@ export default function CardCountBadge({ stats }: Props) {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text">
-            <Badge variant="destructive">{stats.learning} </Badge>
+            <Badge
+              variant="dot"
+              className="h-full rounded-sm before:bg-destructive"
+            >
+              {stats.learning}{" "}
+            </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>Learning</p>
@@ -43,7 +53,12 @@ export default function CardCountBadge({ stats }: Props) {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text">
-            <Badge variant="success">{stats.review} </Badge>
+            <Badge
+              variant="dot"
+              className="h-full rounded-sm before:bg-success"
+            >
+              {stats.review}{" "}
+            </Badge>
           </TooltipTrigger>
           <TooltipContent>
             <p>Review</p>

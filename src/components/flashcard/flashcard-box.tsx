@@ -98,9 +98,9 @@ export default function FlashcardBox({}: Props) {
 
   return (
     <div className="flex w-full flex-col items-center gap-y-2 ">
-      <CardCountBadge stats={stats} />
       {isCard && (
         <Flashcard
+          stats={stats}
           card={card}
           onRating={onRating}
           schemaRatingToReviewDay={schemaRatingToReviewDay}

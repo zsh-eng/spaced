@@ -11,27 +11,18 @@ export default function FlashcardState({
 }) {
   const colour =
     state === "New"
-      ? "bg-accentblue"
+      ? "before:bg-accentblue"
       : state === "Learning"
-        ? "bg-destructive"
+        ? "before:bg-destructive"
         : state === "Relearning"
-          ? "bg-destructive"
+          ? "before:bg-destructive"
           : state === "Review"
-            ? "bg-success"
+            ? "before:bg-success"
             : "";
 
   return (
-    <Badge
-      variant="outline"
-      className={cn("flex w-fit items-center justify-start", className)}
-    >
-      <div
-        className={cn(
-          "mb-[1px] mr-1 inline-block h-2 w-2 rounded-full",
-          colour,
-        )}
-      ></div>
-      <div className={cn(className)}>{state}</div>
+    <Badge variant="dot" className={cn(className, colour)}>
+      {state}
     </Badge>
   );
 }
