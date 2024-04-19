@@ -156,6 +156,7 @@ async function main() {
   await db.delete(reviewLogs).all();
   await db.delete(cardContents).all();
   await db.delete(cards).all();
+  await db.delete(decks).all();
   console.log(success`Deleted all data from the database`);
 
   console.log("Seeding database with 10 decks");
@@ -169,7 +170,7 @@ async function main() {
 
   const itemsToCreate = 2000;
   // Seeding too many items will cause error with Turso for too many SQL variables
-  const skip = 500;
+  const skip = 250;
   const cardIds = Array.from({ length: itemsToCreate }, () =>
     crypto.randomUUID(),
   );
