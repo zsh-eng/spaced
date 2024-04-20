@@ -2,23 +2,28 @@
 
 import CreateFlashcardSimpleForm from "@/components/flashcard/create-flashcard-simple-form";
 import { Button } from "@/components/ui/button";
-import { useCreateManyCard } from "@/hooks/card/use-create-many-card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  CreateManyMutationInput,
+  useCreateManyCard,
+} from "@/hooks/card/use-create-many-card";
+import { extractCardContentFromMarkdownString } from "@/utils/obsidian-parse";
 import { cn } from "@/utils/ui";
 import { Plus, SendHorizonal, TrashIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export type FormValues = {
   id: string;
-  question: string;
-  answer: string;
-};
+} & CreateManyMutationInput[number];
 
-function newFormValues(): FormValues {
+function newFormValues(values?: Partial<FormValues>): FormValues {
   return {
     id: crypto.randomUUID(),
     question: "",
     answer: "",
+    ...values,
   };
 }
 
@@ -65,6 +70,27 @@ export default function CreateManyFlashcardForm() {
     });
   };
 
+  const handleFileUpload: ChangeEventHandler<HTMLInputElement> = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const contents = extractCardContentFromMarkdownString(
+        e.target?.result as string,
+      );
+      const values = contents.map((content) => newFormValues(content));
+      setForms((forms) => [...forms, ...values]);
+    };
+    reader.onerror = (e) => {
+      console.error(e);
+      toast.error("Failed to read file.");
+    };
+    reader.readAsText(file);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== " ") {
@@ -79,34 +105,45 @@ export default function CreateManyFlashcardForm() {
 
   return (
     <div className="flex flex-col items-center gap-y-6">
-      <div className="flex w-full flex-col  justify-center gap-x-2 gap-y-2 md:flex-row">
-        <Button
-          onClick={() => handleAddForm()}
-          variant="outline"
-          className={cn("transition", isPressed ? "scale-105" : "")}
-          disabled={isPending}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {"Press 'space' to Add"}
-        </Button>
+      <div className="flex flex-col gap-y-2">
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="markdownFile">Markdown File Upload</Label>
+          <Input
+            id="markdownFile"
+            type="file"
+            accept=".md"
+            onChange={handleFileUpload}
+          />
+        </div>
+        <div className="flex w-full min-w-80 flex-col  justify-center gap-x-2 gap-y-2 md:flex-row">
+          <Button
+            onClick={() => handleAddForm()}
+            variant="outline"
+            className={cn("transition", isPressed ? "scale-105" : "")}
+            disabled={isPending}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add
+          </Button>
 
-        <Button
-          variant="outline"
-          disabled={forms.length === 0 || isPending}
-          onClick={() => handleSubmit()}
-        >
-          <SendHorizonal className="mr-2 h-4 w-4" />
-          Create All
-        </Button>
+          <Button
+            variant="outline"
+            disabled={forms.length === 0 || isPending}
+            onClick={() => handleSubmit()}
+          >
+            <SendHorizonal className="mr-2 h-4 w-4" />
+            Create All
+          </Button>
 
-        <Button
-          variant="outline"
-          onClick={() => handleDeleteAll()}
-          disabled={forms.length === 0 || isPending}
-        >
-          <TrashIcon className="mr-2 h-4 w-4" />
-          Delete All
-        </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleDeleteAll()}
+            disabled={forms.length === 0 || isPending}
+          >
+            <TrashIcon className="mr-2 h-4 w-4" />
+            Delete All
+          </Button>
+        </div>
       </div>
 
       <section className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
