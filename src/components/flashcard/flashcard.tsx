@@ -91,7 +91,7 @@ export default function Flashcard({
     });
   };
 
-  useKeydownRating(onRating, open, () => setOpen(!open));
+  useKeydownRating(onRating, open, () => setOpen(true));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
@@ -185,9 +185,21 @@ export default function Flashcard({
             </div>
 
             <div
-              className={cn("h-60 w-full", editing ? "bg-muted" : "")}
+              className={cn("relative h-60 w-full", editing ? "bg-muted" : "")}
               onKeyDown={(e) => e.stopPropagation()}
             >
+              <div
+                className={cn(
+                  "group absolute -bottom-0 h-full w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-200 slide-in-from-top-20 hover:bg-background/90 hover:backdrop-blur-sm",
+                  open ? "hidden" : "",
+                )}
+                onClick={() => setOpen(true)}
+              >
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground transition group-hover:opacity-0">
+                  Reveal
+                </div>
+              </div>
+
               <FormMarkdownEditor
                 name="answer"
                 form={form}
@@ -197,6 +209,7 @@ export default function Flashcard({
           </div>
         </form>
       </Form>
+
       {open && (
         <UiCard>
           <AnswerButtons
