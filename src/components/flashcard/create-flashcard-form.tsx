@@ -1,59 +1,70 @@
 "use client";
 
+import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import {
   UiCard,
   UiCardContent,
   UiCardDescription,
+  UiCardFooter,
   UiCardHeader,
   UiCardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 const MAX_INPUT_LENGTH = 20000;
 
+const formSchema = z.object({
+  question: z
+    .string()
+    .min(1, {
+      message: "Question is required.",
+    })
+    .max(MAX_INPUT_LENGTH, {
+      message: "Question is too long.",
+    }),
+  answer: z
+    .string()
+    .min(1, {
+      message: "Answer is required.",
+    })
+    .max(MAX_INPUT_LENGTH, {
+      message: "Answer is too long.",
+    }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 export default function CreateFlashcardForm() {
-  const [question, setQuestion] = useState<string>("");
-  const [answer, setAnswer] = useState<string>("");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      question: "",
+      answer: "",
+    },
+  });
 
   const cardRef = useRef<HTMLDivElement>(null);
-
   const createCardMutation = useCreateCard();
   const deleteCardMutation = useDeleteCard();
   const isLoading =
     createCardMutation.isPending || deleteCardMutation.isPending;
 
-  const onCreate = async () => {
-    if (!question || !answer) {
-      toast.error("Please fill in the question and answer.");
-      return;
-    }
-
-    if (question.length > MAX_INPUT_LENGTH) {
-      toast.error("Question is too long.");
-      return;
-    }
-
-    if (answer.length > MAX_INPUT_LENGTH) {
-      toast.error("Answer is too long.");
-      return;
-    }
-
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      const card = await createCardMutation.mutateAsync({
-        question,
-        answer,
-      });
-
+      const card = await createCardMutation.mutateAsync(data);
       const rollback = () => {
         deleteCardMutation.mutate(card.cards.id);
-        setQuestion(card.card_contents.question);
-        setAnswer(card.card_contents.answer);
+        form.setValue("question", data.question);
+        form.setValue("answer", data.answer);
       };
 
       toast.success("Card created.", {
@@ -62,64 +73,54 @@ export default function CreateFlashcardForm() {
           onClick: rollback,
         },
       });
-      setQuestion("");
-      setAnswer("");
+
+      form.reset();
     } catch (err) {
       toast.error("Failed to create card");
     }
   };
 
   return (
-    <UiCard className="w-full md:w-[36rem]" ref={cardRef}>
-      <UiCardHeader>
+    <UiCard className="w-full border-0 md:w-[36rem] md:border" ref={cardRef}>
+      <UiCardHeader className="px-2 md:px-6">
         <UiCardTitle>Create</UiCardTitle>
         <UiCardDescription>
           Fill in the question and answer to your flashcard.
         </UiCardDescription>
       </UiCardHeader>
 
-      <UiCardContent className="flex min-h-96 flex-col gap-y-4">
-        <Textarea
-          className="h-40 resize-none border-0"
-          disabled={isLoading}
-          spellCheck="false"
-          placeholder="Question"
-          value={question}
-          onChange={(e) => {
-            setQuestion(e.target.value);
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        />
-
-        <hr className="mx-auto w-8" />
-
-        <Textarea
-          className="h-40 resize-none border-0"
-          disabled={isLoading}
-          spellCheck="false"
-          placeholder="Answer"
-          value={answer}
-          onChange={(e) => {
-            setAnswer(e.target.value);
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        />
-      </UiCardContent>
-
-      <UiCardContent className="h-24">
-        <Button
-          className="mt-4 w-full"
-          disabled={isLoading || !question || !answer}
-          size="lg"
-          variant="outline"
-          onClick={() => onCreate()}
-        >
-          {createCardMutation.isPending && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          )}
-          Create
-        </Button>
-      </UiCardContent>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <UiCardContent className="flex min-h-96 flex-col gap-y-4 px-2 md:px-6">
+            <FormTextarea
+              name="question"
+              label="Question"
+              form={form}
+              disabled={isLoading}
+            />
+            <FormTextarea
+              name="answer"
+              label="Answer"
+              form={form}
+              disabled={isLoading}
+            />
+          </UiCardContent>
+          <UiCardFooter className="px-2 md:px-6">
+            <Button
+              className="mt-4 w-full"
+              disabled={isLoading}
+              type="submit"
+              size="lg"
+              variant="outline"
+            >
+              {createCardMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Create
+            </Button>
+          </UiCardFooter>
+        </form>
+      </Form>
     </UiCard>
   );
 }
