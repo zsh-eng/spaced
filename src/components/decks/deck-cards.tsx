@@ -14,13 +14,15 @@ type Props = {
   deckId: string;
 };
 
-const containerClasses = "grid w-full grid-cols-1 gap-4 md:grid-cols-2";
+const containerClasses =
+  "col-span-8 grid w-full grid-cols-1 gap-4 md:grid-cols-2";
 
 function Title({ title }: { title: string }) {
   return (
-    <div className="flex w-full items-center">
-      <Diamond className="mr-3 h-8 w-8  text-accent-foreground" />
+    <div className="col-span-8 mb-2 flex items-center pl-2">
       <h1 className="text-4xl font-bold md:text-5xl">{title}</h1>
+      <Diamond className="ml-3 h-8 w-8 text-accent-foreground md:h-10 md:w-10" />
+
       <Link href="/decks" className="ml-auto">
         <ArrowLeft className="ml-4 h-8 w-8 text-accent-foreground transition duration-300 hover:-translate-x-4" />
       </Link>
@@ -72,8 +74,8 @@ export default function DeckCards({ deckId }: Props) {
 
   return (
     <>
-      <section className="flex w-full flex-col gap-y-4 pl-2">
-        <Title title={deck.name} />
+      <Title title={deck.name} />
+      <section className="col-span-8 mb-6 flex w-full flex-col gap-y-4 pl-2">
         <div className="flex gap-x-4">
           <p className="flex items-center text-xl">
             <NotebookTabs className="mr-2 h-6 w-6" />
@@ -103,7 +105,10 @@ export default function DeckCards({ deckId }: Props) {
       <Button
         onClick={() => fetchNextPage()}
         disabled={isFetchingNextPage}
-        className={cn("ml-auto", !hasNextPage && "hidden")}
+        className={cn(
+          "col-span-8 mt-4 justify-self-stretch sm:justify-self-end",
+          !hasNextPage && "hidden",
+        )}
       >
         {isFetchingNextPage && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
