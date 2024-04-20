@@ -1,7 +1,6 @@
 "use client";
 
 import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
-import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import {
   UiCard,
@@ -12,6 +11,11 @@ import {
   UiCardTitle,
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import {
+  CardContentFormValues,
+  cardContentDefaultValues,
+  cardContentFormSchema,
+} from "@/form";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,38 +23,11 @@ import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const MAX_INPUT_LENGTH = 20000;
-
-const formSchema = z.object({
-  question: z
-    .string()
-    .min(1, {
-      message: "Question is required.",
-    })
-    .max(MAX_INPUT_LENGTH, {
-      message: "Question is too long.",
-    }),
-  answer: z
-    .string()
-    .min(1, {
-      message: "Answer is required.",
-    })
-    .max(MAX_INPUT_LENGTH, {
-      message: "Answer is too long.",
-    }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateFlashcardForm() {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      question: "",
-      answer: "",
-    },
+  const form = useForm<CardContentFormValues>({
+    resolver: zodResolver(cardContentFormSchema),
+    defaultValues: cardContentDefaultValues,
   });
 
   // This is a hack to force the markdown editor to re-render
@@ -64,7 +41,7 @@ export default function CreateFlashcardForm() {
   const isLoading =
     createCardMutation.isPending || deleteCardMutation.isPending;
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+  const onSubmit: SubmitHandler<CardContentFormValues> = async (data) => {
     console.log(JSON.stringify(data, null, 2));
     try {
       const card = await createCardMutation.mutateAsync(data);
