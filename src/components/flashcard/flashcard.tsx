@@ -3,7 +3,7 @@
 import AnswerButtons from "@/components/flashcard/answer-buttons";
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
-import { MarkdownEditor } from "@/components/markdown-editor";
+import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +25,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import EditableTextarea from "@/components/ui/editable-textarea";
+import { Form } from "@/components/ui/form";
 import { Toggle } from "@/components/ui/toggle";
+import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -34,9 +35,11 @@ import useKeydownRating from "@/hooks/use-keydown-rating";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
+import { zodResolver } from "@hookform/resolvers/zod";
 import _ from "lodash";
 import { FilePenIcon, Info, TrashIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 type Props = {
   card: SessionCard;
@@ -59,19 +62,22 @@ export default function Flashcard({
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [content, setContent] = useState({
-    question: initialCardContent.question,
-    answer: initialCardContent.answer,
-    id: initialCardContent.id,
+  const form = useForm<CardContentFormValues>({
+    resolver: zodResolver(cardContentFormSchema),
+    defaultValues: {
+      question: initialCardContent.question,
+      answer: initialCardContent.answer,
+    },
   });
-  const { id, question, answer } = content;
 
   const editCardMutation = useEditCard();
   const deleteCard = useDeleteCard();
 
   const handleEdit = () => {
-    const hasCardChanged = content.id !== initialCardContent.id;
-    if (hasCardChanged) return;
+    // `getValues()` will be undefined if the form is disabled
+    // TODO use readonly field instead
+    // See https://www.react-hook-form.com/api/useform/getvalues/#:~:text=%5B%27%27%5D-,Rules,-Disabled%20inputs%20will
+    const content = form.getValues();
 
     const isQuestionAnswerSame =
       content.question === initialCardContent.question &&
@@ -79,46 +85,21 @@ export default function Flashcard({
     if (isQuestionAnswerSame) return;
 
     editCardMutation.mutate({
-      cardContentId: id,
-      question,
-      answer,
+      cardContentId: initialCardContent.id,
+      question: content.question,
+      answer: content.answer,
     });
   };
-
-  // useCallback is necessary to prevent infinite loop
-  // Infinite loop occurs because onSaveContent is used in a
-  // useEffect in MilkdownEditorWrapper
-  const onSaveQuestion = useCallback(
-    (content: string) => {
-      setContent((prev) => ({ ...prev, question: content }));
-    },
-    [setContent],
-  );
-  const onSaveAnswer = useCallback(
-    (content: string) => {
-      setContent((prev) => ({ ...prev, answer: content }));
-    },
-    [setContent],
-  );
 
   useKeydownRating(onRating, open, () => setOpen(!open));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
     callback: () => {
+      handleEdit();
       setEditing(false);
-      setTimeout(handleEdit, 500);
     },
   });
-
-  useEffect(() => {
-    setContent(initialCardContent);
-  }, [initialCardContent]);
-
-  useEffect(() => {
-    setOpen(false);
-    setEditing(false);
-  }, [sessionCard.cards.id]);
 
   return (
     <div className="flex w-full flex-col gap-y-2 md:w-[36rem]" ref={cardRef}>
@@ -134,8 +115,9 @@ export default function Flashcard({
           pressed={editing}
           onPressedChange={(isEditing) => {
             if (!isEditing) {
-              setTimeout(handleEdit, 500);
+              handleEdit();
             }
+
             setEditing(isEditing);
           }}
         >
@@ -188,31 +170,33 @@ export default function Flashcard({
         </AlertDialog>
       </div>
 
-      <div className="flex flex-col gap-y-2">
-        <div
-          className={cn("h-60 w-full", editing ? "bg-muted" : "")}
-          onKeyDown={(e) => e.stopPropagation()}
-          onDoubleClick={() => setEditing(true)}
-        >
-          <MarkdownEditor
-            initialContent={question}
-            editing={editing}
-            onSaveContent={onSaveQuestion}
-          />
-        </div>
+      <Form {...form}>
+        <form action="">
+          <div className="flex flex-col gap-y-2">
+            <div
+              className={cn("h-60 w-full", editing ? "bg-muted" : "")}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <FormMarkdownEditor
+                name="question"
+                form={form}
+                disabled={!editing}
+              />
+            </div>
 
-        <div
-          className={cn("h-60 w-full", editing ? "bg-muted" : "")}
-          onKeyDown={(e) => e.stopPropagation()}
-          onDoubleClick={() => setEditing(true)}
-        >
-          <MarkdownEditor
-            initialContent={answer}
-            editing={editing}
-            onSaveContent={onSaveAnswer}
-          />
-        </div>
-      </div>
+            <div
+              className={cn("h-60 w-full", editing ? "bg-muted" : "")}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <FormMarkdownEditor
+                name="answer"
+                form={form}
+                disabled={!editing}
+              />
+            </div>
+          </div>
+        </form>
+      </Form>
       {open && (
         <UiCard>
           <AnswerButtons

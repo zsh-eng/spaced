@@ -1,6 +1,5 @@
 "use client";
 
-import CardCountBadge from "@/components/flashcard/card-count-badge";
 import Flashcard from "@/components/flashcard/flashcard";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { type Rating } from "@/schema";
@@ -99,7 +98,10 @@ export default function FlashcardBox({}: Props) {
   return (
     <div className="flex w-full flex-col items-center gap-y-2 ">
       {isCard && (
+        // We trigger a full re-render when the card changes
+        // Currently, there's no need to optimise the rendering
         <Flashcard
+          key={card.cards.id}
           stats={stats}
           card={card}
           onRating={onRating}
