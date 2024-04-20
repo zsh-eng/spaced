@@ -159,7 +159,7 @@ export const cardRouter = router({
         if (deckIds && deckIds.length > 0) {
           console.log("Adding cards to decks");
           const cardsToDecksToInsert = deckIds.map((deckId) => ({
-            cardId: res.cards.id,
+            cardId: insertedCard[0].id,
             deckId,
           })) satisfies NewCardsToDecks[];
           await tx.insert(cardsToDecks).values(cardsToDecksToInsert);

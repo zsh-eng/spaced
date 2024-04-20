@@ -1,7 +1,7 @@
 "use client";
 
 import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
-import { FormSelect, SelectData } from "@/components/form/form-select";
+import { FormSelect } from "@/components/form/form-select";
 import { Button } from "@/components/ui/button";
 import {
   UiCard,
@@ -19,21 +19,13 @@ import {
 } from "@/form";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
-import { RouterOutputs, trpc } from "@/utils/trpc";
+import { allDeckDataToSelectData } from "@/utils/deck";
+import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-type AllDeckData = RouterOutputs["deck"]["all"];
-
-function allDeckDataToSelectData(data: AllDeckData): SelectData {
-  return data.map((deck) => ({
-    value: deck.id,
-    label: deck.name,
-  }));
-}
 
 export default function CreateFlashcardForm() {
   const { data: decks = [], isLoading: isLoadingDeck } =

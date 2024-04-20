@@ -1,69 +1,65 @@
 "use client";
 
-import CreateFlashcardSimpleForm from "@/components/flashcard/create-flashcard-simple-form";
+import { FormSelect } from "@/components/form/form-select";
+import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
+import { UiCard } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CreateManyMutationInput,
-  useCreateManyCard,
-} from "@/hooks/card/use-create-many-card";
+  CreateManyCardsFormValues,
+  cardContentDefaultValues,
+  createManyCardsDefaultValues,
+  createManyCardsFormSchema,
+} from "@/form";
+import { useCreateManyCard } from "@/hooks/card/use-create-many-card";
+import { allDeckDataToSelectData } from "@/utils/deck";
 import { extractCardContentFromMarkdownString } from "@/utils/obsidian-parse";
+import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
-import { Plus, SendHorizonal, TrashIcon } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus, SendHorizonal, Trash, TrashIcon } from "lucide-react";
 import { ChangeEventHandler, useEffect, useState } from "react";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export type FormValues = {
-  id: string;
-} & CreateManyMutationInput[number];
-
-function newFormValues(values?: Partial<FormValues>): FormValues {
-  return {
-    id: crypto.randomUUID(),
-    question: "",
-    answer: "",
-    ...values,
-  };
-}
-
 export default function CreateManyFlashcardForm() {
-  const [forms, setForms] = useState<FormValues[]>([newFormValues()]);
-  const [isPressed, setIsPressed] = useState(false);
+  const { data: decks = [], isLoading: isLoadingDeck } =
+    trpc.deck.all.useQuery();
+  const deckSelectData = allDeckDataToSelectData(decks);
+
+  const form = useForm<CreateManyCardsFormValues>({
+    resolver: zodResolver(createManyCardsFormSchema),
+    defaultValues: createManyCardsDefaultValues,
+  });
+  // https://www.react-hook-form.com/api/usefieldarray/
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "cardInputs",
+  });
+
   const createManyMutation = useCreateManyCard();
-  const isPending = createManyMutation.isPending;
-
-  const handleAddForm = () => {
-    setIsPressed(true);
-    setForms((forms) => [...forms, newFormValues()]);
-    setTimeout(() => setIsPressed(false), 200);
-  };
-
-  const handleEdit = (values: FormValues) => {
-    setForms((forms) =>
-      forms.map((form) => (form.id === values.id ? values : form)),
-    );
-  };
-
-  const handleDelete = (id: string) => {
-    setForms((forms) => forms.filter((form) => form.id !== id));
-  };
+  const isLoading = createManyMutation.isPending;
+  const [isPressed, setIsPressed] = useState(false);
 
   const handleDeleteAll = () => {
+    const previous = form.getValues("cardInputs");
+    form.setValue("cardInputs", []);
+
     toast.success("All forms deleted.", {
       action: {
         label: "Undo",
-        onClick: () => setForms(forms),
+        onClick: () => form.setValue("cardInputs", previous),
       },
     });
-    setForms([]);
   };
 
-  const handleSubmit = () => {
-    toast.promise(createManyMutation.mutateAsync(forms), {
+  const onSubmit: SubmitHandler<CreateManyCardsFormValues> = (data) => {
+    toast.promise(createManyMutation.mutateAsync(data), {
       loading: "Creating flashcards...",
       success: () => {
-        setForms([]);
+        form.reset();
         return "Flashcards created.";
       },
       error: "Failed to create flashcards.",
@@ -81,9 +77,9 @@ export default function CreateManyFlashcardForm() {
       const contents = extractCardContentFromMarkdownString(
         e.target?.result as string,
       );
-      const values = contents.map((content) => newFormValues(content));
-      setForms((forms) => [...forms, ...values]);
+      append(contents);
     };
+
     reader.onerror = (e) => {
       console.error(e);
       toast.error("Failed to read file.");
@@ -96,68 +92,128 @@ export default function CreateManyFlashcardForm() {
       if (e.key !== " ") {
         return;
       }
-      handleAddForm();
+
+      setIsPressed(true);
+      append({
+        ...cardContentDefaultValues,
+      });
+      setTimeout(() => {
+        setIsPressed(false);
+      }, 100);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  });
 
   return (
-    <div className="flex flex-col items-center gap-y-6">
-      <div className="flex flex-col gap-y-2">
-        <div className="grid w-full items-center gap-1.5">
-          <Label htmlFor="markdownFile">Markdown File Upload</Label>
-          <Input
-            id="markdownFile"
-            type="file"
-            accept=".md"
-            onChange={handleFileUpload}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex flex-col items-center gap-y-6">
+          <div className="flex flex-col gap-y-2">
+            {/* Import markdown file input */}
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="markdownFile">Markdown File Upload</Label>
+              <Input
+                id="markdownFile"
+                type="file"
+                accept=".md"
+                onChange={handleFileUpload}
+              />
+            </div>
+
+            {/* Buttons for managing the many cards */}
+            <div className="flex w-full min-w-80 flex-col  justify-center gap-x-2 gap-y-2 md:flex-row">
+              <Button
+                onClick={() =>
+                  append({
+                    ...cardContentDefaultValues,
+                  })
+                }
+                variant="outline"
+                className={cn("transition", isPressed ? "scale-105" : "")}
+                disabled={isLoading}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add
+              </Button>
+
+              <Button
+                variant="outline"
+                disabled={
+                  form.getValues("cardInputs").length === 0 || isLoading
+                }
+                type="submit"
+              >
+                <SendHorizonal className="mr-2 h-4 w-4" />
+                Create All
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => handleDeleteAll()}
+                disabled={
+                  form.getValues("cardInputs").length === 0 || isLoading
+                }
+              >
+                <TrashIcon className="mr-2 h-4 w-4" />
+                Delete All
+              </Button>
+            </div>
+
+            <FormSelect
+              name="deckIds"
+              label="Deck"
+              form={form}
+              disabled={isLoading}
+              multiple={true}
+              data={deckSelectData}
+            />
+          </div>
+
+          {/* Card inputs */}
+          <section
+            className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 xl:grid-cols-3"
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            {fields.map((item, index) => (
+              <UiCard
+                className={cn("flex w-96 flex-col px-4 py-4")}
+                key={item.id}
+              >
+                <FormTextarea
+                  className="h-40 resize-none border-0"
+                  name={`cardInputs.${index}.question`}
+                  label="Question"
+                  form={form}
+                  disabled={isLoading}
+                />
+
+                <hr className="mx-auto w-8" />
+
+                <FormTextarea
+                  className="h-40 resize-none border-0"
+                  name={`cardInputs.${index}.answer`}
+                  label="Answer"
+                  form={form}
+                  disabled={isLoading}
+                />
+
+                <Button
+                  disabled={isLoading}
+                  className="mt-2"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => remove(index)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </UiCard>
+            ))}
+          </section>
         </div>
-        <div className="flex w-full min-w-80 flex-col  justify-center gap-x-2 gap-y-2 md:flex-row">
-          <Button
-            onClick={() => handleAddForm()}
-            variant="outline"
-            className={cn("transition", isPressed ? "scale-105" : "")}
-            disabled={isPending}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add
-          </Button>
-
-          <Button
-            variant="outline"
-            disabled={forms.length === 0 || isPending}
-            onClick={() => handleSubmit()}
-          >
-            <SendHorizonal className="mr-2 h-4 w-4" />
-            Create All
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => handleDeleteAll()}
-            disabled={forms.length === 0 || isPending}
-          >
-            <TrashIcon className="mr-2 h-4 w-4" />
-            Delete All
-          </Button>
-        </div>
-      </div>
-
-      <section className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
-        {forms.map(({ id, ...values }) => (
-          <CreateFlashcardSimpleForm
-            isPending={isPending}
-            key={id}
-            values={values}
-            onChange={(values) => handleEdit({ id, ...values })}
-            onDelete={() => handleDelete(id)}
-          />
-        ))}
-      </section>
-    </div>
+      </form>
+    </Form>
   );
 }
 
