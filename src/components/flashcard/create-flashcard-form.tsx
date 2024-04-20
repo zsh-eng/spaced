@@ -1,6 +1,7 @@
 "use client";
 
 import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
+import { FormSelect, SelectData } from "@/components/form/form-select";
 import { Button } from "@/components/ui/button";
 import {
   UiCard,
@@ -12,22 +13,36 @@ import {
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import {
-  CardContentFormValues,
-  cardContentDefaultValues,
-  cardContentFormSchema,
+  CreateCardFormValues,
+  createCardDefaultValues,
+  createCardFormSchema,
 } from "@/form";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+type AllDeckData = RouterOutputs["deck"]["all"];
+
+function allDeckDataToSelectData(data: AllDeckData): SelectData {
+  return data.map((deck) => ({
+    value: deck.id,
+    label: deck.name,
+  }));
+}
+
 export default function CreateFlashcardForm() {
-  const form = useForm<CardContentFormValues>({
-    resolver: zodResolver(cardContentFormSchema),
-    defaultValues: cardContentDefaultValues,
+  const { data: decks = [], isLoading: isLoadingDeck } =
+    trpc.deck.all.useQuery();
+  const deckSelectData = allDeckDataToSelectData(decks);
+
+  const form = useForm<CreateCardFormValues>({
+    resolver: zodResolver(createCardFormSchema),
+    defaultValues: createCardDefaultValues,
   });
 
   // This is a hack to force the markdown editor to re-render
@@ -41,7 +56,7 @@ export default function CreateFlashcardForm() {
   const isLoading =
     createCardMutation.isPending || deleteCardMutation.isPending;
 
-  const onSubmit: SubmitHandler<CardContentFormValues> = async (data) => {
+  const onSubmit: SubmitHandler<CreateCardFormValues> = async (data) => {
     console.log(JSON.stringify(data, null, 2));
     try {
       const card = await createCardMutation.mutateAsync(data);
@@ -49,6 +64,7 @@ export default function CreateFlashcardForm() {
         // We have to set the value before the re-render triggers
         form.setValue("question", data.question);
         form.setValue("answer", data.answer);
+        form.setValue("deckIds", data.deckIds);
         deleteCardMutation.mutate(card.cards.id);
 
         setTimeout(() => {
@@ -82,6 +98,15 @@ export default function CreateFlashcardForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <UiCardContent className="flex min-h-96 flex-col gap-y-4 px-2 md:px-6">
+            <FormSelect
+              name="deckIds"
+              label="Deck"
+              form={form}
+              disabled={isLoading}
+              multiple={true}
+              data={deckSelectData}
+            />
+
             <FormMarkdownEditor
               key={markdownEditorKey + "question"}
               name="question"

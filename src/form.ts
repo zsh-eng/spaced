@@ -1,8 +1,11 @@
-import { RouterInputs } from "@/utils/trpc";
 import { z } from "zod";
+
+// Form schemas are shared between the client and the server.
+// This ensures that the inputs are validated on both ends.
 
 const MAX_INPUT_LENGTH = 20000;
 
+// Card Content
 export const cardContentFormSchema = z.object({
   question: z
     .string()
@@ -29,6 +32,34 @@ export const cardContentDefaultValues = {
   answer: "",
 } satisfies CardContentFormValues;
 
+// Create Card
+export const createCardFormSchema = cardContentFormSchema.extend({
+  deckIds: z.array(z.string().uuid()).optional(),
+});
+
+export type CreateCardFormValues = z.infer<typeof createCardFormSchema>;
+
+export const createCardDefaultValues = {
+  ...cardContentDefaultValues,
+  deckIds: [],
+} satisfies CreateCardFormValues;
+
+// Create Many Cards
+export const createManyCardsFormSchema = z.object({
+  cardInputs: z.array(cardContentFormSchema).min(1),
+  deckIds: z.array(z.string().uuid()).optional(),
+});
+
+export type CreateManyCardsFormValues = z.infer<
+  typeof createManyCardsFormSchema
+>;
+
+export const createManyCardsDefaultValues = {
+  cardInputs: [],
+  deckIds: [],
+} satisfies CreateManyCardsFormValues;
+
+// Create Deck
 export const deckFormSchema = z.object({
   name: z
     .string()

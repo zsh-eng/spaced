@@ -1,5 +1,4 @@
-import { relations, sql } from "drizzle-orm";
-import {
+import { relations, sql } from "drizzle-orm"; import {
   integer,
   primaryKey,
   real,

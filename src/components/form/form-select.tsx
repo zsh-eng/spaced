@@ -18,7 +18,7 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import { FieldValues } from "react-hook-form";
 
-type SelectData =
+type SelectValueData =
   | {
       value: string;
       label: string;
@@ -27,25 +27,38 @@ type SelectData =
 
 type SelectGroupData = {
   group: string;
-  items: SelectData[];
+  items: SelectValueData[];
 };
 
-type Data = Array<SelectData | SelectGroupData>;
+export type SelectData = Array<SelectValueData | SelectGroupData>;
 
 type FormSelectProps<TFieldValues extends FieldValues> =
   FormInputProps<TFieldValues> & {
+    /**
+     * The label of the select input.
+     */
     placeholder?: string;
+    /**
+     * The description of the select input.
+     */
     description?: string;
-    data: Data;
+    /**
+     * The data of the select input.
+     */
+    data: SelectData;
+    /**
+     * If true, the select input will allow multiple selections.
+     */
+    multiple?: boolean;
   };
 
 function isGroupData(
-  data: SelectData | SelectGroupData,
+  data: SelectValueData | SelectGroupData,
 ): data is SelectGroupData {
   return (data as SelectGroupData).group !== undefined;
 }
 
-function getSelectDataKey(data: SelectData) {
+function getSelectDataKey(data: SelectValueData) {
   if (typeof data === "string") {
     return data;
   }
@@ -53,7 +66,7 @@ function getSelectDataKey(data: SelectData) {
   return data.value;
 }
 
-function SelectDataItem({ data }: { data: SelectData }) {
+function SelectDataItem({ data }: { data: SelectValueData }) {
   if (typeof data === "string") {
     return (
       <SelectItem key={data} value={data}>
@@ -77,6 +90,7 @@ export function FormSelect<TFieldValues extends FieldValues>({
   placeholder,
   description,
   data,
+  multiple,
 }: FormSelectProps<TFieldValues>) {
   return (
     <FormField
@@ -86,33 +100,41 @@ export function FormSelect<TFieldValues extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           {label && <FormLabel>{label}</FormLabel>}
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select
+            onValueChange={(value) => {
+              // TODO implement true multi select using react-select library
+              // The implementation is going to be non-trivial
+              field.onChange(() => (multiple ? [value] : value));
+            }}
+            defaultValue={multiple ? field.value[0] : field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
-              <SelectContent>
-                {data.map((item) => {
-                  if (isGroupData(item)) {
-                    return (
-                      <SelectGroup key={item.group}>
-                        <SelectLabel>{item.group}</SelectLabel>
-                        {item.items.map((groupItem) => (
-                          <SelectDataItem
-                            key={getSelectDataKey(groupItem)}
-                            data={groupItem}
-                          />
-                        ))}
-                      </SelectGroup>
-                    );
-                  }
-
-                  return (
-                    <SelectDataItem key={getSelectDataKey(item)} data={item} />
-                  );
-                })}
-              </SelectContent>
             </FormControl>
+
+            <SelectContent>
+              {data.map((item) => {
+                if (isGroupData(item)) {
+                  return (
+                    <SelectGroup key={item.group}>
+                      <SelectLabel>{item.group}</SelectLabel>
+                      {item.items.map((groupItem) => (
+                        <SelectDataItem
+                          key={getSelectDataKey(groupItem)}
+                          data={groupItem}
+                        />
+                      ))}
+                    </SelectGroup>
+                  );
+                }
+
+                return (
+                  <SelectDataItem key={getSelectDataKey(item)} data={item} />
+                );
+              })}
+            </SelectContent>
           </Select>
           {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />

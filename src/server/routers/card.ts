@@ -1,5 +1,14 @@
 import db from "@/db";
-import { cardContents, cards, ratings, reviewLogs, states } from "@/schema";
+import { createCardFormSchema, createManyCardsFormSchema } from "@/form";
+import {
+  NewCardsToDecks,
+  cardContents,
+  cards,
+  cardsToDecks,
+  ratings,
+  reviewLogs,
+  states,
+} from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { gradeCard, newCardWithContent } from "@/utils/fsrs";
@@ -134,15 +143,10 @@ export const cardRouter = router({
 
   // Create a new card with content
   create: publicProcedure
-    .input(
-      z.object({
-        question: z.string(),
-        answer: z.string(),
-      }),
-    )
+    .input(createCardFormSchema)
     .mutation(async ({ ctx, input }) => {
       console.log("Adding card");
-      const { question, answer } = input;
+      const { question, answer, deckIds } = input;
       const { card, cardContent } = newCardWithContent(question, answer);
 
       const res = await db.transaction(async (tx) => {
@@ -151,6 +155,19 @@ export const cardRouter = router({
           .insert(cardContents)
           .values(cardContent)
           .returning();
+
+        if (deckIds && deckIds.length > 0) {
+          console.log("Adding cards to decks");
+          const cardsToDecksToInsert = deckIds.map((deckId) => ({
+            cardId: res.cards.id,
+            deckId,
+          })) satisfies NewCardsToDecks[];
+          await tx.insert(cardsToDecks).values(cardsToDecksToInsert);
+          console.log(
+            success`Added ${cardsToDecksToInsert.length} cards to decks`,
+          );
+        }
+
         return {
           cards: insertedCard[0],
           card_contents: insertedCardContent[0],
@@ -164,17 +181,11 @@ export const cardRouter = router({
 
   // Create many cards
   createMany: publicProcedure
-    .input(
-      z.array(
-        z.object({
-          question: z.string(),
-          answer: z.string(),
-        }),
-      ),
-    )
+    .input(createManyCardsFormSchema)
     .mutation(async ({ ctx, input }) => {
-      console.log(`Adding ${input.length} cards`);
-      const cardWithContents = input.map(({ question, answer }) =>
+      const { cardInputs, deckIds } = input;
+      console.log(`Adding ${cardInputs.length} cards`);
+      const cardWithContents = cardInputs.map(({ question, answer }) =>
         newCardWithContent(question, answer),
       );
 
@@ -193,13 +204,27 @@ export const cardRouter = router({
           .values(cardContentsToInsert)
           .returning();
 
+        if (deckIds && deckIds.length > 0) {
+          console.log("Adding cards to decks");
+          const cardsToDecksToInsert = deckIds.flatMap((deckId) =>
+            insertedCards.map((card) => ({
+              cardId: card.id,
+              deckId,
+            })),
+          ) satisfies NewCardsToDecks[];
+          await tx.insert(cardsToDecks).values(cardsToDecksToInsert);
+          console.log(
+            success`Added ${cardsToDecksToInsert.length} cards to decks`,
+          );
+        }
+
         return insertedCards.map((card, index) => ({
           cards: card,
           card_contents: insertedCardContents[index],
         }));
       });
 
-      console.log(success`Added ${input.length} cards`);
+      console.log(success`Added ${cardInputs.length} cards`);
       return res;
     }),
 
