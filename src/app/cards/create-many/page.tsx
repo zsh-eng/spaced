@@ -2,7 +2,7 @@ import CreateManyFlashcardForm from "@/components/flashcard/create-many-flashcar
 
 export default function CreateManyFlashcardsPage() {
   return (
-    <main className="flex flex-col items-center justify-center px-2 py-8 lg:justify-between">
+    <main className="col-span-12 pb-12 pt-6">
       <CreateManyFlashcardForm />
     </main>
   );

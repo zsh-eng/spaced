@@ -79,7 +79,10 @@ export default function CreateFlashcardForm() {
   };
 
   return (
-    <UiCard className="w-full border-0 md:w-[36rem] md:border" ref={cardRef}>
+    <UiCard
+      className="col-start-1 col-end-9 self-start border-0 sm:col-start-2 sm:col-end-8 md:border lg:col-start-3 lg:col-end-7"
+      ref={cardRef}
+    >
       <UiCardHeader className="px-2 md:px-6">
         <UiCardTitle>Create</UiCardTitle>
         <UiCardDescription>

@@ -12,6 +12,7 @@ import { FieldValues } from "react-hook-form";
 type FormMarkdownEditorProps<TFieldValues extends FieldValues> =
   FormInputProps<TFieldValues> & {
     editing?: boolean;
+    className?: string;
   };
 
 /**
@@ -28,6 +29,7 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
   name,
   disabled,
   label,
+  className,
 }: FormMarkdownEditorProps<TFieldValues>) {
   return (
     <FormField
@@ -35,7 +37,7 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
       name={name}
       disabled={disabled}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={className}>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <MarkdownEditor {...field} />

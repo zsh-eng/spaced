@@ -20,7 +20,7 @@ import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, SendHorizonal, Trash, TrashIcon } from "lucide-react";
-import { ChangeEventHandler, useEffect, useState } from "react";
+import { ChangeEventHandler } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -41,7 +41,6 @@ export default function CreateManyFlashcardForm() {
 
   const createManyMutation = useCreateManyCard();
   const isLoading = createManyMutation.isPending;
-  const [isPressed, setIsPressed] = useState(false);
 
   const handleDeleteAll = () => {
     const previous = form.getValues("cardInputs");
@@ -87,28 +86,9 @@ export default function CreateManyFlashcardForm() {
     reader.readAsText(file);
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== " ") {
-        return;
-      }
-
-      setIsPressed(true);
-      append({
-        ...cardContentDefaultValues,
-      });
-      setTimeout(() => {
-        setIsPressed(false);
-      }, 100);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  });
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="">
         <div className="flex flex-col items-center gap-y-6">
           <div className="flex flex-col gap-y-2">
             {/* Import markdown file input */}
@@ -131,7 +111,6 @@ export default function CreateManyFlashcardForm() {
                   })
                 }
                 variant="outline"
-                className={cn("transition", isPressed ? "scale-105" : "")}
                 disabled={isLoading}
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -173,7 +152,7 @@ export default function CreateManyFlashcardForm() {
 
           {/* Card inputs */}
           <section
-            className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 xl:grid-cols-3"
+            className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 2xl:grid-cols-3"
             onKeyDown={(e) => e.stopPropagation()}
           >
             {fields.map((item, index) => (

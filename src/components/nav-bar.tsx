@@ -108,13 +108,13 @@ function MenuDrawer() {
 
 export function NavigationBar() {
   return (
-    <NavigationMenu className="w-full px-2 py-2 sm:px-6 lg:px-8">
+    <NavigationMenu className="col-start-1 col-end-13 h-16 xl:col-start-3 xl:col-end-11">
       <MenuDrawer />
 
       <NavigationMenuList className="hidden md:flex">
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink className={"flex justify-start"}>
               <Telescope className="h-6 w-6 xs:mr-2" strokeWidth={1.5} />
               <span className="hidden text-lg font-semibold xs:block">
                 spaced

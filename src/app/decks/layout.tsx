@@ -1,5 +1,5 @@
 const containerClasses =
-  "flex flex-col items-center gap-4 md:items-start md:gap-8 max-w-6xl w-full";
+  "col-start-1 col-end-13 xl:col-start-3 xl:col-end-11 grid grid-cols-8 gap-x-4 pt-6 pb-12";
 
 function Layout({
   children,
@@ -7,7 +7,7 @@ function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex flex-col items-center justify-center px-2 md:py-4 lg:justify-between">
+    <main className="col-span-12 grid grid-cols-12">
       <div className={containerClasses}>{children}</div>
     </main>
   );

@@ -12,13 +12,13 @@ type Props = {
 };
 
 export function DeckSkeleton() {
-  return <Skeleton className="h-48 w-[36rem]" />;
+  return <Skeleton className="h-48 w-full" />;
 }
 
 export default function Deck({ deck }: Props) {
   return (
     <Link href={`/decks/${deck.id}`}>
-      <UiCard className="flex h-full max-w-xl cursor-pointer flex-col gap-y-2 px-6 py-6">
+      <UiCard className="flex h-full w-full cursor-pointer flex-col gap-y-2 px-6 py-6">
         <UiCardTitle>{deck.name}</UiCardTitle>
         <UiCardDescription>{deck.description}</UiCardDescription>
         <div className="mt-auto flex items-end">

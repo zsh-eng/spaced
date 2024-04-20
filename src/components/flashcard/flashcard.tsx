@@ -37,7 +37,7 @@ import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import _ from "lodash";
-import { FilePenIcon, Info, TrashIcon } from "lucide-react";
+import { FilePenIcon, Info, Telescope, TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -102,8 +102,11 @@ export default function Flashcard({
   });
 
   return (
-    <div className="flex w-full flex-col gap-y-2 md:w-[36rem]" ref={cardRef}>
-      <div className="flex justify-end gap-x-2">
+    <div
+      className="col-start-1 col-end-13 grid grid-cols-8 grid-rows-[auto_1fr] gap-x-4 gap-y-2 xl:col-start-3 xl:col-end-11"
+      ref={cardRef}
+    >
+      <div className="col-start-1 col-end-9 flex h-12 items-end gap-x-2 sm:h-24">
         <CardCountBadge stats={stats} />
         <FlashcardState
           state={sessionCard.cards.state}
@@ -171,53 +174,63 @@ export default function Flashcard({
       </div>
 
       <Form {...form}>
-        <form action="">
-          <div className="flex flex-col gap-y-2">
-            <div
-              className={cn("h-60 w-full", editing ? "bg-muted" : "")}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <FormMarkdownEditor
-                name="question"
-                form={form}
-                disabled={!editing}
-              />
-            </div>
+        <form
+          action=""
+          className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 sm:grid-rows-[2fr_1fr]"
+        >
+          <div
+            className={cn(
+              "col-span-8 flex h-full min-h-80 w-full items-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
+              editing ? "bg-muted" : "",
+            )}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <FormMarkdownEditor
+              name="question"
+              form={form}
+              disabled={!editing}
+            />
+          </div>
 
+          <div
+            className={cn(
+              "relative col-span-8 h-full min-h-80 w-full border border-input sm:col-span-4 sm:min-h-96",
+              editing ? "bg-muted" : "",
+            )}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div
-              className={cn("relative h-60 w-full", editing ? "bg-muted" : "")}
-              onKeyDown={(e) => e.stopPropagation()}
+              className={cn(
+                "absolute -bottom-0 z-10 h-full w-full cursor-pointer bg-muted transition hover:bg-muted/80",
+                open ? "-z-10 opacity-0" : "",
+              )}
+              onClick={() => setOpen(true)}
             >
-              <div
-                className={cn(
-                  "group absolute -bottom-0 h-full w-full cursor-pointer rounded-lg bg-background shadow-sm ring-1 ring-primary/10 transition duration-200 slide-in-from-top-20 hover:bg-background/90 hover:backdrop-blur-sm",
-                  open ? "hidden" : "",
-                )}
-                onClick={() => setOpen(true)}
-              >
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground transition group-hover:opacity-0">
-                  Reveal
-                </div>
+              <div className="flex h-full w-full items-center justify-center text-background">
+                <Telescope className="h-16 w-16" strokeWidth={1} />
               </div>
-
-              <FormMarkdownEditor
-                name="answer"
-                form={form}
-                disabled={!editing}
-              />
             </div>
+            <FormMarkdownEditor
+              className={cn(
+                "flex h-full items-center",
+                !open ? "opacity-0" : "",
+              )}
+              name="answer"
+              form={form}
+              disabled={!editing}
+            />
+          </div>
+
+          <div className="col-span-8 flex justify-center self-start justify-self-center">
+            <AnswerButtons
+              schemaRatingToReviewDay={schemaRatingToReviewDay}
+              onRating={onRating}
+              open={open}
+              setOpen={setOpen}
+            />
           </div>
         </form>
       </Form>
-
-      {open && (
-        <UiCard>
-          <AnswerButtons
-            schemaRatingToReviewDay={schemaRatingToReviewDay}
-            onRating={onRating}
-          />
-        </UiCard>
-      )}
     </div>
   );
 }
