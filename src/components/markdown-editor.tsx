@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/utils/ui";
 import {
   Editor,
   defaultValueCtx,
@@ -10,6 +9,8 @@ import {
   serializerCtx,
 } from "@milkdown/core";
 import { clipboard } from "@milkdown/plugin-clipboard";
+import { history } from "@milkdown/plugin-history";
+import { listener, listenerCtx } from "@milkdown/plugin-listener";
 import {
   blockquoteAttr,
   bulletListAttr,
@@ -21,30 +22,37 @@ import {
 import { gfm } from "@milkdown/preset-gfm";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 import { useEffect, useRef } from "react";
-import { history } from "@milkdown/plugin-history";
 
 type Props = {
-  initialContent: string;
-  editing: boolean;
-  onSaveContent: (content: string) => void;
+  value: string;
+  disabled?: boolean;
+  onChange?: (content: string) => void;
 };
 
 const editorClasses =
   "milkdown-editor mx-auto outline-none h-60 overflow-y-auto border border-input px-3 py-2 rounded-md";
 
-const MilkdownEditor = ({ initialContent, editing, onSaveContent }: Props) => {
+export function getMarkdown(editor: Editor | undefined) {
+  if (!editor) return "";
+
+  return editor.action((ctx) => {
+    const editorView = ctx.get(editorViewCtx);
+    const serializer = ctx.get(serializerCtx);
+    return serializer(editorView.state.doc);
+  });
+}
+
+const MilkdownEditor = ({ disabled, value, onChange }: Props) => {
   // Create a ref to store the current editing state
-  const editingRef = useRef(editing);
+  const disabledRef = useRef(disabled);
   useEffect(() => {
-    console.log("editable", editing);
-    editingRef.current = editing;
-  }, [editing]);
-  const isEditing = () => editingRef.current;
+    disabledRef.current = disabled;
+  }, [disabled]);
+  const isEditable = () => !disabledRef.current;
 
   const { get } = useEditor((root) =>
     Editor.make()
       .config((ctx) => {
-        console.log("Editor");
         ctx.set(rootCtx, root);
 
         // Add attributes to the editor container
@@ -54,7 +62,7 @@ const MilkdownEditor = ({ initialContent, editing, onSaveContent }: Props) => {
             class: editorClasses,
             spellcheck: "false",
           },
-          editable: isEditing,
+          editable: isEditable,
         }));
 
         // Add attributes to nodes and marks
@@ -112,36 +120,34 @@ const MilkdownEditor = ({ initialContent, editing, onSaveContent }: Props) => {
             "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
         }));
 
-        ctx.set(defaultValueCtx, initialContent);
+        ctx.set(defaultValueCtx, value);
+
+        const listener = ctx.get(listenerCtx);
+        listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
+          if (markdown === prevMarkdown) {
+            return;
+          }
+          onChange && onChange(markdown);
+        });
       })
       .use(commonmark)
       .use(gfm)
       .use(clipboard)
-      .use(history),
+      .use(history)
+      .use(listener),
   );
-
-  const editor = get();
-
-  useEffect(() => {
-    if (editing) return;
-
-    if (!editor) return;
-    const markdown = editor.action((ctx) => {
-      const editorView = ctx.get(editorViewCtx);
-      const serializer = ctx.get(serializerCtx);
-      return serializer(editorView.state.doc);
-    });
-
-    onSaveContent(markdown);
-  }, [editing, onSaveContent, editor]);
 
   return <Milkdown />;
 };
 
-export const MilkdownEditorWrapper = (props: Props) => {
+MilkdownEditor.displayName = "MilkdownEditor";
+
+export const MarkdownEditor = (props: Props) => {
   return (
     <MilkdownProvider>
       <MilkdownEditor {...props} />
     </MilkdownProvider>
   );
 };
+
+MarkdownEditor.displayName = "MarkdownEditor";

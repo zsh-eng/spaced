@@ -30,16 +30,12 @@ export function FormTextInput<TFieldValues extends FieldValues>({
     <FormField
       control={form.control}
       name={name}
+      disabled={disabled}
       render={({ field }) => (
         <FormItem>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
-            <Input
-              className={className}
-              placeholder={placeholder}
-              disabled={disabled}
-              {...field}
-            />
+            <Input className={className} placeholder={placeholder} {...field} />
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />

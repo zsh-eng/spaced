@@ -1,5 +1,6 @@
 "use client";
 
+import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,7 @@ import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -52,6 +53,11 @@ export default function CreateFlashcardForm() {
     },
   });
 
+  // This is a hack to force the markdown editor to re-render
+  const [markdownEditorKey, setMarkdownEditorKey] = useState<string>(
+    crypto.randomUUID(),
+  );
+
   const cardRef = useRef<HTMLDivElement>(null);
   const createCardMutation = useCreateCard();
   const deleteCardMutation = useDeleteCard();
@@ -59,12 +65,18 @@ export default function CreateFlashcardForm() {
     createCardMutation.isPending || deleteCardMutation.isPending;
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    console.log(JSON.stringify(data, null, 2));
     try {
       const card = await createCardMutation.mutateAsync(data);
       const rollback = () => {
-        deleteCardMutation.mutate(card.cards.id);
+        // We have to set the value before the re-render triggers
         form.setValue("question", data.question);
         form.setValue("answer", data.answer);
+        deleteCardMutation.mutate(card.cards.id);
+
+        setTimeout(() => {
+          setMarkdownEditorKey(crypto.randomUUID());
+        }, 500);
       };
 
       toast.success("Card created.", {
@@ -75,6 +87,7 @@ export default function CreateFlashcardForm() {
       });
 
       form.reset();
+      setMarkdownEditorKey(crypto.randomUUID());
     } catch (err) {
       toast.error("Failed to create card");
     }
@@ -92,13 +105,15 @@ export default function CreateFlashcardForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <UiCardContent className="flex min-h-96 flex-col gap-y-4 px-2 md:px-6">
-            <FormTextarea
+            <FormMarkdownEditor
+              key={markdownEditorKey + "question"}
               name="question"
               label="Question"
               form={form}
               disabled={isLoading}
             />
-            <FormTextarea
+            <FormMarkdownEditor
+              key={markdownEditorKey + "answer"}
               name="answer"
               label="Answer"
               form={form}

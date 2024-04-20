@@ -32,6 +32,7 @@ export function FormTextarea<TFieldValues extends FieldValues>({
     <FormField
       control={form.control}
       name={name}
+      disabled={disabled}
       render={({ field }) => (
         <FormItem>
           {label && <FormLabel>{label}</FormLabel>}
@@ -39,7 +40,6 @@ export function FormTextarea<TFieldValues extends FieldValues>({
             <Textarea
               className={className}
               placeholder={placeholder}
-              disabled={disabled}
               rows={rows}
               {...field}
             />

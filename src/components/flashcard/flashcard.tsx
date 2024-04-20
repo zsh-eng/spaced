@@ -3,7 +3,7 @@
 import AnswerButtons from "@/components/flashcard/answer-buttons";
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
-import { MilkdownEditorWrapper } from "@/components/markdown-editor";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,7 +194,7 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
           onDoubleClick={() => setEditing(true)}
         >
-          <MilkdownEditorWrapper
+          <MarkdownEditor
             initialContent={question}
             editing={editing}
             onSaveContent={onSaveQuestion}
@@ -206,7 +206,7 @@ export default function Flashcard({
           onKeyDown={(e) => e.stopPropagation()}
           onDoubleClick={() => setEditing(true)}
         >
-          <MilkdownEditorWrapper
+          <MarkdownEditor
             initialContent={answer}
             editing={editing}
             onSaveContent={onSaveAnswer}

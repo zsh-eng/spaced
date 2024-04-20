@@ -23,6 +23,9 @@ dependencies:
   '@milkdown/plugin-history':
     specifier: ^7.3.6
     version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+  '@milkdown/plugin-listener':
+    specifier: ^7.3.6
+    version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
   '@milkdown/preset-commonmark':
     specifier: ^7.3.6
     version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
@@ -934,6 +937,24 @@ packages:
       '@milkdown/ctx': 7.3.6
       '@milkdown/prose': 7.3.6
       '@milkdown/utils': 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@milkdown/transformer'
+    dev: false
+
+  /@milkdown/plugin-listener@7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6):
+    resolution: {integrity: sha512-sp9w36Vn/XLSCKl/4fqUIz2NNJnU1hXzX5X/XHH3WXCszqs6cJPRTtR6k8wAoTG2le0sW8EOdmptdjEsC2w5+Q==}
+    peerDependencies:
+      '@milkdown/core': ^7.2.0
+      '@milkdown/ctx': ^7.2.0
+      '@milkdown/prose': ^7.2.0
+    dependencies:
+      '@milkdown/core': 7.3.6(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+      '@milkdown/ctx': 7.3.6
+      '@milkdown/prose': 7.3.6
+      '@milkdown/utils': 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+      '@types/lodash.debounce': 4.0.9
+      lodash.debounce: 4.0.8
       tslib: 2.6.2
     transitivePeerDependencies:
       - '@milkdown/transformer'
@@ -2000,9 +2021,14 @@ packages:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
 
+  /@types/lodash.debounce@4.0.9:
+    resolution: {integrity: sha512-Ma5JcgTREwpLRwMM+XwBR7DaWe96nC38uCBDFKZWbNKD+osjVzdpnUSwBcqCptrp16sSOLBAUb50Car5I0TCsQ==}
+    dependencies:
+      '@types/lodash': 4.17.0
+    dev: false
+
   /@types/lodash@4.17.0:
     resolution: {integrity: sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==}
-    dev: true
 
   /@types/mdast@4.0.3:
     resolution: {integrity: sha512-LsjtqsyF+d2/yFOYaN22dHZI1Cpwkrj+g06G8+qtUKlhovPW89YhqSnfKtMbkgmEtYpH2gydRNULd6y8mciAFg==}
@@ -4103,6 +4129,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash.debounce@4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+    dev: false
 
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
