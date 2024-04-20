@@ -1,39 +1,38 @@
 "use client";
 
+import { FormTextInput } from "@/components/form/form-input";
+import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import {
   UiCard,
   UiCardContent,
   UiCardDescription,
+  UiCardFooter,
   UiCardHeader,
   UiCardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea, TextareaClasses } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
+import { DeckFormValues, deckDefaultValues, deckFormSchema } from "@/form";
 import { useCreateDeck } from "@/hooks/deck/use-create-deck";
-import { RouterInputs } from "@/utils/trpc";
-import { cn } from "@/utils/ui";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-type DeckInputs = RouterInputs["deck"]["create"];
-
-const emptyDeck = {
-  name: "",
-  description: "",
-} satisfies DeckInputs;
 
 export function CreateDeckForm() {
   const createDeckMutation = useCreateDeck();
-  const [deck, setDeck] = useState<DeckInputs>(structuredClone(emptyDeck));
+  const form = useForm<DeckFormValues>({
+    resolver: zodResolver(deckFormSchema),
+    defaultValues: deckDefaultValues,
+  });
+
   const isLoading = createDeckMutation.isPending;
 
-  const handleCreate = () => {
-    toast.promise(createDeckMutation.mutateAsync(deck), {
+  const onSubmit: SubmitHandler<DeckFormValues> = (data) => {
+    toast.promise(createDeckMutation.mutateAsync(data), {
       loading: "Creating deck...",
       success: () => {
-        setDeck(structuredClone(emptyDeck));
+        form.reset();
         return "Deck created.";
       },
       error: "Failed to create deck.",
@@ -41,51 +40,46 @@ export function CreateDeckForm() {
   };
 
   return (
-    <UiCard className="w-full md:w-[36rem]">
-      <UiCardHeader>
+    <UiCard className="w-full border-0 md:w-[36rem] md:border">
+      <UiCardHeader className="px-2 md:px-6">
         <UiCardTitle>Create</UiCardTitle>
         <UiCardDescription>
           Provide a name and description for your new deck.
         </UiCardDescription>
       </UiCardHeader>
 
-      <UiCardContent className="flex min-h-96 flex-col gap-y-4">
-        <Input
-          placeholder="Name"
-          className={cn("text-md")}
-          value={deck.name}
-          onChange={(e) => setDeck({ ...deck, name: e.target.value })}
-        />
-        <Textarea
-          className="h-40 resize-none border-0"
-          disabled={isLoading}
-          spellCheck="false"
-          placeholder="Description"
-          value={deck.description}
-          onChange={(e) => {
-            setDeck({
-              ...deck,
-              description: e.target.value,
-            });
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <UiCardContent className="flex min-h-96 flex-col gap-y-4 px-2 md:px-6">
+            <FormTextInput
+              name="name"
+              label="Name"
+              form={form}
+              disabled={isLoading}
+            />
+            <hr className="mx-auto w-8" />
+            <FormTextarea
+              name="description"
+              label="Description"
+              form={form}
+              disabled={isLoading}
+            />
+          </UiCardContent>
 
-        <hr className="mx-auto w-8" />
-      </UiCardContent>
-
-      <UiCardContent className="h-24">
-        <Button
-          className="mt-4 w-full"
-          disabled={isLoading || !deck.name}
-          size="lg"
-          variant="outline"
-          onClick={() => handleCreate()}
-        >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create
-        </Button>
-      </UiCardContent>
+          <UiCardFooter className="px-2 md:px-6">
+            <Button
+              className="mt-4 w-full"
+              disabled={isLoading}
+              size="lg"
+              variant="outline"
+              type="submit"
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create
+            </Button>
+          </UiCardFooter>
+        </form>
+      </Form>
     </UiCard>
   );
 }

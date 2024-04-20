@@ -11,7 +11,7 @@ const MULTILINE_SEPARATOR = "?";
 
 export function extractCardContentFromMarkdownString(
   markdown: string,
-): CreateManyMutationInput {
+): CreateManyMutationInput["cardInputs"] {
   const mdReplacedNewlines = markdown.replace(/\r\n/g, "\n");
   const lines = mdReplacedNewlines.split("\n");
 
