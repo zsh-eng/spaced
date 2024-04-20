@@ -17,7 +17,7 @@ type Props = {
  */
 export default function CardCountBadge({ stats }: Props) {
   return (
-    <div className="flex justify-center gap-x-2">
+    <div className="flex h-8 justify-center gap-x-2">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text">

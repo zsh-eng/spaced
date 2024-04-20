@@ -21,7 +21,7 @@ export default function FlashcardState({
             : "";
 
   return (
-    <Badge variant="dot" className={cn(className, colour)}>
+    <Badge variant="dot" className={cn("h-8", colour, className)}>
       {state}
     </Badge>
   );

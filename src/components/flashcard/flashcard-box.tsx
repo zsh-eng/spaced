@@ -35,7 +35,7 @@ export default function FlashcardBox({}: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 w-full items-center justify-center">
+      <div className="col-span-12 flex h-96 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-accentblue" />
       </div>
     );
@@ -43,7 +43,7 @@ export default function FlashcardBox({}: Props) {
 
   if (error) {
     return (
-      <div className="flex h-96 w-full items-center justify-center">
+      <div className="col-span-12 flex h-96 items-center justify-center">
         <div>{error.message}</div>
       </div>
     );
@@ -96,7 +96,7 @@ export default function FlashcardBox({}: Props) {
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-y-2 ">
+    <>
       {isCard && (
         // We trigger a full re-render when the card changes
         // Currently, there's no need to optimise the rendering
@@ -108,6 +108,6 @@ export default function FlashcardBox({}: Props) {
           schemaRatingToReviewDay={schemaRatingToReviewDay}
         />
       )}
-    </div>
+    </>
   );
 }

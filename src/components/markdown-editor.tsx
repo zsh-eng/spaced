@@ -29,8 +29,7 @@ type Props = {
   onChange?: (content: string) => void;
 };
 
-const editorClasses =
-  "milkdown-editor mx-auto outline-none h-60 overflow-y-auto border border-input px-3 py-2 rounded-md";
+const editorClasses = "mx-auto outline-none px-3 py-2";
 
 export function getMarkdown(editor: Editor | undefined) {
   if (!editor) return "";

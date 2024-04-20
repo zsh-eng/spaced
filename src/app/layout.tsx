@@ -23,7 +23,7 @@ function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "grid min-h-screen grid-cols-12 grid-rows-[min-content_1fr] gap-x-6 bg-background px-2 font-sans antialiased sm:px-6",
           inter.variable,
         )}
       >
