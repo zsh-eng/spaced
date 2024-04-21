@@ -1,4 +1,5 @@
-import { relations, sql } from "drizzle-orm"; import {
+import { relations, sql } from "drizzle-orm";
+import {
   integer,
   primaryKey,
   real,
@@ -63,7 +64,10 @@ export const cards = sqliteTable("cards", {
   state: text("state", { enum: states }).notNull(),
   last_review: integer("last_review", { mode: "timestamp" }),
 
-  suspended: integer("suspended", { mode: "boolean" }).notNull().default(false),
+  // The time the card is suspended until
+  suspended: integer("suspended", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 
   // revlogs logs
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
