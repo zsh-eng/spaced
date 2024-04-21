@@ -10,6 +10,7 @@ import { type CreateManyMutationInput } from "@/hooks/card/use-create-many-card"
 type CardInput = CreateManyMutationInput["cardInputs"][0];
 
 const MULTILINE_SEPARATOR = "?";
+const MULTILINE_REVERSED_SEPARATOR = "??";
 const SINGLELINE_SEPARATOR = "@@";
 
 function extractCardContentFromSingleLine(line: string): CardInput | undefined {
@@ -40,7 +41,7 @@ export function extractCardContentFromMarkdownString(
       continue;
     }
 
-    if (line !== MULTILINE_SEPARATOR) {
+    if (line !== MULTILINE_SEPARATOR && line !== MULTILINE_REVERSED_SEPARATOR) {
       continue;
     }
 
@@ -51,6 +52,9 @@ export function extractCardContentFromMarkdownString(
     }
 
     contents.push({ question, answer });
+    if (line === MULTILINE_REVERSED_SEPARATOR) {
+      contents.push({ question: answer, answer: question });
+    }
   }
 
   return contents;
