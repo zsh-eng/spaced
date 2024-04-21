@@ -12,6 +12,8 @@ import {
 import { clipboard } from "@milkdown/plugin-clipboard";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
+import { upload, uploadConfig, Uploader } from "@milkdown/plugin-upload";
+import type { Node } from "@milkdown/prose/model";
 import {
   blockquoteAttr,
   bulletListAttr,
@@ -23,6 +25,7 @@ import {
 import { gfm } from "@milkdown/preset-gfm";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 import { useEffect, useRef } from "react";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 
 type Props = {
   value: string;
@@ -41,7 +44,54 @@ export function getMarkdown(editor: Editor | undefined) {
   });
 }
 
+// https://stackoverflow.com/questions/36280818/how-to-convert-file-to-base64-in-javascript
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+  });
+
 const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
+  const mutation = trpc.image.upload.useMutation({});
+
+  // See https://milkdown.dev/docs/api/plugin-upload
+  const uploader: Uploader = async (files, schema) => {
+    const images: File[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files.item(i);
+      if (!file) {
+        continue;
+      }
+
+      // You can handle whatever the file type you want, we handle image here.
+      if (!file.type.includes("image")) {
+        continue;
+      }
+
+      images.push(file);
+    }
+
+    const nodes: Array<Node | undefined> = await Promise.all(
+      images.map(async (image) => {
+        const base64String = await toBase64(image);
+        const link = await mutation.mutateAsync({
+          base64String,
+          name: image.name,
+        });
+
+        return schema.nodes.image.createAndFill({
+          src: link,
+          alt: image.name,
+        }) as Node;
+      }),
+    );
+
+    return nodes.filter(Boolean) as Node[];
+  };
+
   const editorClasses = cn(
     "mx-auto outline-none px-3 py-2",
     border && "border border-input rounded-sm",
@@ -133,12 +183,18 @@ const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
           }
           onChange && onChange(markdown);
         });
+
+        ctx.update(uploadConfig.key, (prev) => ({
+          ...prev,
+          uploader,
+        }));
       })
       .use(commonmark)
       .use(gfm)
       .use(clipboard)
       .use(history)
-      .use(listener),
+      .use(listener)
+      .use(upload),
   );
 
   return <Milkdown />;

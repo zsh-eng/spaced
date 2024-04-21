@@ -26,6 +26,9 @@ dependencies:
   '@milkdown/plugin-listener':
     specifier: ^7.3.6
     version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+  '@milkdown/plugin-upload':
+    specifier: ^7.3.6
+    version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
   '@milkdown/preset-commonmark':
     specifier: ^7.3.6
     version: 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
@@ -961,6 +964,23 @@ packages:
       '@milkdown/utils': 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
       '@types/lodash.debounce': 4.0.9
       lodash.debounce: 4.0.8
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@milkdown/transformer'
+    dev: false
+
+  /@milkdown/plugin-upload@7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6):
+    resolution: {integrity: sha512-s2zCez9tZmza2SlnVrEbqJ+PQWR869EBCcvhWs4FDe8caehDQ7CriQ65J7nwBK9JoU1kT+kDMithbVWIxLqRbQ==}
+    peerDependencies:
+      '@milkdown/core': ^7.2.0
+      '@milkdown/ctx': ^7.2.0
+      '@milkdown/prose': ^7.2.0
+    dependencies:
+      '@milkdown/core': 7.3.6(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
+      '@milkdown/ctx': 7.3.6
+      '@milkdown/exception': 7.3.6
+      '@milkdown/prose': 7.3.6
+      '@milkdown/utils': 7.3.6(@milkdown/core@7.3.6)(@milkdown/ctx@7.3.6)(@milkdown/prose@7.3.6)(@milkdown/transformer@7.3.6)
       tslib: 2.6.2
     transitivePeerDependencies:
       - '@milkdown/transformer'
