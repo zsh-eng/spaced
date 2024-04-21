@@ -5,6 +5,7 @@ import db from "@/db";
 import { NewDeck, cardContents, cards, cardsToDecks, decks } from "@/schema";
 import { success } from "@/utils/format";
 import { newCardWithContent } from "@/utils/fsrs";
+import _ from "lodash";
 
 const currentDir = path.resolve(__dirname);
 const filename = path.join(currentDir, "..", "..", "data", "export.json");
@@ -36,34 +37,48 @@ async function main() {
     name: deck,
   })) satisfies NewDeck[];
   await db.insert(decks).values(decksToInsert);
+  const deckNameToDeckId: Record<string, string> = decksToInsert.reduce<
+    Record<string, string>
+  >((acc, deck) => {
+    acc[deck.name] = deck.id;
+    return acc;
+  }, {});
   console.log(success`Imported ${parsed.decks.length} decks`);
 
   console.log(`Importing ${parsed.cards.length} cards`);
   const batchSize = 250;
 
-  for (let i = 0; i < parsed.cards.length; i += batchSize) {
-    const slicedCards = parsed.cards.slice(i, i + batchSize);
+  // As new cards are displayed in order of creation date, this will help
+  // ensure that the cards are in a somewhat random order
+  const randomisedCards = _.shuffle(parsed.cards);
+
+  for (let i = 0; i < randomisedCards.length; i += batchSize) {
+    const slicedCards = randomisedCards.slice(i, i + batchSize);
+
     const cardWithContents = slicedCards.map((card) => ({
       ...newCardWithContent(card.question, card.answer),
-      deckIds: card.deckIds,
+      deckNames: card.deckIds,
     }));
-
     const cardsToInsert = cardWithContents.map(({ card }) => card);
     const cardContentsToInsert = cardWithContents.map(
       ({ cardContent }) => cardContent,
     );
-    const cardsToDecksToInsert = cardWithContents.flatMap(({ card, deckIds }) =>
-      deckIds.map((deckId) => ({ cardId: card.id, deckId })),
+    const cardsToDecksToInsert = cardWithContents.flatMap(
+      ({ card, deckNames }) =>
+        deckNames.map((name) => ({
+          cardId: card.id,
+          deckId: deckNameToDeckId[name],
+        })),
     );
 
     await db.insert(cards).values(cardsToInsert);
     await db.insert(cardContents).values(cardContentsToInsert);
     await db.insert(cardsToDecks).values(cardsToDecksToInsert);
     console.log(
-      success`Imported ${i + 1}-${Math.min(i + batchSize, parsed.cards.length)} cards`,
+      success`Imported ${i + 1}-${Math.min(i + batchSize, randomisedCards.length)} cards`,
     );
   }
-  console.log(success`Imported ${parsed.cards.length} cards`);
+  console.log(success`Imported ${randomisedCards.length} cards`);
 }
 
 main();
