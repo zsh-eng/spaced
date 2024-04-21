@@ -21,9 +21,6 @@ import { z } from "zod";
 export const MAX_CARDS_TO_FETCH = 50;
 export const MAX_LEARN_PER_DAY = 20;
 
-// Sort orders
-// See discussion here: https://github.com/ishiko732/ts-fsrs-demo/issues/17
-
 async function getReviewCards(): Promise<SessionCard[]> {
   const now = new Date();
 
@@ -34,10 +31,14 @@ async function getReviewCards(): Promise<SessionCard[]> {
     .leftJoin(cards, eq(cardContents.cardId, cards.id))
     .where(
       and(
+        // Filter out deleted cards
         eq(cardContents.deleted, false),
         eq(cards.deleted, false),
+        // Filter out cards that are not in review state
         ne(cards.state, states[0]),
+        // Filter out cards that are not due or suspended
         lte(cards.due, now),
+        lte(cards.suspended, now),
       ),
     )
     .orderBy(CardSorts.DIFFICULTY_ASC.db)
@@ -89,10 +90,14 @@ async function getNewCards(): Promise<SessionCard[]> {
     .leftJoin(cards, eq(cardContents.cardId, cards.id))
     .where(
       and(
+        // Filter out deleted cards
         eq(cardContents.deleted, false),
         eq(cards.deleted, false),
+        // Filter out cards that are not in new state
         eq(cards.state, states[0]),
+        // Filter out cards that are not due or suspended
         lte(cards.due, now),
+        lte(cards.suspended, now),
       ),
     )
     .orderBy(CardSorts.CREATED_AT_ASC.db)
@@ -120,7 +125,13 @@ async function getStats(): Promise<SessionStats> {
         ) as int)`,
     })
     .from(cards)
-    .where(and(eq(cards.deleted, false), lte(cards.due, now)));
+    .where(
+      and(
+        eq(cards.deleted, false),
+        lte(cards.due, now),
+        lte(cards.suspended, now),
+      ),
+    );
 
   console.log(success`Fetched stats`);
   return stats[0];
@@ -326,5 +337,25 @@ export const cardRouter = router({
 
       await db.update(cards).set(nextCard).where(eq(cards.id, input.id));
       console.log(success`Graded card: ${input.id}`);
+    }),
+
+  // Suspend a card
+  suspend: publicProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        suspendUntil: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      console.log("Suspending card");
+      const { id, suspendUntil } = input;
+
+      await db
+        .update(cards)
+        .set({ suspended: suspendUntil })
+        .where(eq(cards.id, id));
+
+      console.log(success`Suspended card: ${input.id}`);
     }),
 });

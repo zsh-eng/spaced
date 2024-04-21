@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +26,16 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
+import { useSuspendCard } from "@/hooks/card/use-suspend.card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
 import { Rating, type Card } from "@/schema";
@@ -36,9 +43,16 @@ import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import _ from "lodash";
-import { FilePenIcon, Info, Telescope, TrashIcon } from "lucide-react";
+import {
+  ChevronsRight,
+  FilePenIcon,
+  Info,
+  Telescope,
+  TrashIcon,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Props = {
   card: SessionCard;
@@ -71,6 +85,7 @@ export default function Flashcard({
 
   const editCardMutation = useEditCard();
   const deleteCard = useDeleteCard();
+  const suspendCardMutation = useSuspendCard();
 
   const handleEdit = () => {
     // `getValues()` will be undefined if the form is disabled
@@ -90,6 +105,17 @@ export default function Flashcard({
     });
   };
 
+  const handleSkip = () => {
+    const id = sessionCard.cards.id;
+    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10);
+    suspendCardMutation.mutate({
+      id,
+      suspendUntil: tenMinutesLater,
+    });
+    // TODO implement undo functionality
+    toast.success("Card suspended for 10 minutes.");
+  };
+
   useKeydownRating(onRating, open, () => setOpen(true));
   useClickOutside({
     ref: cardRef,
@@ -105,13 +131,32 @@ export default function Flashcard({
       className="col-start-1 col-end-13 grid grid-cols-8 grid-rows-[auto_1fr] gap-x-4 gap-y-2 xl:col-start-3 xl:col-end-11"
       ref={cardRef}
     >
-      <div className="col-start-1 col-end-9 flex h-12 items-end gap-x-2 sm:h-24">
+      <div className="col-start-1 col-end-9 flex h-24 flex-wrap items-end justify-center gap-x-2">
+        {/* Stats and review information */}
         <CardCountBadge stats={stats} />
         <FlashcardState
           state={sessionCard.cards.state}
           className="hidden rounded-sm md:flex"
         />
-        <div className="mr-auto"></div>
+
+        {/* Separator */}
+        <div className="mr-auto w-screen sm:w-0"></div>
+
+        {/* Icons */}
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-text" onClick={handleSkip}>
+              <Button variant="ghost" size="icon">
+                <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Skip card and show in 10 minutes</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <Toggle
           aria-label="toggle edit"
           pressed={editing}
@@ -217,9 +262,9 @@ export default function Flashcard({
             />
           </div>
 
-          <div className="h-40 sm:hidden"></div>
+          <div className="h-32 sm:hidden"></div>
 
-          <div className="fixed bottom-8 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
+          <div className="fixed bottom-16 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
             <AnswerButtons
               schemaRatingToReviewDay={schemaRatingToReviewDay}
               onRating={onRating}
