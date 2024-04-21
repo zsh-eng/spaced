@@ -142,9 +142,9 @@ export function newCardToCard(newCard: NewCard): Card {
   return {
     ...newCard,
     createdAt: new Date(),
+    suspended: new Date(0),
     due: newCard.due,
     last_review: null,
-    suspended: false,
     deleted: false,
   };
 }
