@@ -217,7 +217,9 @@ export default function Flashcard({
             />
           </div>
 
-          <div className="col-span-8 flex justify-center self-start justify-self-center">
+          <div className="h-40 sm:hidden"></div>
+
+          <div className="fixed bottom-8 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
             <AnswerButtons
               schemaRatingToReviewDay={schemaRatingToReviewDay}
               onRating={onRating}
