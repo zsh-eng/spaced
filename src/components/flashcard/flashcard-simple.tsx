@@ -17,21 +17,20 @@ export function FlashcardSimpleSkeleton() {
 export default function FlashcardSimple({ card, cardContent }: Props) {
   return (
     <UiCard className="flex w-full flex-col gap-y-4">
-      <UiCardContent className="mt-6">
-        <ScrollArea className="h-60">
-          <div>
-            <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Question</h2>
-            <p className="text-md">{cardContent.question}</p>
-          </div>
+      <UiCardContent className="mt-6 h-72 overflow-y-auto py-0">
+        <div>
+          <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Question</h2>
+          <p className="text-md">{cardContent.question}</p>
+        </div>
 
-          <hr className="mx-auto my-6 w-16" />
+        <hr className="mx-auto my-6 w-16" />
 
-          <div>
-            <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Answer</h2>
-            <p className="text-md">{cardContent.answer}</p>
-          </div>
-        </ScrollArea>
+        <div>
+          <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Answer</h2>
+          <p className="text-md">{cardContent.answer}</p>
+        </div>
       </UiCardContent>
+
       <UiCardFooter className="flex">
         <TimeIconText date={card.createdAt} />
         <FlashcardState className="ml-auto" state={card.state} />

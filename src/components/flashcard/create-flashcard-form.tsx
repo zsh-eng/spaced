@@ -80,7 +80,7 @@ export default function CreateFlashcardForm() {
 
   return (
     <UiCard
-      className="col-start-1 col-end-9 self-start border-0 sm:col-start-2 sm:col-end-8 md:border lg:col-start-3 lg:col-end-7"
+      className="col-span-12 w-full max-w-xl self-start justify-self-center border-0 md:border"
       ref={cardRef}
     >
       <UiCardHeader className="px-2 md:px-6">
@@ -92,7 +92,7 @@ export default function CreateFlashcardForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <UiCardContent className="flex min-h-96 flex-col gap-y-4 px-2 md:px-6">
+          <UiCardContent className="flex h-full flex-col gap-y-4 px-2 md:px-6">
             <FormSelect
               name="deckIds"
               label="Deck"
@@ -108,6 +108,8 @@ export default function CreateFlashcardForm() {
               label="Question"
               form={form}
               disabled={isLoading}
+              border={true}
+              className="max-h-96 overflow-y-auto"
             />
             <FormMarkdownEditor
               key={markdownEditorKey + "answer"}
@@ -115,6 +117,8 @@ export default function CreateFlashcardForm() {
               label="Answer"
               form={form}
               disabled={isLoading}
+              border={true}
+              className="max-h-96 overflow-y-auto"
             />
           </UiCardContent>
           <UiCardFooter className="px-2 md:px-6">

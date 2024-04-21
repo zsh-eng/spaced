@@ -67,7 +67,7 @@ async function getNewCards(): Promise<SessionCard[]> {
     .orderBy(desc(reviewLogs.createdAt))
     .groupBy(reviewLogs.cardId);
 
-  const numLearnToday = numLearnTodayRes[0].total;
+  const numLearnToday = numLearnTodayRes[0]?.total ?? 0;
   if (typeof numLearnToday !== "number") {
     throw new TRPCError({
       message: "Failed to get the number of cards learned today",

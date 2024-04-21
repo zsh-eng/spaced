@@ -13,6 +13,7 @@ type FormMarkdownEditorProps<TFieldValues extends FieldValues> =
   FormInputProps<TFieldValues> & {
     editing?: boolean;
     className?: string;
+    border?: boolean;
   };
 
 /**
@@ -30,6 +31,7 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
   disabled,
   label,
   className,
+  border,
 }: FormMarkdownEditorProps<TFieldValues>) {
   return (
     <FormField
@@ -40,7 +42,7 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
         <FormItem className={className}>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
-            <MarkdownEditor {...field} />
+            <MarkdownEditor border={border} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

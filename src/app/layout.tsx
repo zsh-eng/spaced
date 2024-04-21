@@ -5,6 +5,7 @@ import { cn } from "@/utils/ui";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { baseGrid } from "@/components/ui/grid";
 
 export const metadata: Metadata = {
   title: "Spaced",
@@ -23,7 +24,8 @@ function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "grid min-h-screen grid-cols-12 grid-rows-[min-content_1fr] gap-x-6 bg-background px-2 font-sans antialiased sm:px-6",
+          baseGrid,
+          "min-h-screen grid-rows-[min-content_1fr] bg-background font-sans antialiased",
           inter.variable,
         )}
       >

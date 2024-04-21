@@ -5,11 +5,11 @@ import { trpc } from "@/utils/trpc";
 import { Diamond } from "lucide-react";
 
 const sectionClasses =
-  "col-span-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2";
+  "col-span-12 grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2";
 
 function Title() {
   return (
-    <div className="col-span-8 mb-4 flex items-center pl-2">
+    <div className="col-span-12 mb-4 flex items-center pl-2">
       <h1 className="text-4xl font-bold md:text-5xl">Decks</h1>
       <Diamond className="ml-3 h-8 w-8 text-accent-foreground md:h-10 md:w-10" />
     </div>
