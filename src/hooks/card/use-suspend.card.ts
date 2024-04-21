@@ -5,6 +5,8 @@ import { toast } from "sonner";
 type SuspendCardMutationOptions = ReactQueryOptions["card"]["suspend"];
 type SuspendMutation = ReturnType<typeof trpc.card.suspend.useMutation>;
 
+const THRESHOLD_FOR_REFETCH = 10;
+
 export function useSuspendCard(
   options?: SuspendCardMutationOptions,
 ): SuspendMutation {
@@ -21,6 +23,15 @@ export function useSuspendCard(
 
       const nextSessionData = getNextSessionData(sessionData, id);
       utils.card.sessionData.setData(undefined, nextSessionData);
+
+      if (
+        !sessionData ||
+        sessionData.reviewCards.length + sessionData.newCards.length >
+          THRESHOLD_FOR_REFETCH
+      )
+        return;
+
+      await utils.card.sessionData.invalidate();
 
       return {
         previousSession: sessionData,
