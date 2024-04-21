@@ -32,6 +32,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
     },
 
     async onSuccess() {
+      await utils.card.sessionData.cancel();
       const sessionData = utils.card.sessionData.getData();
       // Refetch periodically to get more cards
       // We don't use infinite queries here because there is no pagination
@@ -43,6 +44,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       )
         return;
 
+      console.log("Invalidated");
       await utils.card.sessionData.invalidate();
     },
 
