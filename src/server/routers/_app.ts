@@ -1,5 +1,6 @@
 import { cardRouter } from "@/server/routers/card";
 import { deckRouter } from "@/server/routers/deck";
+import { imageRouter } from "@/server/routers/image";
 import { router, publicProcedure } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { z } from "zod";
@@ -14,6 +15,7 @@ export const appRouter = router({
   }),
   card: cardRouter,
   deck: deckRouter,
+  image: imageRouter,
 });
 // Export type router type signature,
 // NOT the router itself.
