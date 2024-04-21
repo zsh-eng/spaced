@@ -28,7 +28,11 @@ function AnswerButton({
     <TooltipProvider key={rating}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" onClick={() => onRating(rating)}>
+          <Button
+            className="h-full"
+            variant="outline"
+            onClick={() => onRating(rating)}
+          >
             <p>{rating}</p>
           </Button>
         </TooltipTrigger>
@@ -52,7 +56,7 @@ export default function AnswerButtons({
   const ratingsToShow: Rating[] = ["Again", "Hard", "Good", "Easy"];
 
   return (
-    <div className="grid w-80 grid-cols-2 gap-x-2 gap-y-2 sm:w-96 md:grid-cols-4">
+    <div className="grid h-12 w-screen grid-cols-2 gap-x-2 gap-y-2 px-2 sm:w-96 md:grid-cols-4">
       {open ? (
         ratingsToShow.map((rating) => {
           return (
@@ -70,7 +74,7 @@ export default function AnswerButtons({
       ) : (
         <Button
           variant="secondary"
-          className="col-span-2 font-mono hover:animate-pulse md:col-span-4"
+          className="invisible col-span-2 h-full font-mono hover:animate-pulse sm:visible md:col-span-4"
           onClick={() => setOpen(true)}
         >
           space to reveal

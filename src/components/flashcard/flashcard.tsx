@@ -16,7 +16,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
-import { UiCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -38,7 +37,7 @@ import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import _ from "lodash";
 import { FilePenIcon, Info, Telescope, TrashIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type Props = {
@@ -174,10 +173,7 @@ export default function Flashcard({
       </div>
 
       <Form {...form}>
-        <form
-          action=""
-          className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 sm:grid-rows-[2fr_1fr]"
-        >
+        <div className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 sm:grid-rows-[2fr_1fr]">
           <div
             className={cn(
               "col-span-8 flex h-full min-h-80 w-full items-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
@@ -221,7 +217,9 @@ export default function Flashcard({
             />
           </div>
 
-          <div className="col-span-8 flex justify-center self-start justify-self-center">
+          <div className="h-40 sm:hidden"></div>
+
+          <div className="fixed bottom-8 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
             <AnswerButtons
               schemaRatingToReviewDay={schemaRatingToReviewDay}
               onRating={onRating}
@@ -229,7 +227,7 @@ export default function Flashcard({
               setOpen={setOpen}
             />
           </div>
-        </form>
+        </div>
       </Form>
     </div>
   );

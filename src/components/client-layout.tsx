@@ -17,7 +17,7 @@ function ClientLayout({ children }: PropsWithChildren<{}>) {
     >
       <NavigationBar />
       {children}
-      <Toaster />
+      <Toaster position="top-center" />
     </ThemeProvider>
   );
 }
