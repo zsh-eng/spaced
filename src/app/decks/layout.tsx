@@ -1,5 +1,5 @@
-const containerClasses =
-  "col-start-1 col-end-13 xl:col-start-3 xl:col-end-11 grid grid-cols-8 gap-x-4 pt-6 pb-12";
+import { gridChildContentGrid } from "@/components/ui/grid";
+import { cn } from "@/utils/ui";
 
 function Layout({
   children,
@@ -7,9 +7,7 @@ function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="col-span-12 grid grid-cols-12">
-      <div className={containerClasses}>{children}</div>
-    </main>
+    <main className={cn(gridChildContentGrid, "pb-12 pt-6")}>{children}</main>
   );
 }
 

@@ -67,7 +67,7 @@ async function getNewCards(): Promise<SessionCard[]> {
     .orderBy(desc(reviewLogs.createdAt))
     .groupBy(reviewLogs.cardId);
 
-  const numLearnToday = numLearnTodayRes[0].total;
+  const numLearnToday = numLearnTodayRes[0]?.total ?? 0;
   if (typeof numLearnToday !== "number") {
     throw new TRPCError({
       message: "Failed to get the number of cards learned today",
@@ -205,38 +205,39 @@ export const cardRouter = router({
         ({ cardContent }) => cardContent,
       );
 
-      const res = await db.transaction(async (tx) => {
-        const insertedCards = await tx
-          .insert(cards)
-          .values(cardsToInsert)
-          .returning();
-        const insertedCardContents = await tx
-          .insert(cardContents)
-          .values(cardContentsToInsert)
-          .returning();
-
-        if (deckIds && deckIds.length > 0) {
-          console.log("Adding cards to decks");
-          const cardsToDecksToInsert = deckIds.flatMap((deckId) =>
-            insertedCards.map((card) => ({
-              cardId: card.id,
-              deckId,
-            })),
-          ) satisfies NewCardsToDecks[];
-          await tx.insert(cardsToDecks).values(cardsToDecksToInsert);
-          console.log(
-            success`Added ${cardsToDecksToInsert.length} cards to decks`,
-          );
-        }
-
-        return insertedCards.map((card, index) => ({
-          cards: card,
-          card_contents: insertedCardContents[index],
-        }));
-      });
+      // When using drizzle's transaction, we bump into an issue
+      // of error when batch inserting.
+      // For now, let's now use transactions and instead just insert normally
+      // This is a bit risky, but we can't do much about it for now.
+      // See https://github.com/tursodatabase/libsql-client-ts/issues/177
+      const insertedCards = await db
+        .insert(cards)
+        .values(cardsToInsert)
+        .returning();
+      const insertedCardContents = await db
+        .insert(cardContents)
+        .values(cardContentsToInsert)
+        .returning();
+      if (deckIds && deckIds.length > 0) {
+        console.log("Adding cards to decks");
+        const cardsToDecksToInsert = deckIds.flatMap((deckId) =>
+          insertedCards.map((card) => ({
+            cardId: card.id,
+            deckId,
+          })),
+        ) satisfies NewCardsToDecks[];
+        await db.insert(cardsToDecks).values(cardsToDecksToInsert);
+        console.log(
+          success`Added ${cardsToDecksToInsert.length} cards to decks`,
+        );
+      }
 
       console.log(success`Added ${cardInputs.length} cards`);
-      return res;
+
+      return insertedCards.map((card, index) => ({
+        cards: card,
+        card_contents: insertedCardContents[index],
+      }));
     }),
 
   // Delete a card

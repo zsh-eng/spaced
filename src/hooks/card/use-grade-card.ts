@@ -44,7 +44,6 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       )
         return;
 
-      console.log("Invalidated");
       await utils.card.sessionData.invalidate();
     },
 

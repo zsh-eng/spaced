@@ -19,7 +19,7 @@ import { faker } from "@faker-js/faker";
 import { add, isBefore, sub } from "date-fns";
 import { createEmptyCard } from "ts-fsrs";
 import { Card, CardContent, ReviewLog } from "../schema";
-import { wipeDatabase } from "@/scripts/wipe";
+import { wipeDatabase } from "@/scripts/utils";
 
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/

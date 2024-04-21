@@ -127,11 +127,8 @@ export default function Flashcard({
   });
 
   return (
-    <div
-      className="col-start-1 col-end-13 grid grid-cols-8 grid-rows-[auto_1fr] gap-x-4 gap-y-2 xl:col-start-3 xl:col-end-11"
-      ref={cardRef}
-    >
-      <div className="col-start-1 col-end-9 flex h-24 flex-wrap items-end justify-center gap-x-2">
+    <div className="col-span-12 flex flex-col gap-x-4 gap-y-4" ref={cardRef}>
+      <div className="col-span-8 flex h-24 flex-wrap items-end justify-center gap-x-2">
         {/* Stats and review information */}
         <CardCountBadge stats={stats} />
         <FlashcardState
@@ -143,7 +140,6 @@ export default function Flashcard({
         <div className="mr-auto w-screen sm:w-0"></div>
 
         {/* Icons */}
-
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="cursor-text" onClick={handleSkip}>

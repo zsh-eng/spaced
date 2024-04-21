@@ -114,7 +114,7 @@ export function NavigationBar() {
       <NavigationMenuList className="hidden md:flex">
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={"flex justify-start"}>
+            <NavigationMenuLink className={"mr-2 flex justify-start"}>
               <Telescope className="h-6 w-6 xs:mr-2" strokeWidth={1.5} />
               <span className="hidden text-lg font-semibold xs:block">
                 spaced

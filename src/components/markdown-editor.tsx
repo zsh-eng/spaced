@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/utils/ui";
 import {
   Editor,
   defaultValueCtx,
@@ -27,9 +28,8 @@ type Props = {
   value: string;
   disabled?: boolean;
   onChange?: (content: string) => void;
+  border?: boolean;
 };
-
-const editorClasses = "mx-auto outline-none px-3 py-2";
 
 export function getMarkdown(editor: Editor | undefined) {
   if (!editor) return "";
@@ -41,7 +41,12 @@ export function getMarkdown(editor: Editor | undefined) {
   });
 }
 
-const MilkdownEditor = ({ disabled, value, onChange }: Props) => {
+const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
+  const editorClasses = cn(
+    "mx-auto outline-none px-3 py-2",
+    border && "border border-input rounded-sm",
+  );
+
   // Create a ref to store the current editing state
   const disabledRef = useRef(disabled);
   useEffect(() => {

@@ -11,7 +11,9 @@
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push:sqlite",
     "db:seed": "tsx --env-file=.env src/scripts/seed.ts",
-    "db:wipe": "tsx --env-file=.env src/scripts/wipe.ts"
+    "db:wipe": "tsx --env-file=.env src/scripts/wipe.ts",
+    "obsidian:export": "tsx src/scripts/export.ts",
+    "obsidian:import": "tsx --env-file=.env src/scripts/import.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -76,6 +78,7 @@
     "drizzle-kit": "^0.20.14",
     "eslint": "^8",
     "eslint-config-next": "14.1.4",
+    "gray-matter": "^4.0.3",
     "postcss": "^8",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.13",
