@@ -10,7 +10,8 @@
     "db:migrate": "drizzle-kit generate:sqlite && tsx --env-file=.env src/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push:sqlite",
-    "db:seed": "tsx --env-file=.env src/seed.ts"
+    "db:seed": "tsx --env-file=.env src/scripts/seed.ts",
+    "db:wipe": "tsx --env-file=.env src/scripts/wipe.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

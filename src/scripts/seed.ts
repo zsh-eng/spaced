@@ -18,7 +18,8 @@ import { gradeCard, mergeFsrsCard, newCard, newCardToCard } from "@/utils/fsrs";
 import { faker } from "@faker-js/faker";
 import { add, isBefore, sub } from "date-fns";
 import { createEmptyCard } from "ts-fsrs";
-import { Card, CardContent, ReviewLog } from "./schema";
+import { Card, CardContent, ReviewLog } from "../schema";
+import { wipeDatabase } from "@/scripts/wipe";
 
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/
@@ -147,17 +148,9 @@ function simulateNewCardAndReviews(id: string): [Card, NewReviewLog[]] {
  * Note that this script can take a while to run since we're inserting data into the Turso database.
  *
  * Each {@link Card} has a corresponding {@link CardContent} and {@link ReviewLog}.
- * TODO Add more review logs for each card - we can simulate using the `ts-fsrs` library to generate reviews.
- *
- *
  */
 async function main() {
-  console.log("Deleting all data from the database");
-  await db.delete(reviewLogs).all();
-  await db.delete(cardContents).all();
-  await db.delete(cards).all();
-  await db.delete(decks).all();
-  console.log(success`Deleted all data from the database`);
+  await wipeDatabase();
 
   console.log("Seeding database with 10 decks");
   const decksToCreate = 10;
