@@ -1,3 +1,4 @@
+import { states } from "@/schema";
 import { z } from "zod";
 
 // Form schemas are shared between the client and the server.
@@ -80,3 +81,17 @@ export const deckDefaultValues = {
   name: "",
   description: "",
 } satisfies DeckFormValues;
+
+// Manual grading
+export const cardSchema = z.object({
+  id: z.string(),
+  due: z.date(),
+  stability: z.number(),
+  difficulty: z.number(),
+  elapsed_days: z.number(),
+  scheduled_days: z.number(),
+  reps: z.number(),
+  lapses: z.number(),
+  state: z.enum(states),
+  last_review: z.date().nullable(),
+});

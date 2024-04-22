@@ -1,6 +1,7 @@
 "use client";
 
 import Flashcard from "@/components/flashcard/flashcard";
+import { useHistory } from "@/history";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { type Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
@@ -31,6 +32,7 @@ export default function FlashcardBox({}: Props) {
   } = trpc.card.sessionData.useQuery();
 
   const gradeMutation = useGradeCard();
+  const history = useHistory();
   const [isNextCardNew, setIsNextCardNew] = useState(getNew());
 
   if (isLoading) {
@@ -83,10 +85,11 @@ export default function FlashcardBox({}: Props) {
       id: card.cards.id,
     });
 
+    const id = history.add("grade", card);
     toast(`Card marked as ${rating}.`, {
       action: {
         label: "Undo",
-        onClick: () => {},
+        onClick: () => history.undo(id),
       },
       description: `You'll see this again ${intlFormatDistance(
         reviewDay,

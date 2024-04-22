@@ -1,5 +1,9 @@
 import db from "@/db";
-import { createCardFormSchema, createManyCardsFormSchema } from "@/form";
+import {
+  cardSchema,
+  createCardFormSchema,
+  createManyCardsFormSchema,
+} from "@/form";
 import {
   NewCardsToDecks,
   cardContents,
@@ -11,7 +15,7 @@ import {
 } from "@/schema";
 import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
-import { gradeCard, newCardWithContent } from "@/utils/fsrs";
+import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { SessionCard, SessionData, SessionStats } from "@/utils/session";
 import { CardSorts } from "@/utils/sort";
 import { TRPCError } from "@trpc/server";
@@ -242,21 +246,25 @@ export const cardRouter = router({
 
   // Delete a card
   delete: publicProcedure
-    .input(z.string().uuid())
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        deleted: z.boolean().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      console.log("Deleting card");
+      const { id, deleted = true } = input;
+
+      console.log(`Setting card as deleted: ${deleted}`);
       await db.transaction(async (tx) => {
-        await tx
-          .update(cards)
-          .set({ deleted: true })
-          .where(eq(cards.id, input));
+        await tx.update(cards).set({ deleted }).where(eq(cards.id, id));
         await tx
           .update(cardContents)
-          .set({ deleted: true })
-          .where(eq(cardContents.cardId, input));
+          .set({ deleted })
+          .where(eq(cardContents.cardId, id));
       });
 
-      console.log(success`Deleted card: ${input}`);
+      console.log(success`Set card ${id} as deleted: ${deleted}`);
     }),
 
   undoDelete: publicProcedure
@@ -338,6 +346,38 @@ export const cardRouter = router({
 
       await db.update(cards).set(nextCard).where(eq(cards.id, input.id));
       console.log(success`Graded card: ${input.id}`);
+    }),
+
+  // Manually grade a card
+  manualGrade: publicProcedure
+    .input(
+      z.object({
+        card: cardSchema,
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { card } = input;
+      const currentCard = await db.query.cards.findFirst({
+        where: eq(cards.id, card.id),
+      });
+
+      if (!currentCard) {
+        throw new TRPCError({
+          message: "Card not found",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      console.log(`Manually grading card: ${card.id}`);
+      // When manually grading, we save the current version of the card
+      // as a review log
+      const reviewLog = cardToReviewLog(currentCard, "Manual");
+      await db.transaction(async (tx) => {
+        await tx.update(cards).set(card).where(eq(cards.id, card.id));
+        await tx.insert(reviewLogs).values(reviewLog);
+      });
+
+      console.log(success`Manually graded card: ${card.id}`);
     }),
 
   // Suspend a card

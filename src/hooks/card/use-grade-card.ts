@@ -1,4 +1,4 @@
-import { getNextSessionData } from "@/utils/session";
+import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 
@@ -12,10 +12,9 @@ const THRESHOLD_FOR_REFETCH = 10;
  */
 export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
   const utils = trpc.useUtils();
-
   return trpc.card.grade.useMutation({
     ...options,
-    async onMutate({ grade, id }) {
+    async onMutate({ id }) {
       await utils.card.sessionData.cancel();
       const sessionData = utils.card.sessionData.getData();
       if (!sessionData) {
@@ -23,7 +22,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       }
 
       // We technically don't need the grade for optimistic updates
-      const nextSessionData = getNextSessionData(sessionData, id);
+      const nextSessionData = removeCardFromSessionData(sessionData, id);
       utils.card.sessionData.setData(undefined, nextSessionData);
 
       return {

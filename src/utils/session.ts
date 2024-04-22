@@ -1,6 +1,4 @@
-import { Card, CardContent, Rating, states } from "@/schema";
-import { getReviewDateForEachRating, gradeCard } from "@/utils/fsrs";
-import { isBefore } from "date-fns";
+import { Card, CardContent } from "@/schema";
 import { produce } from "immer";
 
 /**
@@ -42,16 +40,13 @@ export type SessionData = {
  * @param data The current session data
  * @param cardId The id of the card that was graded
  */
-export function getNextSessionData(
+export function removeCardFromSessionData(
   data: SessionData,
   cardId: string,
 ): SessionData {
   // In this implementation, we only show cards that are past the due date.
   // As such, we can assume that we won't see the card again in the current deck.
-  const card =
-    data.newCards.find((c) => c.cards.id === cardId) ??
-    data.reviewCards.find((c) => c.cards.id === cardId);
-
+  const card = getSessionCard(data, cardId);
   if (!card) {
     throw new Error(`Card with id ${cardId} not found in session data`);
   }
@@ -83,4 +78,64 @@ export function getNextSessionData(
   });
 
   return nextData;
+}
+
+function addCardToSessionData(
+  data: SessionData,
+  card: SessionCard,
+): SessionData {
+  const nextData = produce(data, (draft) => {
+    if (card.cards.state === "New") {
+      draft.newCards.push(card);
+    } else {
+      draft.reviewCards.push(card);
+    }
+
+    switch (card.cards.state) {
+      case "New":
+        draft.stats.new++;
+        break;
+      case "Learning":
+      case "Relearning":
+        draft.stats.learning++;
+        break;
+      case "Review":
+        draft.stats.review++;
+        break;
+    }
+    draft.stats.total++;
+  });
+
+  return nextData;
+}
+
+export function updateCardInSessionData(
+  data: SessionData,
+  card: SessionCard,
+): SessionData {
+  const filteredData = removeCardFromSessionData(data, card.cards.id);
+  return addCardToSessionData(filteredData, card);
+}
+
+/**
+ * Gets the card from the session data.
+ */
+export function getSessionCard(
+  sessionData: SessionData,
+  cardId: string,
+): SessionCard | undefined {
+  return (
+    sessionData.newCards.find((c) => c.cards.id === cardId) ??
+    sessionData.reviewCards.find((c) => c.cards.id === cardId)
+  );
+}
+
+export function getSessionCardWithContentId(
+  sessionData: SessionData,
+  cardContentId: string,
+): SessionCard | undefined {
+  return (
+    sessionData.newCards.find((c) => c.card_contents.id === cardContentId) ??
+    sessionData.reviewCards.find((c) => c.card_contents.id === cardContentId)
+  );
 }

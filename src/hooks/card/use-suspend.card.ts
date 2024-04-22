@@ -1,5 +1,6 @@
-import { getNextSessionData } from "@/utils/session";
+import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
+import { isBefore } from "date-fns";
 import { toast } from "sonner";
 
 type SuspendCardMutationOptions = ReactQueryOptions["card"]["suspend"];
@@ -14,6 +15,10 @@ export function useSuspendCard(
   return trpc.card.suspend.useMutation({
     ...options,
     async onMutate({ id, suspendUntil }) {
+      if (isBefore(suspendUntil, new Date())) {
+        return;
+      }
+
       // Assume that we'll get the card on the next fetch
       await utils.card.sessionData.cancel();
       const sessionData = utils.card.sessionData.getData();
@@ -21,7 +26,7 @@ export function useSuspendCard(
         return;
       }
 
-      const nextSessionData = getNextSessionData(sessionData, id);
+      const nextSessionData = removeCardFromSessionData(sessionData, id);
       utils.card.sessionData.setData(undefined, nextSessionData);
 
       if (
@@ -36,6 +41,13 @@ export function useSuspendCard(
       return {
         previousSession: sessionData,
       };
+    },
+
+    async onSuccess(_data, { suspendUntil }) {
+      if (isBefore(new Date(), suspendUntil)) {
+        return;
+      }
+      await utils.card.sessionData.invalidate();
     },
 
     async onError(err, _variables, context) {
