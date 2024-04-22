@@ -1,3 +1,4 @@
+import { getSessionCardWithContentId } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { produce } from "immer";
 import { toast } from "sonner";
@@ -37,8 +38,6 @@ export function useEditCard(options?: EditCardMutationOptions): EditMutation {
       });
 
       utils.card.sessionData.setData(undefined, nextCards);
-      toast.success("Card updated.");
-
       return { previousSession: sessionData };
     },
 

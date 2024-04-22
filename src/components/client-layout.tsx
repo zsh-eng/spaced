@@ -4,21 +4,24 @@
 import { NavigationBar } from "@/components/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { HistoryProvider } from "@/history";
 import { trpc } from "@/utils/trpc";
 import { PropsWithChildren } from "react";
 
 function ClientLayout({ children }: PropsWithChildren<{}>) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <NavigationBar />
-      {children}
-      <Toaster position="top-center" />
-    </ThemeProvider>
+    <HistoryProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <NavigationBar />
+        {children}
+        <Toaster position="top-center" />
+      </ThemeProvider>
+    </HistoryProvider>
   );
 }
 

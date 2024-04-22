@@ -17,6 +17,7 @@ import {
   createCardDefaultValues,
   createCardFormSchema,
 } from "@/form";
+import { useHistory } from "@/history";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { allDeckDataToSelectData } from "@/utils/deck";
@@ -42,6 +43,7 @@ export default function CreateFlashcardForm() {
     crypto.randomUUID(),
   );
 
+  const history = useHistory();
   const cardRef = useRef<HTMLDivElement>(null);
   const createCardMutation = useCreateCard();
   const deleteCardMutation = useDeleteCard();
@@ -52,12 +54,14 @@ export default function CreateFlashcardForm() {
     console.log(JSON.stringify(data, null, 2));
     try {
       const card = await createCardMutation.mutateAsync(data);
+      const id = history.add("create", card);
+
       const rollback = () => {
         // We have to set the value before the re-render triggers
         form.setValue("question", data.question);
         form.setValue("answer", data.answer);
         form.setValue("deckIds", data.deckIds);
-        deleteCardMutation.mutate(card.cards.id);
+        history.undo(id);
 
         setTimeout(() => {
           setMarkdownEditorKey(crypto.randomUUID());

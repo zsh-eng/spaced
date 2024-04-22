@@ -33,6 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
+import { useHistory } from "@/history";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useSuspendCard } from "@/hooks/card/use-suspend.card";
@@ -83,16 +84,14 @@ export default function Flashcard({
     },
   });
 
-  const editCardMutation = useEditCard();
-  const deleteCard = useDeleteCard();
-  const suspendCardMutation = useSuspendCard();
+  const history = useHistory();
 
+  const editCardMutation = useEditCard();
   const handleEdit = () => {
     // `getValues()` will be undefined if the form is disabled
     // TODO use readonly field instead
     // See https://www.react-hook-form.com/api/useform/getvalues/#:~:text=%5B%27%27%5D-,Rules,-Disabled%20inputs%20will
     const content = form.getValues();
-
     const isQuestionAnswerSame =
       content.question === initialCardContent.question &&
       content.answer === initialCardContent.answer;
@@ -103,17 +102,53 @@ export default function Flashcard({
       question: content.question,
       answer: content.answer,
     });
+
+    const id = history.add("edit", sessionCard);
+    toast.success("Card updated.", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          history.undo(id);
+        },
+      },
+    });
   };
 
+  const suspendCardMutation = useSuspendCard();
   const handleSkip = () => {
-    const id = sessionCard.cards.id;
+    const cardId = sessionCard.cards.id;
     const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10);
     suspendCardMutation.mutate({
-      id,
+      id: cardId,
       suspendUntil: tenMinutesLater,
     });
-    // TODO implement undo functionality
-    toast.success("Card suspended for 10 minutes.");
+
+    const id = history.add("suspend", sessionCard);
+    toast.success("Card suspended for 10 minutes.", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          history.undo(id);
+        },
+      },
+    });
+  };
+
+  const deleteCardMutation = useDeleteCard();
+  const handleDelete = () => {
+    deleteCardMutation.mutate({
+      id: sessionCard.cards.id,
+    });
+    const id = history.add("delete", sessionCard);
+    toast.success("Card deleted.", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          console.log(history.entries);
+          history.undo(id);
+        },
+      },
+    });
   };
 
   useKeydownRating(onRating, open, () => setOpen(true));
@@ -204,7 +239,7 @@ export default function Flashcard({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
-                onClick={() => deleteCard.mutate(sessionCard.cards.id)}
+                onClick={() => handleDelete()}
               >
                 Continue
               </AlertDialogAction>
