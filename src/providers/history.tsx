@@ -178,6 +178,20 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
     setIsUndoing(false);
   };
 
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      const isUndo = event.ctrlKey && event.key === "z";
+      if (!isUndo) {
+        return;
+      }
+
+      undo();
+    };
+    document.addEventListener("keydown", handler);
+    return () => {
+      document.removeEventListener("keydown", handler);
+    };
+  });
   const state = {
     entries,
     add,
