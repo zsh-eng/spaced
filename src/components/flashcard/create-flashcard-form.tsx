@@ -17,7 +17,7 @@ import {
   createCardDefaultValues,
   createCardFormSchema,
 } from "@/form";
-import { useHistory } from "@/history";
+import { useHistory } from "@/providers/history";
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { allDeckDataToSelectData } from "@/utils/deck";

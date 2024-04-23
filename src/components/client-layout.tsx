@@ -4,7 +4,7 @@
 import { NavigationBar } from "@/components/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { HistoryProvider } from "@/history";
+import { HistoryProvider } from "@/providers/history";
 import { trpc } from "@/utils/trpc";
 import { PropsWithChildren } from "react";
 

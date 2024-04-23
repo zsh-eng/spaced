@@ -33,26 +33,30 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
-import { useHistory } from "@/history";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useSuspendCard } from "@/hooks/card/use-suspend.card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
+import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import _ from "lodash";
 import {
+  Check,
   ChevronsRight,
+  CircleAlert,
   FilePenIcon,
   Info,
   Telescope,
   TrashIcon,
+  Undo,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useSwipeable } from "react-swipeable";
 import { toast } from "sonner";
 
 type Props = {
@@ -151,6 +155,57 @@ export default function Flashcard({
     });
   };
 
+  const [beforeRating, setBeforeRating] = useState<Rating | undefined>(
+    undefined,
+  );
+  const handlers = useSwipeable({
+    onSwiping: (eventData) => {
+      const target = eventData.event.currentTarget;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const { deltaX: x, deltaY: y } = eventData;
+      target.style.transition = "none";
+      target.style.transform = `translateX(${Math.floor(x / 4)}px)`;
+
+      if (x > 50) {
+        setBeforeRating("Good");
+      }
+
+      if (x < -50) {
+        setBeforeRating("Hard");
+      }
+    },
+    onTouchEndOrOnMouseUp: (eventData) => {
+      const target = eventData.event.currentTarget;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      target.style.transition = "transform 0.3s";
+      target.style.transform = "translateX(0)";
+      setBeforeRating(undefined);
+    },
+    onSwipedRight: () => {
+      if (!open) {
+        handleSkip();
+        return;
+      }
+      onRating("Good");
+    },
+    onSwipedLeft: () => {
+      if (!open) {
+        history.undo();
+        return;
+      }
+      onRating("Hard");
+    },
+    delta: 200,
+    swipeDuration: 300,
+    preventScrollOnSwipe: true,
+  });
+
   useKeydownRating(onRating, open, () => setOpen(true));
   useClickOutside({
     ref: cardRef,
@@ -162,7 +217,56 @@ export default function Flashcard({
   });
 
   return (
-    <div className="col-span-12 flex flex-col gap-x-4 gap-y-4" ref={cardRef}>
+    <div
+      className="relative col-span-12 flex flex-col gap-x-4 gap-y-4"
+      ref={cardRef}
+    >
+      <div className="absolute -left-8 bottom-1/2 -z-30 -rotate-90 text-2xl font-bold">
+        <div
+          className={cn(
+            "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
+            beforeRating && "text-primary",
+          )}
+        >
+          {open ? (
+            <>
+              Good
+              <Check className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
+            </>
+          ) : (
+            <>
+              Skip
+              <ChevronsRight className="inline h-8 w-8" strokeWidth={1.5} />
+            </>
+          )}
+        </div>
+      </div>
+      <div
+        className={cn(
+          "absolute -right-8 bottom-1/2 -z-30 rotate-90 text-2xl font-bold",
+        )}
+      >
+        <div
+          className={cn(
+            "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
+
+            beforeRating && "text-primary",
+          )}
+        >
+          {open ? (
+            <>
+              Hard
+              <CircleAlert className="ml-2 inline h-6 w-6" strokeWidth={2} />
+            </>
+          ) : (
+            <>
+              Undo
+              <Undo className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
+            </>
+          )}
+        </div>
+      </div>
+
       <div className="col-span-8 flex h-24 flex-wrap items-end justify-center gap-x-2">
         {/* Stats and review information */}
         <CardCountBadge stats={stats} />
@@ -175,6 +279,19 @@ export default function Flashcard({
         <div className="mr-auto w-screen sm:w-0"></div>
 
         {/* Icons */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-text" onClick={handleSkip}>
+              <Button variant="ghost" size="icon">
+                <Undo className="h-6 w-6" strokeWidth={1.5} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Undo</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="cursor-text" onClick={handleSkip}>
@@ -249,7 +366,10 @@ export default function Flashcard({
       </div>
 
       <Form {...form}>
-        <div className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 sm:grid-rows-[2fr_1fr]">
+        <div
+          className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background sm:grid-rows-[2fr_1fr]"
+          {...handlers}
+        >
           <div
             className={cn(
               "col-span-8 flex h-full min-h-80 w-full items-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
@@ -293,14 +413,15 @@ export default function Flashcard({
             />
           </div>
 
-          <div className="h-32 sm:hidden"></div>
+          <div className="h-40 sm:hidden"></div>
 
-          <div className="fixed bottom-16 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
+          <div className="fixed bottom-8 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
             <AnswerButtons
               schemaRatingToReviewDay={schemaRatingToReviewDay}
               onRating={onRating}
               open={open}
               setOpen={setOpen}
+              beforeRating={beforeRating}
             />
           </div>
         </div>

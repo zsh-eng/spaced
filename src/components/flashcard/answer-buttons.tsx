@@ -10,6 +10,7 @@ import { intlFormatDistance } from "date-fns";
 
 type Props = {
   schemaRatingToReviewDay: Record<string, Date>;
+  beforeRating?: Rating;
   onRating: (rating: Rating) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -19,7 +20,9 @@ function AnswerButton({
   rating,
   onRating,
   dateString,
+  beforeRating,
 }: {
+  beforeRating?: Rating;
   rating: Rating;
   onRating: (rating: Rating) => void;
   dateString: string;
@@ -29,11 +32,12 @@ function AnswerButton({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            className="h-full"
-            variant="outline"
+            className="flex h-16 flex-col gap-0 transition sm:h-full"
+            variant={beforeRating === rating ? "secondary" : "outline"}
             onClick={() => onRating(rating)}
           >
-            <p>{rating}</p>
+            <div>{rating}</div>
+            <div className="sm:hidden">{dateString}</div>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -52,11 +56,12 @@ export default function AnswerButtons({
   onRating,
   open,
   setOpen,
+  beforeRating,
 }: Props) {
   const ratingsToShow: Rating[] = ["Again", "Hard", "Good", "Easy"];
 
   return (
-    <div className="grid h-12 w-screen grid-cols-2 gap-x-2 gap-y-2 px-2 sm:w-96 md:grid-cols-4">
+    <div className="grid h-full w-screen grid-cols-2 gap-x-2 gap-y-2 px-2 sm:h-12 sm:w-96 md:grid-cols-4">
       {open ? (
         ratingsToShow.map((rating) => {
           return (
@@ -68,16 +73,17 @@ export default function AnswerButtons({
                 schemaRatingToReviewDay[rating],
                 new Date(),
               )}
+              beforeRating={beforeRating}
             />
           );
         })
       ) : (
         <Button
           variant="secondary"
-          className="invisible col-span-2 h-full font-mono hover:animate-pulse sm:visible md:col-span-4"
+          className="sm:text-md col-span-2 h-32 text-2xl hover:animate-pulse sm:h-full md:col-span-4"
           onClick={() => setOpen(true)}
         >
-          space to reveal
+          Reveal
         </Button>
       )}
     </div>
