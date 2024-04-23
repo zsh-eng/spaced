@@ -1,7 +1,7 @@
 "use client";
 
 import Flashcard from "@/components/flashcard/flashcard";
-import { useHistory } from "@/history";
+import { useHistory } from "@/providers/history";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { type Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";

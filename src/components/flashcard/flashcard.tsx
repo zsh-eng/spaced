@@ -33,7 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
-import { useHistory } from "@/history";
+import { useHistory } from "@/providers/history";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useSuspendCard } from "@/hooks/card/use-suspend.card";

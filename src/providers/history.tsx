@@ -13,15 +13,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-// HistoryContext
-// useHistory hook that throws an error if used outside of a HistoryProvider
-// HistoryProvider that provides the history state and implements the undo functionality
-
-// The undo functionality should trigger a promise based toast
-// If the promise fails, then the toast will display an error message and
-// we won't update the history state
-// Else, we'll run setState with the filtered entries
-
 type ChangeType = "grade" | "edit" | "delete" | "create" | "suspend";
 
 type HistoryStateEntry = {
@@ -47,8 +38,16 @@ export function useHistory() {
   return context;
 }
 
+/**
+ * Manages the history of changes to cards.
+ * We expose the list of entries, a function to add a new entry, and a function to undo the last change.
+ */
 export function HistoryProvider({ children }: PropsWithChildren<{}>) {
-  const entriesRef = useRef<HistoryStateEntry[]>([]);
+  const [entries, setEntries] = useState<HistoryStateEntry[]>([]);
+  // We use a ref to avoid stale state in the function closures
+  const entriesRef = useRef<HistoryStateEntry[]>(entries);
+  entriesRef.current = entries;
+
   const [isUndoing, setIsUndoing] = useState(false);
 
   const editCardMutation = useEditCard();
@@ -58,20 +57,15 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
 
   const add = (type: ChangeType, card: SessionCard): string => {
     const id = crypto.randomUUID();
-    console.log(
-      "Adding entry",
-      id,
-      type,
-      card.cards.id,
-      entriesRef.current.length,
-    );
-    entriesRef.current.push({
-      id,
-      date: new Date(),
-      type,
-      card,
-    });
-    console.log(entriesRef.current);
+    setEntries((entries) => [
+      ...entries,
+      {
+        id,
+        date: new Date(),
+        type,
+        card,
+      },
+    ]);
     return id;
   };
 
@@ -124,7 +118,6 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
   };
 
   const undo = (id?: string) => {
-    console.log("Undoing", entriesRef.current);
     if (entriesRef.current.length === 0) {
       toast.info("Nothing left to undo.");
       return;
@@ -181,12 +174,12 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
         const _: never = entry.type;
     }
 
-    entriesRef.current = entriesRef.current.filter((e) => e.id !== entry.id);
+    setEntries((entries) => entries.filter((e) => e.id !== entry.id));
     setIsUndoing(false);
   };
 
   const state = {
-    entries: entriesRef.current,
+    entries,
     add,
     undo,
     isUndoing,
