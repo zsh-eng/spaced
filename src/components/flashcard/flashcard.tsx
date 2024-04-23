@@ -202,7 +202,7 @@ export default function Flashcard({
       onRating("Hard");
     },
     delta: 120,
-    swipeDuration: 1000,
+    swipeDuration: 800,
     preventScrollOnSwipe: true,
   });
 
@@ -221,7 +221,7 @@ export default function Flashcard({
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-4"
       ref={cardRef}
     >
-      <div className="absolute -left-8 bottom-1/2 -z-30 -rotate-90 text-2xl font-bold">
+      <div className="absolute -left-12 bottom-1/2 -z-30 -rotate-90 text-2xl font-bold">
         <div
           className={cn(
             "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
@@ -243,7 +243,7 @@ export default function Flashcard({
       </div>
       <div
         className={cn(
-          "absolute -right-8 bottom-1/2 -z-30 rotate-90 text-2xl font-bold",
+          "absolute -right-12 bottom-1/2 -z-30 rotate-90 text-2xl font-bold",
         )}
       >
         <div
