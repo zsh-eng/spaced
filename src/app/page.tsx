@@ -1,5 +1,5 @@
 import FlashcardBox from "@/components/flashcard/flashcard-box";
-import { gridChildContentGrid, gridChildGrid } from "@/components/ui/grid";
+import { gridChildContentGrid } from "@/components/ui/grid";
 import { cn } from "@/utils/ui";
 
 export default async function Home() {
