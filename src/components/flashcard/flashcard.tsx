@@ -169,11 +169,11 @@ export default function Flashcard({
       target.style.transition = "none";
       target.style.transform = `translateX(${Math.floor(x / 4)}px)`;
 
-      if (x > 50) {
+      if (x > 30) {
         setBeforeRating("Good");
       }
 
-      if (x < -50) {
+      if (x < -30) {
         setBeforeRating("Hard");
       }
     },
@@ -201,8 +201,8 @@ export default function Flashcard({
       }
       onRating("Hard");
     },
-    delta: 200,
-    swipeDuration: 300,
+    delta: 120,
+    swipeDuration: 1000,
     preventScrollOnSwipe: true,
   });
 
