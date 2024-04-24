@@ -9,7 +9,7 @@ import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { SessionCard, SessionData } from "@/utils/session";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { toast } from "sonner";
 
 type FlashcardSession = {
