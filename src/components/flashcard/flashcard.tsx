@@ -34,9 +34,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
-import { useDeleteCard } from "@/hooks/card/use-delete-card";
-import { useEditCard } from "@/hooks/card/use-edit-card";
-import { useSuspendCard } from "@/hooks/card/use-suspend.card";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
 import { useHistory } from "@/providers/history";
@@ -57,14 +54,17 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { SwipeEventData, useSwipeable } from "react-swipeable";
-import { toast } from "sonner";
+import { useSwipeable } from "react-swipeable";
 
 type Props = {
   card: SessionCard;
-  onRating: (rating: Rating) => void;
   schemaRatingToReviewDay: Record<Rating, Date>;
   stats: SessionStats;
+
+  onRating: (rating: Rating) => void;
+  onEdit: (content: CardContentFormValues) => void;
+  onSkip: () => void;
+  onDelete: () => void;
 };
 
 const SWIPE_THRESHOLD = 120;
@@ -82,8 +82,11 @@ const targetIsHTMLElement = (
 export default function Flashcard({
   card: sessionCard,
   stats,
-  onRating,
   schemaRatingToReviewDay,
+  onRating,
+  onEdit,
+  onDelete,
+  onSkip,
 }: Props) {
   const { card_contents: initialCardContent } = sessionCard;
   const [open, setOpen] = useState(false);
@@ -100,69 +103,12 @@ export default function Flashcard({
 
   const history = useHistory();
 
-  const editCardMutation = useEditCard();
   const handleEdit = () => {
     // `getValues()` will be undefined if the form is disabled
     // TODO use readonly field instead
     // See https://www.react-hook-form.com/api/useform/getvalues/#:~:text=%5B%27%27%5D-,Rules,-Disabled%20inputs%20will
     const content = form.getValues();
-    const isQuestionAnswerSame =
-      content.question === initialCardContent.question &&
-      content.answer === initialCardContent.answer;
-    if (isQuestionAnswerSame) return;
-
-    editCardMutation.mutate({
-      cardContentId: initialCardContent.id,
-      question: content.question,
-      answer: content.answer,
-    });
-
-    const id = history.add("edit", sessionCard);
-    toast.success("Card updated.", {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          history.undo(id);
-        },
-      },
-    });
-  };
-
-  const suspendCardMutation = useSuspendCard();
-  const handleSkip = () => {
-    const cardId = sessionCard.cards.id;
-    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10);
-    suspendCardMutation.mutate({
-      id: cardId,
-      suspendUntil: tenMinutesLater,
-    });
-
-    const id = history.add("suspend", sessionCard);
-    toast.success("Card suspended for 10 minutes.", {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          history.undo(id);
-        },
-      },
-    });
-  };
-
-  const deleteCardMutation = useDeleteCard();
-  const handleDelete = () => {
-    deleteCardMutation.mutate({
-      id: sessionCard.cards.id,
-    });
-    const id = history.add("delete", sessionCard);
-    toast.success("Card deleted.", {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          console.log(history.entries);
-          history.undo(id);
-        },
-      },
-    });
+    onEdit(content);
   };
 
   const [beforeRating, setBeforeRating] = useState<Rating | undefined>(
@@ -217,7 +163,7 @@ export default function Flashcard({
     },
     onSwipedRight: () => {
       if (!open) {
-        handleSkip();
+        onSkip();
         return;
       }
       beforeRating && onRating(beforeRating);
@@ -290,7 +236,10 @@ export default function Flashcard({
         {/* Icons */}
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text" onClick={handleSkip}>
+            <TooltipTrigger
+              className="cursor-text"
+              onClick={() => history.undo()}
+            >
               <Button variant="ghost" size="icon">
                 <Undo className="h-6 w-6" strokeWidth={1.5} />
               </Button>
@@ -303,7 +252,7 @@ export default function Flashcard({
 
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text" onClick={handleSkip}>
+            <TooltipTrigger className="cursor-text" onClick={onSkip}>
               <Button variant="ghost" size="icon">
                 <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
               </Button>
@@ -363,10 +312,7 @@ export default function Flashcard({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={() => handleDelete()}
-              >
+              <AlertDialogAction variant="destructive" onClick={onDelete}>
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>

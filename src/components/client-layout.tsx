@@ -4,6 +4,7 @@
 import { NavigationBar } from "@/components/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { FlashcardSessionProvider } from "@/providers/flashcard-session";
 import { HistoryProvider } from "@/providers/history";
 import { trpc } from "@/utils/trpc";
 import { PropsWithChildren } from "react";
@@ -11,16 +12,18 @@ import { PropsWithChildren } from "react";
 function ClientLayout({ children }: PropsWithChildren<{}>) {
   return (
     <HistoryProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <NavigationBar />
-        {children}
-        <Toaster position="top-center" />
-      </ThemeProvider>
+      <FlashcardSessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NavigationBar />
+          {children}
+          <Toaster position="top-center" />
+        </ThemeProvider>
+      </FlashcardSessionProvider>
     </HistoryProvider>
   );
 }
