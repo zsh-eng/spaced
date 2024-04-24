@@ -64,8 +64,8 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
       name={name}
       disabled={disabled}
       render={({ field }) => (
-        <ScrollArea className={className}>
-          <FormItem ref={formRef}>
+        <ScrollArea className={className} ref={formRef}>
+          <FormItem>
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
               <MarkdownEditor border={border} {...field} />

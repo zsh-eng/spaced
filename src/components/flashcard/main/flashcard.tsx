@@ -151,7 +151,7 @@ export default function Flashcard({
     preventScrollOnSwipe: true,
   });
 
-  useKeydownRating(onRating, open, () => setOpen(true));
+  useKeydownRating(onRating, open && !editing, () => setOpen(true));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
