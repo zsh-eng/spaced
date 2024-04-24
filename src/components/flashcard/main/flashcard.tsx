@@ -12,7 +12,7 @@ import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsRight, CircleAlert, Undo } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
 
@@ -29,8 +29,8 @@ type Props = {
 
 const SWIPE_THRESHOLD = 120;
 const SWIPE_PADDING = 60;
-const ANIMATION_DURATION = 300;
-const SWIPE_DURATION = ANIMATION_DURATION + 300;
+const ANIMATION_DURATION = 200;
+const SWIPE_DURATION = ANIMATION_DURATION + 500;
 
 const targetIsHTMLElement = (
   target: EventTarget | null,
@@ -54,6 +54,7 @@ export default function Flashcard({
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const answerButtonsContainerRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<CardContentFormValues>({
     resolver: zodResolver(cardContentFormSchema),
@@ -152,6 +153,13 @@ export default function Flashcard({
     },
   });
 
+  useEffect(() => {
+    if (!open) return;
+    answerButtonsContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [open]);
+
   return (
     <div
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-2"
@@ -206,8 +214,10 @@ export default function Flashcard({
         />
       </div>
 
-      <div className="h-40 sm:hidden"></div>
-      <div className="fixed bottom-8 z-20 w-full pr-4 sm:static sm:mx-auto sm:w-max">
+      <div
+        className="z-20 mb-6 w-full sm:static sm:mx-auto sm:w-max"
+        ref={answerButtonsContainerRef}
+      >
         <AnswerButtons
           schemaRatingToReviewDay={schemaRatingToReviewDay}
           onRating={onRating}
