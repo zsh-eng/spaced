@@ -22,6 +22,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 type Props = {
   card: SessionCard;
@@ -62,6 +63,7 @@ export default function Flashcard({
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const answerButtonsContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery("only screen and (max-width: 640px)");
 
   const form = useForm<CardContentFormValues>({
     resolver: zodResolver(cardContentFormSchema),
@@ -217,7 +219,7 @@ export default function Flashcard({
         className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background"
         {...handlers}
         onDoubleClick={() => {
-          if (!open || editing || currentlyFocusedRating) return;
+          if (!open || editing || currentlyFocusedRating || !isMobile) return;
           setCurrentlyFocusedRating("Good");
           setTimeout(() => {
             setCurrentlyFocusedRating(undefined);
