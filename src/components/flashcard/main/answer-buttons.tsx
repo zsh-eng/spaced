@@ -11,7 +11,7 @@ import { intlFormatDistance } from "date-fns";
 
 type Props = {
   schemaRatingToReviewDay: Record<string, Date>;
-  beforeRating?: Rating;
+  focusedRating?: Rating;
   onRating: (rating: Rating) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -57,7 +57,7 @@ export default function AnswerButtons({
   onRating,
   open,
   setOpen,
-  beforeRating,
+  focusedRating: beforeRating,
 }: Props) {
   const ratingsToShow: Rating[] = ["Again", "Hard", "Good", "Easy"];
 

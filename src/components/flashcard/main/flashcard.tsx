@@ -28,8 +28,10 @@ type Props = {
 };
 
 const SWIPE_THRESHOLD = 120;
-const SWIPE_DURATION = 500;
 const SWIPE_PADDING = 60;
+const ANIMATION_DURATION = 300;
+const SWIPE_DURATION = ANIMATION_DURATION + 300;
+
 const targetIsHTMLElement = (
   target: EventTarget | null,
 ): target is HTMLElement => {
@@ -71,9 +73,9 @@ export default function Flashcard({
     onEdit(content);
   };
 
-  const [beforeRating, setBeforeRating] = useState<Rating | undefined>(
-    undefined,
-  );
+  const [currentlyFocusedRating, setCurrentlyFocusedRating] = useState<
+    Rating | undefined
+  >(undefined);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
     undefined,
   );
@@ -84,8 +86,8 @@ export default function Flashcard({
       target.style.transition = "transform 0.05s";
 
       const id = setTimeout(() => {
-        setBeforeRating(undefined);
-      }, SWIPE_DURATION);
+        setCurrentlyFocusedRating(undefined);
+      }, SWIPE_DURATION - 100);
       setTimeoutId(id);
     },
     onSwiping: (eventData) => {
@@ -101,11 +103,11 @@ export default function Flashcard({
       target.style.transform = `translateX(${transformDistance}px)`;
 
       if (x > SWIPE_THRESHOLD) {
-        setBeforeRating("Good");
+        setCurrentlyFocusedRating("Good");
       }
 
       if (x < -SWIPE_THRESHOLD) {
-        setBeforeRating("Hard");
+        setCurrentlyFocusedRating("Hard");
       }
     },
     onTouchEndOrOnMouseUp: (eventData) => {
@@ -117,26 +119,26 @@ export default function Flashcard({
       const target = eventData.event.currentTarget;
       if (!targetIsHTMLElement(target)) return;
 
-      target.style.transition = "transform 0.3s";
+      target.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
       target.style.transform = "translateX(0)";
-      setBeforeRating(undefined);
+      setCurrentlyFocusedRating(undefined);
     },
     onSwipedRight: () => {
       if (!open) {
         onSkip();
         return;
       }
-      beforeRating && onRating(beforeRating);
+      currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     onSwipedLeft: () => {
       if (!open) {
         history.undo();
         return;
       }
-      beforeRating && onRating(beforeRating);
+      currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     delta: SWIPE_THRESHOLD,
-    swipeDuration: SWIPE_DURATION + 100,
+    swipeDuration: SWIPE_DURATION,
     preventScrollOnSwipe: true,
   });
 
@@ -155,7 +157,7 @@ export default function Flashcard({
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-2"
       ref={cardRef}
     >
-      <SwipeAction direction="right" active={!!beforeRating}>
+      <SwipeAction direction="right" active={!!currentlyFocusedRating}>
         {open ? (
           <>
             Good
@@ -168,7 +170,7 @@ export default function Flashcard({
           </>
         )}
       </SwipeAction>
-      <SwipeAction direction="left" active={!!beforeRating}>
+      <SwipeAction direction="left" active={!!currentlyFocusedRating}>
         {open ? (
           <>
             Hard
@@ -211,7 +213,7 @@ export default function Flashcard({
           onRating={onRating}
           open={open}
           setOpen={setOpen}
-          beforeRating={beforeRating}
+          focusedRating={currentlyFocusedRating}
         />
       </div>
     </div>
