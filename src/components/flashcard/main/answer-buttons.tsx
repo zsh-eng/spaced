@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Rating } from "@/schema";
+import { cn } from "@/utils/ui";
 import { intlFormatDistance } from "date-fns";
 
 type Props = {
@@ -61,7 +62,11 @@ export default function AnswerButtons({
   const ratingsToShow: Rating[] = ["Again", "Hard", "Good", "Easy"];
 
   return (
-    <div className="grid h-full w-screen grid-cols-2 gap-x-2 gap-y-2 px-2 sm:h-12 sm:w-96 md:grid-cols-4">
+    <div
+      className={cn(
+        "grid h-full grid-cols-2 gap-x-2 gap-y-2 sm:h-12 sm:w-96 md:grid-cols-4",
+      )}
+    >
       {open ? (
         ratingsToShow.map((rating) => {
           return (
@@ -80,7 +85,7 @@ export default function AnswerButtons({
       ) : (
         <Button
           variant="secondary"
-          className="sm:text-md col-span-2 h-32 text-2xl hover:animate-pulse sm:h-full md:col-span-4"
+          className="col-span-2 h-32 text-2xl sm:h-full sm:text-lg md:col-span-4"
           onClick={() => setOpen(true)}
         >
           Reveal
