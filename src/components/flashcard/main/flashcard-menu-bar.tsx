@@ -37,6 +37,7 @@ import {
   TrashIcon,
   Undo,
 } from "lucide-react";
+import { Kbd } from "@/components/ui/kbd";
 
 type Props = {
   card: SessionCard;
@@ -82,8 +83,9 @@ export function FlashcardMenuBar({
               <Undo className="h-6 w-6" strokeWidth={1.5} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent className="flex flex-col items-center">
             <p>Undo</p>
+            <Kbd>Ctrl+Z</Kbd>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
