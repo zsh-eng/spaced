@@ -1,4 +1,4 @@
-import FlashcardBox from "@/components/flashcard/flashcard-box";
+import FlashcardBox from "@/components/flashcard/main/flashcard-box";
 import { gridChildContentGrid } from "@/components/ui/grid";
 import { cn } from "@/utils/ui";
 

@@ -1,4 +1,4 @@
-import CardCountBadge from "@/components/flashcard/card-count-badge";
+import CardCountBadge from "@/components/flashcard/main/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
 import {
   AlertDialog,

@@ -1,6 +1,6 @@
 "use client";
 
-import Flashcard from "@/components/flashcard/flashcard";
+import Flashcard from "@/components/flashcard/main/flashcard";
 import { useFlashcardSession } from "@/providers/flashcard-session";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { Loader2 } from "lucide-react";

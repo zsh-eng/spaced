@@ -1,9 +1,9 @@
 "use client";
 
-import AnswerButtons from "@/components/flashcard/answer-buttons";
-import { EditableFlashcard } from "@/components/flashcard/editable-flashcard";
-import { FlashcardMenuBar } from "@/components/flashcard/flashcard-menu-bar";
-import { SwipeAction } from "@/components/flashcard/swipe-action";
+import AnswerButtons from "@/components/flashcard/main/answer-buttons";
+import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
+import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
+import { SwipeAction } from "@/components/flashcard/main/swipe-action";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
