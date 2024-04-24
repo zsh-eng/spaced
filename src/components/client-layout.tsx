@@ -21,7 +21,12 @@ function ClientLayout({ children }: PropsWithChildren<{}>) {
         >
           <NavigationBar />
           {children}
-          <Toaster position="top-center" />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 1000,
+            }}
+          />
         </ThemeProvider>
       </FlashcardSessionProvider>
     </HistoryProvider>
