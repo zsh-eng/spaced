@@ -3,7 +3,7 @@
 import AnswerButtons from "@/components/flashcard/main/answer-buttons";
 import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
 import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
-import { SwipeAction } from "@/components/flashcard/main/swipe-action";
+import { SwipeActionText } from "@/components/flashcard/main/swipe-action";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
@@ -174,10 +174,10 @@ export default function Flashcard({
       ref={cardRef}
     >
       {currentlyFocusedRating === "Good" && (
-        <ThumbsUp className="animate-tada absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 text-primary" />
+        <ThumbsUp className="absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 animate-tada text-primary" />
       )}
 
-      <SwipeAction direction="right" active={!!currentlyFocusedRating}>
+      <SwipeActionText direction="right" active={!!currentlyFocusedRating}>
         {open ? (
           <>
             Easy
@@ -189,8 +189,8 @@ export default function Flashcard({
             <ChevronsRight className="inline h-8 w-8" strokeWidth={1.5} />
           </>
         )}
-      </SwipeAction>
-      <SwipeAction direction="left" active={!!currentlyFocusedRating}>
+      </SwipeActionText>
+      <SwipeActionText direction="left" active={!!currentlyFocusedRating}>
         {open ? (
           <>
             Hard
@@ -202,7 +202,7 @@ export default function Flashcard({
             <Undo className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
           </>
         )}
-      </SwipeAction>
+      </SwipeActionText>
 
       <FlashcardMenuBar
         card={sessionCard}

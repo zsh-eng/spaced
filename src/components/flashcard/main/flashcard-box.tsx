@@ -65,3 +65,5 @@ export default function FlashcardBox({}: Props) {
     </>
   );
 }
+
+FlashcardBox.displayName = "FlashcardBox";

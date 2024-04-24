@@ -26,3 +26,5 @@ export default function FlashcardState({
     </Badge>
   );
 }
+
+FlashcardState.displayName = "FlashcardState";
