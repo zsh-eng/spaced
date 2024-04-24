@@ -22,7 +22,6 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
           "col-span-8 flex h-full min-h-80 w-full items-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         <FormMarkdownEditor name="question" form={form} disabled={!editing} />
       </div>
@@ -32,7 +31,6 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
           "relative col-span-8 h-full min-h-80 w-full border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         <div
           className={cn(
@@ -52,7 +50,6 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
           disabled={!editing}
         />
       </div>
-
     </Form>
   );
 }

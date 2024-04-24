@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
 
 type FormMarkdownEditorProps<TFieldValues extends FieldValues> =
@@ -33,13 +34,36 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
   className,
   border,
 }: FormMarkdownEditorProps<TFieldValues>) {
+  // https://github.com/facebook/react/issues/12518
+  // onKeyDown is a React synthetic event
+  // To stop propagation, we need to use the native event
+  // We want to prevent any global keyboard shortcuts from triggering
+  // while the user is typing in the editor
+  const formRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const div = formRef.current;
+    if (!div || disabled) return;
+
+    const handler = (event: KeyboardEvent) => {
+      event.stopPropagation();
+    };
+
+    div.addEventListener("keydown", handler);
+    div.addEventListener("keyup", handler);
+
+    return () => {
+      div.removeEventListener("keydown", handler);
+      div.removeEventListener("keyup", handler);
+    };
+  }, [disabled]);
+
   return (
     <FormField
       control={form.control}
       name={name}
       disabled={disabled}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem className={className} ref={formRef}>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <MarkdownEditor border={border} {...field} />

@@ -11,18 +11,17 @@ import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMediaQuery } from "@uidotdev/usehooks";
 import {
   Check,
   ChevronsRight,
   CircleAlert,
-  Heart,
   ThumbsUp,
   Undo,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
-import { useMediaQuery } from "@uidotdev/usehooks";
 
 type Props = {
   card: SessionCard;
