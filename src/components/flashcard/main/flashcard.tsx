@@ -11,7 +11,14 @@ import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronsRight, CircleAlert, Undo } from "lucide-react";
+import {
+  Check,
+  ChevronsRight,
+  CircleAlert,
+  Heart,
+  ThumbsUp,
+  Undo,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
@@ -104,7 +111,7 @@ export default function Flashcard({
       target.style.transform = `translateX(${transformDistance}px)`;
 
       if (x > SWIPE_THRESHOLD) {
-        setCurrentlyFocusedRating("Good");
+        setCurrentlyFocusedRating("Easy");
       }
 
       if (x < -SWIPE_THRESHOLD) {
@@ -122,7 +129,7 @@ export default function Flashcard({
 
       target.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
       target.style.transform = "translateX(0)";
-      setCurrentlyFocusedRating(undefined);
+      currentlyFocusedRating !== "Good" && setCurrentlyFocusedRating(undefined);
     },
     onSwipedRight: () => {
       if (!open) {
@@ -165,10 +172,14 @@ export default function Flashcard({
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-2"
       ref={cardRef}
     >
+      {currentlyFocusedRating === "Good" && (
+        <ThumbsUp className="animate-tada absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 text-primary" />
+      )}
+
       <SwipeAction direction="right" active={!!currentlyFocusedRating}>
         {open ? (
           <>
-            Good
+            Easy
             <Check className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
           </>
         ) : (
@@ -205,6 +216,14 @@ export default function Flashcard({
       <div
         className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background"
         {...handlers}
+        onDoubleClick={() => {
+          if (!open || editing || currentlyFocusedRating) return;
+          setCurrentlyFocusedRating("Good");
+          setTimeout(() => {
+            setCurrentlyFocusedRating(undefined);
+            onRating("Good");
+          }, 600);
+        }}
       >
         <EditableFlashcard
           form={form}
