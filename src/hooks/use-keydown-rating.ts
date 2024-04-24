@@ -11,7 +11,7 @@ export default function useKeydownRating(
 ) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!open) {
+      if (!open && event.key === " ") {
         onOpen();
         return;
       }

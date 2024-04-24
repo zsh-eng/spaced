@@ -15,7 +15,7 @@ type Props = PropsWithChildren<{
 /**
  * The action that's shown when a user swipes a flashcard
  */
-export function SwipeAction({ direction, active, children }: Props) {
+export function SwipeActionText({ direction, active, children }: Props) {
   // Position of text is opposite of direction
   return (
     <div
@@ -27,7 +27,7 @@ export function SwipeAction({ direction, active, children }: Props) {
       <div
         className={cn(
           "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
-          active && "text-primary",
+          active && "animate-wiggle text-primary",
         )}
       >
         {children}
@@ -36,4 +36,4 @@ export function SwipeAction({ direction, active, children }: Props) {
   );
 }
 
-SwipeAction.displayName = "SwipeAction";
+SwipeActionText.displayName = "SwipeActionText";

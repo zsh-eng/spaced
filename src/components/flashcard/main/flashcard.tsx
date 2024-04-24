@@ -3,7 +3,7 @@
 import AnswerButtons from "@/components/flashcard/main/answer-buttons";
 import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
 import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
-import { SwipeAction } from "@/components/flashcard/main/swipe-action";
+import { SwipeActionText } from "@/components/flashcard/main/swipe-action";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import useKeydownRating from "@/hooks/use-keydown-rating";
@@ -11,8 +11,15 @@ import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronsRight, CircleAlert, Undo } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import {
+  Check,
+  ChevronsRight,
+  CircleAlert,
+  ThumbsUp,
+  Undo,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
 
@@ -28,8 +35,10 @@ type Props = {
 };
 
 const SWIPE_THRESHOLD = 120;
-const SWIPE_DURATION = 500;
 const SWIPE_PADDING = 60;
+const ANIMATION_DURATION = 200;
+const SWIPE_DURATION = ANIMATION_DURATION + 500;
+
 const targetIsHTMLElement = (
   target: EventTarget | null,
 ): target is HTMLElement => {
@@ -52,6 +61,8 @@ export default function Flashcard({
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const answerButtonsContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery("only screen and (max-width: 640px)");
 
   const form = useForm<CardContentFormValues>({
     resolver: zodResolver(cardContentFormSchema),
@@ -71,9 +82,9 @@ export default function Flashcard({
     onEdit(content);
   };
 
-  const [beforeRating, setBeforeRating] = useState<Rating | undefined>(
-    undefined,
-  );
+  const [currentlyFocusedRating, setCurrentlyFocusedRating] = useState<
+    Rating | undefined
+  >(undefined);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
     undefined,
   );
@@ -84,8 +95,8 @@ export default function Flashcard({
       target.style.transition = "transform 0.05s";
 
       const id = setTimeout(() => {
-        setBeforeRating(undefined);
-      }, SWIPE_DURATION);
+        setCurrentlyFocusedRating(undefined);
+      }, SWIPE_DURATION - 100);
       setTimeoutId(id);
     },
     onSwiping: (eventData) => {
@@ -101,11 +112,11 @@ export default function Flashcard({
       target.style.transform = `translateX(${transformDistance}px)`;
 
       if (x > SWIPE_THRESHOLD) {
-        setBeforeRating("Good");
+        setCurrentlyFocusedRating("Easy");
       }
 
       if (x < -SWIPE_THRESHOLD) {
-        setBeforeRating("Hard");
+        setCurrentlyFocusedRating("Hard");
       }
     },
     onTouchEndOrOnMouseUp: (eventData) => {
@@ -117,30 +128,30 @@ export default function Flashcard({
       const target = eventData.event.currentTarget;
       if (!targetIsHTMLElement(target)) return;
 
-      target.style.transition = "transform 0.3s";
+      target.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
       target.style.transform = "translateX(0)";
-      setBeforeRating(undefined);
+      currentlyFocusedRating !== "Good" && setCurrentlyFocusedRating(undefined);
     },
     onSwipedRight: () => {
       if (!open) {
         onSkip();
         return;
       }
-      beforeRating && onRating(beforeRating);
+      currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     onSwipedLeft: () => {
       if (!open) {
         history.undo();
         return;
       }
-      beforeRating && onRating(beforeRating);
+      currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     delta: SWIPE_THRESHOLD,
-    swipeDuration: SWIPE_DURATION + 100,
+    swipeDuration: SWIPE_DURATION,
     preventScrollOnSwipe: true,
   });
 
-  useKeydownRating(onRating, open, () => setOpen(true));
+  useKeydownRating(onRating, open && !editing, () => setOpen(true));
   useClickOutside({
     ref: cardRef,
     enabled: editing,
@@ -150,15 +161,26 @@ export default function Flashcard({
     },
   });
 
+  useEffect(() => {
+    if (!open) return;
+    answerButtonsContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [open]);
+
   return (
     <div
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-2"
       ref={cardRef}
     >
-      <SwipeAction direction="right" active={!!beforeRating}>
+      {currentlyFocusedRating === "Good" && (
+        <ThumbsUp className="absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 animate-tada text-primary" />
+      )}
+
+      <SwipeActionText direction="right" active={!!currentlyFocusedRating}>
         {open ? (
           <>
-            Good
+            Easy
             <Check className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
           </>
         ) : (
@@ -167,8 +189,8 @@ export default function Flashcard({
             <ChevronsRight className="inline h-8 w-8" strokeWidth={1.5} />
           </>
         )}
-      </SwipeAction>
-      <SwipeAction direction="left" active={!!beforeRating}>
+      </SwipeActionText>
+      <SwipeActionText direction="left" active={!!currentlyFocusedRating}>
         {open ? (
           <>
             Hard
@@ -180,7 +202,7 @@ export default function Flashcard({
             <Undo className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
           </>
         )}
-      </SwipeAction>
+      </SwipeActionText>
 
       <FlashcardMenuBar
         card={sessionCard}
@@ -195,6 +217,14 @@ export default function Flashcard({
       <div
         className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background"
         {...handlers}
+        onDoubleClick={() => {
+          if (!open || editing || currentlyFocusedRating || !isMobile) return;
+          setCurrentlyFocusedRating("Good");
+          setTimeout(() => {
+            setCurrentlyFocusedRating(undefined);
+            onRating("Good");
+          }, 600);
+        }}
       >
         <EditableFlashcard
           form={form}
@@ -204,14 +234,16 @@ export default function Flashcard({
         />
       </div>
 
-      <div className="h-40 sm:hidden"></div>
-      <div className="fixed bottom-8 z-20 w-full pr-4 sm:static sm:mx-auto sm:w-max">
+      <div
+        className="z-20 mb-6 w-full sm:static sm:mx-auto sm:w-max"
+        ref={answerButtonsContainerRef}
+      >
         <AnswerButtons
           schemaRatingToReviewDay={schemaRatingToReviewDay}
           onRating={onRating}
           open={open}
           setOpen={setOpen}
-          beforeRating={beforeRating}
+          focusedRating={currentlyFocusedRating}
         />
       </div>
     </div>

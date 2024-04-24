@@ -1,5 +1,6 @@
 "use client";
 
+import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import {
   Editor,
@@ -12,8 +13,7 @@ import {
 import { clipboard } from "@milkdown/plugin-clipboard";
 import { history } from "@milkdown/plugin-history";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
-import { upload, uploadConfig, Uploader } from "@milkdown/plugin-upload";
-import type { Node } from "@milkdown/prose/model";
+import { Uploader, upload, uploadConfig } from "@milkdown/plugin-upload";
 import {
   blockquoteAttr,
   bulletListAttr,
@@ -23,9 +23,9 @@ import {
   paragraphAttr,
 } from "@milkdown/preset-commonmark";
 import { gfm } from "@milkdown/preset-gfm";
+import type { Node } from "@milkdown/prose/model";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 import { useEffect, useRef } from "react";
-import { RouterOutputs, trpc } from "@/utils/trpc";
 
 type Props = {
   value: string;

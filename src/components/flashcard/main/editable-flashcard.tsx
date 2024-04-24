@@ -15,24 +15,30 @@ type Props = {
 };
 
 export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
+  const onContainerFocus = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const milkdown = target.querySelector(".ProseMirror") as HTMLDivElement;
+    if (milkdown) milkdown.focus();
+  };
+
   return (
     <Form {...form}>
       <div
         className={cn(
-          "col-span-8 flex h-full min-h-80 w-full items-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
+          "col-span-8 flex h-full min-h-80 w-full items-center justify-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
-        onKeyDown={(e) => e.stopPropagation()}
+        onClick={onContainerFocus}
       >
         <FormMarkdownEditor name="question" form={form} disabled={!editing} />
       </div>
 
       <div
         className={cn(
-          "relative col-span-8 h-full min-h-80 w-full border border-input sm:col-span-4 sm:min-h-96",
+          "relative col-span-8 flex h-full min-h-80 w-full items-center justify-center border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
-        onKeyDown={(e) => e.stopPropagation()}
+        onClick={onContainerFocus}
       >
         <div
           className={cn(
@@ -46,13 +52,12 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
           </div>
         </div>
         <FormMarkdownEditor
-          className={cn("flex h-full items-center", !open ? "opacity-0" : "")}
+          className={cn(!open ? "opacity-0" : "")}
           name="answer"
           form={form}
           disabled={!editing}
         />
       </div>
-
     </Form>
   );
 }

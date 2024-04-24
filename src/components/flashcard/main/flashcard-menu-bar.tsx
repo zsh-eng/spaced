@@ -34,9 +34,13 @@ import {
   ChevronsRight,
   FilePenIcon,
   Info,
+  Plus,
   TrashIcon,
   Undo,
 } from "lucide-react";
+import { Kbd } from "@/components/ui/kbd";
+import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
+import { useEffect, useState } from "react";
 
 type Props = {
   card: SessionCard;
@@ -60,6 +64,29 @@ export function FlashcardMenuBar({
   onDelete,
   onUndo,
 }: Props) {
+  const [cardFormOpen, setCardFormOpen] = useState(false);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === "ArrowRight") {
+        onSkip();
+      }
+      if (e.shiftKey && e.key === "I") {
+        setEditing(!editing);
+      }
+      if (e.shiftKey && e.key === "D") {
+        onDelete();
+      }
+      if (e.shiftKey && e.key === "N") {
+        setCardFormOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handler);
+    return () => {
+      document.removeEventListener("keydown", handler);
+    };
+  });
+
   return (
     <div className="col-span-8 flex h-24 flex-wrap items-end justify-center gap-x-2">
       {/* Stats and review information */}
@@ -82,8 +109,9 @@ export function FlashcardMenuBar({
               <Undo className="h-6 w-6" strokeWidth={1.5} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent className="flex flex-col items-center">
             <p>Undo</p>
+            <Kbd>Ctrl+Z</Kbd>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -95,32 +123,55 @@ export function FlashcardMenuBar({
               <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Skip card and show in 10 minutes</p>
+          <TooltipContent className="flex flex-col items-center">
+            <p>Suspend</p>
+            <Kbd className="mx-auto">Shift+→</Kbd>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
-      <Toggle
-        aria-label="toggle edit"
-        pressed={editing}
-        onPressedChange={(isEditing) => {
-          if (!isEditing) {
-            handleEdit();
-          }
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger className="cursor-text" onClick={onSkip}>
+            <Toggle
+              aria-label="toggle edit"
+              pressed={editing}
+              onPressedChange={(isEditing) => {
+                if (!isEditing) {
+                  handleEdit();
+                }
 
-          setEditing(isEditing);
-        }}
-      >
-        <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
-      </Toggle>
+                setEditing(isEditing);
+              }}
+            >
+              <FilePenIcon className="h-4 w-4" strokeWidth={1.5} />
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent className="flex flex-col items-center">
+            <p>Edit</p>
+            <Kbd className="mx-auto">Shift+I</Kbd>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <Dialog>
-        <DialogTrigger
-          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-        >
-          <Info className="h-4 w-4" />
-        </DialogTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-text">
+              <DialogTrigger
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                )}
+              >
+                <Info className="h-4 w-4" />
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Show card info</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Stats</DialogTitle>
@@ -136,12 +187,55 @@ export function FlashcardMenuBar({
         </DialogContent>
       </Dialog>
 
+      <Dialog open={cardFormOpen} onOpenChange={setCardFormOpen}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-text">
+              <DialogTrigger
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                )}
+              >
+                <Plus className="h-4 w-4" />
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="flex flex-col items-center">
+              <p>New card</p>
+              <Kbd className="mx-auto">Shift+N</Kbd>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create</DialogTitle>
+            <DialogDescription>
+              Fill in the front and back to your flashcard.
+            </DialogDescription>
+          </DialogHeader>
+          <CreateFlashcardForm />
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog>
-        <AlertDialogTrigger
-          className={cn(buttonVariants({ variant: "outline", size: "icon" }))}
-        >
-          <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
-        </AlertDialogTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-text">
+              <AlertDialogTrigger
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "icon" }),
+                )}
+              >
+                <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
+              </AlertDialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="flex flex-col items-center">
+              <p>Delete card</p>
+              <Kbd className="mx-auto">Shift+D</Kbd>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmation</AlertDialogTitle>

@@ -85,10 +85,23 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-2deg)" },
+          "50%": { transform: "rotate(2deg)" },
+        },
+        tada: {
+          "0%": { transform: "scale(1)" },
+          "25%": { transform: "scale(0.9) rotate(-3deg)" },
+          "50%": { transform: "scale(1.1) rotate(3deg)" },
+          "75%": { transform: "scale(1.1) rotate(-3deg)" },
+          "100%": { transform: "scale(1) rotate(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        wiggle: "wiggle 0.5s ease-in-out",
+        tada: "tada 0.5s ease-in-out",
       },
     },
   },
