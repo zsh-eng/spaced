@@ -3,6 +3,7 @@
 import AnswerButtons from "@/components/flashcard/answer-buttons";
 import CardCountBadge from "@/components/flashcard/card-count-badge";
 import FlashcardState from "@/components/flashcard/flashcard-state";
+import { SwipeAction } from "@/components/flashcard/swipe-action";
 import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
 import {
   AlertDialog,
@@ -56,7 +57,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSwipeable } from "react-swipeable";
+import { SwipeEventData, useSwipeable } from "react-swipeable";
 import { toast } from "sonner";
 
 type Props = {
@@ -64,6 +65,15 @@ type Props = {
   onRating: (rating: Rating) => void;
   schemaRatingToReviewDay: Record<Rating, Date>;
   stats: SessionStats;
+};
+
+const SWIPE_THRESHOLD = 120;
+const SWIPE_DURATION = 500;
+const SWIPE_PADDING = 60;
+const targetIsHTMLElement = (
+  target: EventTarget | null,
+): target is HTMLElement => {
+  return target instanceof HTMLElement;
 };
 
 /**
@@ -158,30 +168,48 @@ export default function Flashcard({
   const [beforeRating, setBeforeRating] = useState<Rating | undefined>(
     undefined,
   );
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
+    undefined,
+  );
   const handlers = useSwipeable({
+    onSwipeStart: (eventData) => {
+      const target = eventData.event.currentTarget;
+      if (!targetIsHTMLElement(target)) return;
+      target.style.transition = "transform 0.05s";
+
+      const id = setTimeout(() => {
+        setBeforeRating(undefined);
+      }, SWIPE_DURATION);
+      setTimeoutId(id);
+    },
     onSwiping: (eventData) => {
       const target = eventData.event.currentTarget;
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
+      if (!targetIsHTMLElement(target)) return;
 
       const { deltaX: x, deltaY: y } = eventData;
-      target.style.transition = "none";
-      target.style.transform = `translateX(${Math.floor(x / 4)}px)`;
+      const absX = Math.abs(x);
+      const transformAbsDistance =
+        Math.floor(absX / 4) + absX > SWIPE_THRESHOLD ? SWIPE_PADDING : 0;
+      const transformDistance =
+        x > 0 ? transformAbsDistance : -transformAbsDistance;
+      target.style.transform = `translateX(${transformDistance}px)`;
 
-      if (x > 30) {
+      if (x > SWIPE_THRESHOLD) {
         setBeforeRating("Good");
       }
 
-      if (x < -30) {
+      if (x < -SWIPE_THRESHOLD) {
         setBeforeRating("Hard");
       }
     },
     onTouchEndOrOnMouseUp: (eventData) => {
-      const target = eventData.event.currentTarget;
-      if (!(target instanceof HTMLElement)) {
-        return;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        setTimeoutId(undefined);
       }
+
+      const target = eventData.event.currentTarget;
+      if (!targetIsHTMLElement(target)) return;
 
       target.style.transition = "transform 0.3s";
       target.style.transform = "translateX(0)";
@@ -192,17 +220,17 @@ export default function Flashcard({
         handleSkip();
         return;
       }
-      onRating("Good");
+      beforeRating && onRating(beforeRating);
     },
     onSwipedLeft: () => {
       if (!open) {
         history.undo();
         return;
       }
-      onRating("Hard");
+      beforeRating && onRating(beforeRating);
     },
-    delta: 120,
-    swipeDuration: 800,
+    delta: SWIPE_THRESHOLD,
+    swipeDuration: SWIPE_DURATION + 100,
     preventScrollOnSwipe: true,
   });
 
@@ -221,51 +249,32 @@ export default function Flashcard({
       className="relative col-span-12 flex flex-col gap-x-4 gap-y-4"
       ref={cardRef}
     >
-      <div className="absolute -left-12 bottom-1/2 -z-30 -rotate-90 text-2xl font-bold">
-        <div
-          className={cn(
-            "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
-            beforeRating && "text-primary",
-          )}
-        >
-          {open ? (
-            <>
-              Good
-              <Check className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
-            </>
-          ) : (
-            <>
-              Skip
-              <ChevronsRight className="inline h-8 w-8" strokeWidth={1.5} />
-            </>
-          )}
-        </div>
-      </div>
-      <div
-        className={cn(
-          "absolute -right-12 bottom-1/2 -z-30 rotate-90 text-2xl font-bold",
+      <SwipeAction direction="right" active={!!beforeRating}>
+        {open ? (
+          <>
+            Good
+            <Check className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
+          </>
+        ) : (
+          <>
+            Skip
+            <ChevronsRight className="inline h-8 w-8" strokeWidth={1.5} />
+          </>
         )}
-      >
-        <div
-          className={cn(
-            "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
-
-            beforeRating && "text-primary",
-          )}
-        >
-          {open ? (
-            <>
-              Hard
-              <CircleAlert className="ml-2 inline h-6 w-6" strokeWidth={2} />
-            </>
-          ) : (
-            <>
-              Undo
-              <Undo className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
-            </>
-          )}
-        </div>
-      </div>
+      </SwipeAction>
+      <SwipeAction direction="left" active={!!beforeRating}>
+        {open ? (
+          <>
+            Hard
+            <CircleAlert className="ml-2 inline h-6 w-6" strokeWidth={2} />
+          </>
+        ) : (
+          <>
+            Undo
+            <Undo className="ml-2 inline h-8 w-8" strokeWidth={1.5} />
+          </>
+        )}
+      </SwipeAction>
 
       <div className="col-span-8 flex h-24 flex-wrap items-end justify-center gap-x-2">
         {/* Stats and review information */}
@@ -367,7 +376,7 @@ export default function Flashcard({
 
       <Form {...form}>
         <div
-          className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background sm:grid-rows-[2fr_1fr]"
+          className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background"
           {...handlers}
         >
           <div
@@ -414,18 +423,18 @@ export default function Flashcard({
           </div>
 
           <div className="h-40 sm:hidden"></div>
-
-          <div className="fixed bottom-8 z-20 col-span-8 flex justify-center self-start justify-self-center sm:static">
-            <AnswerButtons
-              schemaRatingToReviewDay={schemaRatingToReviewDay}
-              onRating={onRating}
-              open={open}
-              setOpen={setOpen}
-              beforeRating={beforeRating}
-            />
-          </div>
         </div>
       </Form>
+
+      <div className="fixed bottom-8 z-20 mx-auto sm:static">
+        <AnswerButtons
+          schemaRatingToReviewDay={schemaRatingToReviewDay}
+          onRating={onRating}
+          open={open}
+          setOpen={setOpen}
+          beforeRating={beforeRating}
+        />
+      </div>
     </div>
   );
 }
