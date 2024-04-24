@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
 
@@ -63,13 +64,15 @@ export function FormMarkdownEditor<TFieldValues extends FieldValues>({
       name={name}
       disabled={disabled}
       render={({ field }) => (
-        <FormItem className={className} ref={formRef}>
-          {label && <FormLabel>{label}</FormLabel>}
-          <FormControl>
-            <MarkdownEditor border={border} {...field} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
+        <ScrollArea className={className}>
+          <FormItem ref={formRef}>
+            {label && <FormLabel>{label}</FormLabel>}
+            <FormControl>
+              <MarkdownEditor border={border} {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </ScrollArea>
       )}
     />
   );

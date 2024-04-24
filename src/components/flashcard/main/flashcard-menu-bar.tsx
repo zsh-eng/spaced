@@ -34,10 +34,12 @@ import {
   ChevronsRight,
   FilePenIcon,
   Info,
+  Plus,
   TrashIcon,
   Undo,
 } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
+import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 
 type Props = {
   card: SessionCard;
@@ -135,6 +137,23 @@ export function FlashcardMenuBar({
                 );
               })}
           </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog>
+        <DialogTrigger
+          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+        >
+          <Plus className="h-4 w-4" />
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create</DialogTitle>
+            <DialogDescription>
+              Fill in the front and back to your flashcard.
+            </DialogDescription>
+          </DialogHeader>
+          <CreateFlashcardForm />
         </DialogContent>
       </Dialog>
 

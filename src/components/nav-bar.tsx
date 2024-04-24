@@ -76,13 +76,6 @@ function MenuDrawer() {
               Deck
             </Link>
             <Link
-              href="/cards/create"
-              className="text-md"
-              onClick={() => setOpen(false)}
-            >
-              Card
-            </Link>
-            <Link
               href="/cards/create-many"
               className="text-md"
               onClick={() => setOpen(false)}
@@ -140,23 +133,19 @@ export function NavigationBar() {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Create</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-full gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              <ListItem href="/cards/create" title="Create Flashcard">
-                Create a new flashcard with a question and answer.
-              </ListItem>
-              <ListItem
-                href="/cards/create-many"
-                title="Bulk Create Flashcards"
-              >
-                Create many flashcards at once.
-              </ListItem>
-              <ListItem href="/decks/create" title="Create Deck">
-                Create a new deck.
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
+          <Link href="/decks/create" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              New Deck
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <Link href="/cards/create-many" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              Bulk Create
+            </NavigationMenuLink>
+          </Link>
         </NavigationMenuItem>
         <NavigationMenuIndicator />
       </NavigationMenuList>
