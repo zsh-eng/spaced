@@ -1,11 +1,10 @@
+import { THRESHOLD_CARDS_FOR_REFETCH } from "@/hooks/card/common";
 import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 
 type GradeMutationOptions = ReactQueryOptions["card"]["grade"];
 type GradeMutation = ReturnType<typeof trpc.card.grade.useMutation>;
-
-const THRESHOLD_FOR_REFETCH = 10;
 
 /**
  * Hook to grade a card.
@@ -39,7 +38,7 @@ export function useGradeCard(options?: GradeMutationOptions): GradeMutation {
       if (
         !sessionData ||
         sessionData.reviewCards.length + sessionData.newCards.length >
-          THRESHOLD_FOR_REFETCH
+          THRESHOLD_CARDS_FOR_REFETCH
       )
         return;
 
