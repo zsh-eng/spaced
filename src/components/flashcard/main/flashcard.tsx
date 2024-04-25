@@ -289,7 +289,7 @@ export default function Flashcard({
       ></div>
 
       <div
-        className="z-20 mb-6 mt-2 w-full sm:static sm:mx-auto sm:w-max"
+        className="z-20 mb-6 w-full sm:static sm:mx-auto sm:mt-2 sm:w-max"
         ref={answerButtonsContainerRef}
       >
         <RatingButtons

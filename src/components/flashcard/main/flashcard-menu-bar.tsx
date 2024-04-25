@@ -132,7 +132,7 @@ export function FlashcardMenuBar({
 
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="cursor-text" onClick={onSkip}>
+          <TooltipTrigger className="cursor-text">
             <Toggle
               aria-label="toggle edit"
               pressed={editing}
