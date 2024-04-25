@@ -1,4 +1,4 @@
-import { THRESHOLD_CARDS_FOR_REFETCH } from "@/hooks/card/common";
+import { THRESHOLD_CARDS_FOR_REFETCH } from "@/common";
 import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { isBefore } from "date-fns";

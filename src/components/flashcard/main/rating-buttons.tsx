@@ -1,4 +1,6 @@
+import { RATING_TO_KEY } from "@/common";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +30,7 @@ function RatingButton({
   onRating: (rating: Rating) => void;
   dateString: string;
 }) {
+  const key = RATING_TO_KEY[rating] ?? "";
   return (
     <TooltipProvider key={rating}>
       <Tooltip>
@@ -41,7 +44,8 @@ function RatingButton({
             <div className="sm:hidden">{dateString}</div>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="flex items-center">
+          <Kbd className="text-md mr-2">{key}</Kbd>
           <p>{dateString}</p>
         </TooltipContent>
       </Tooltip>
