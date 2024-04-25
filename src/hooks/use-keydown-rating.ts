@@ -33,9 +33,9 @@ export default function useKeydownRating(
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyDown);
     };
   }, [onRating, open, onOpen]);
 }
