@@ -34,7 +34,7 @@ type Props = {
   onDelete: () => void;
 };
 
-const SWIPE_THRESHOLD = 120;
+const SWIPE_THRESHOLD = 40;
 const SWIPE_PADDING = 60;
 const ANIMATION_DURATION = 200;
 const SWIPE_DURATION = ANIMATION_DURATION + 500;
@@ -106,7 +106,7 @@ export default function Flashcard({
       const { deltaX: x, deltaY: y } = eventData;
       const absX = Math.abs(x);
       const transformAbsDistance =
-        Math.floor(absX / 4) + absX > SWIPE_THRESHOLD ? SWIPE_PADDING : 0;
+        Math.floor(absX) + absX > SWIPE_THRESHOLD ? SWIPE_PADDING : 0;
       const transformDistance =
         x > 0 ? transformAbsDistance : -transformAbsDistance;
       target.style.transform = `translateX(${transformDistance}px)`;
