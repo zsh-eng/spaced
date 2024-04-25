@@ -34,7 +34,7 @@ type Props = {
   onDelete: () => void;
 };
 
-const SWIPE_THRESHOLD = 40;
+const SWIPE_THRESHOLD = 60;
 const SWIPE_PADDING = 60;
 const ANIMATION_DURATION = 200;
 const SWIPE_DURATION = ANIMATION_DURATION + 500;
@@ -44,6 +44,52 @@ const targetIsHTMLElement = (
 ): target is HTMLElement => {
   return target instanceof HTMLElement;
 };
+
+function replaceCardWithPlaceholder(
+  card: HTMLElement,
+  placeholder: HTMLElement,
+) {
+  const rect = card.getBoundingClientRect();
+  const parentNode = card.parentNode as HTMLElement;
+  const parentRect = parentNode.getBoundingClientRect();
+
+  // Position the target element correctly
+  card.style.left = `${rect.left - parentRect.left}px`;
+  card.style.top = `${rect.top - parentRect.top}px`;
+  // Set up the placeholder element to be same size as the target element
+  placeholder.style.height = `${rect.height}px`;
+  placeholder.style.display = "block";
+  card.parentNode?.insertBefore(placeholder, card);
+  // Set up the target element
+  card.style.transition = "transform 0.05s";
+  card.style.position = "absolute";
+  // Ensure that the target element has the same size
+  card.style.width = `${rect.width}px`;
+  card.style.height = `${rect.height}px`;
+}
+
+function revertCardFromPlaceholder(
+  card: HTMLElement,
+  placeholder: HTMLElement,
+) {
+  placeholder.style.height = "0px";
+  placeholder.style.display = "none";
+  card.style.position = "static";
+}
+
+function translateCardToThreshold(card: HTMLElement, x: number, y: number) {
+  const absX = Math.abs(x);
+  const transformAbsDistance =
+    Math.floor(absX) + absX > SWIPE_THRESHOLD ? SWIPE_PADDING : 0;
+  const transformDistance =
+    x > 0 ? transformAbsDistance : -transformAbsDistance;
+  card.style.transform = `translateX(${transformDistance}px)`;
+}
+
+function revertCardFromTranslation(card: HTMLElement) {
+  card.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+  card.style.transform = "translateX(0)";
+}
 
 /**
  * Flashcard is the component that displays a {@link Card}
@@ -60,7 +106,9 @@ export default function Flashcard({
   const { card_contents: initialCardContent } = sessionCard;
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const placeholderRef = useRef<HTMLDivElement>(null);
+
   const answerButtonsContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("only screen and (max-width: 640px)");
 
@@ -91,12 +139,15 @@ export default function Flashcard({
   const handlers = useSwipeable({
     onSwipeStart: (eventData) => {
       const target = eventData.event.currentTarget;
-      if (!targetIsHTMLElement(target)) return;
-      target.style.transition = "transform 0.05s";
+      const placeholderElement = placeholderRef.current;
+      if (!targetIsHTMLElement(target) || !placeholderElement) return;
 
-      const id = setTimeout(() => {
-        setCurrentlyFocusedRating(undefined);
-      }, SWIPE_DURATION - 100);
+      replaceCardWithPlaceholder(target, placeholderElement);
+
+      const id = setTimeout(
+        () => setCurrentlyFocusedRating(undefined),
+        SWIPE_DURATION - 100,
+      );
       setTimeoutId(id);
     },
     onSwiping: (eventData) => {
@@ -104,17 +155,11 @@ export default function Flashcard({
       if (!targetIsHTMLElement(target)) return;
 
       const { deltaX: x, deltaY: y } = eventData;
-      const absX = Math.abs(x);
-      const transformAbsDistance =
-        Math.floor(absX) + absX > SWIPE_THRESHOLD ? SWIPE_PADDING : 0;
-      const transformDistance =
-        x > 0 ? transformAbsDistance : -transformAbsDistance;
-      target.style.transform = `translateX(${transformDistance}px)`;
+      translateCardToThreshold(target, x, y);
 
       if (x > SWIPE_THRESHOLD) {
         setCurrentlyFocusedRating("Easy");
       }
-
       if (x < -SWIPE_THRESHOLD) {
         setCurrentlyFocusedRating("Hard");
       }
@@ -126,10 +171,14 @@ export default function Flashcard({
       }
 
       const target = eventData.event.currentTarget;
-      if (!targetIsHTMLElement(target)) return;
+      const placeholderElement = placeholderRef.current;
+      if (!targetIsHTMLElement(target) || !placeholderElement) return;
+      revertCardFromTranslation(target);
 
-      target.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-      target.style.transform = "translateX(0)";
+      setTimeout(
+        () => revertCardFromPlaceholder(target, placeholderElement),
+        ANIMATION_DURATION,
+      );
       currentlyFocusedRating !== "Good" && setCurrentlyFocusedRating(undefined);
     },
     onSwipedRight: () => {
@@ -153,7 +202,7 @@ export default function Flashcard({
 
   useKeydownRating(onRating, open && !editing, () => setOpen(true));
   useClickOutside({
-    ref: cardRef,
+    ref: cardContainerRef,
     enabled: editing,
     callback: () => {
       handleEdit();
@@ -170,8 +219,8 @@ export default function Flashcard({
 
   return (
     <div
-      className="relative col-span-12 flex flex-col gap-x-4 gap-y-2"
-      ref={cardRef}
+      className="relative col-span-12 flex flex-col gap-x-4 gap-y-2 overflow-hidden"
+      ref={cardContainerRef}
     >
       {currentlyFocusedRating === "Good" && (
         <ThumbsUp className="absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 animate-tada text-primary" />
@@ -214,8 +263,9 @@ export default function Flashcard({
         onDelete={onDelete}
         onUndo={() => history.undo()}
       />
+
       <div
-        className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-4 bg-background"
+        className="col-span-8 grid grid-cols-8 place-items-end gap-x-4 gap-y-2 bg-background"
         {...handlers}
         onDoubleClick={() => {
           if (!open || editing || currentlyFocusedRating || !isMobile) return;
@@ -233,6 +283,10 @@ export default function Flashcard({
           editing={editing}
         />
       </div>
+      <div
+        className="-z-40 col-span-12 hidden bg-muted opacity-60 shadow-inner"
+        ref={placeholderRef}
+      ></div>
 
       <div
         className="z-20 mb-6 w-full sm:static sm:mx-auto sm:w-max"

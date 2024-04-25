@@ -26,7 +26,7 @@ export function SwipeActionText({ direction, active, children }: Props) {
     >
       <div
         className={cn(
-          "rounded-md bg-background px-8 py-4 text-muted transition duration-300",
+          "rounded-md px-8 py-4 text-muted transition duration-300",
           active && "animate-wiggle text-primary",
         )}
       >

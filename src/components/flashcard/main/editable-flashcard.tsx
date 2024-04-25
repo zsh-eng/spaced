@@ -25,7 +25,7 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
     <Form {...form}>
       <div
         className={cn(
-          "col-span-8 flex h-full min-h-80 w-full items-center justify-center overflow-y-auto border border-input sm:col-span-4 sm:min-h-96",
+          "col-span-8 flex h-full min-h-80 w-full items-center justify-center overflow-y-auto rounded-md border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
         onClick={onContainerFocus}
@@ -35,7 +35,7 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
 
       <div
         className={cn(
-          "relative col-span-8 flex h-full min-h-80 w-full items-center justify-center border border-input sm:col-span-4 sm:min-h-96",
+          "relative col-span-8 flex h-full min-h-80 w-full items-center justify-center rounded-md border border-input sm:col-span-4 sm:min-h-96",
           editing ? "bg-muted" : "",
         )}
         onClick={onContainerFocus}
