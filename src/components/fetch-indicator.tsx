@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";

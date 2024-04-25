@@ -4,6 +4,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -12,17 +13,14 @@ import {
 } from "@/components/ui/drawer";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
 // And refactor it

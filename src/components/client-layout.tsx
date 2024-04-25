@@ -8,9 +8,15 @@ import { Toaster } from "@/components/ui/sonner";
 import { FlashcardSessionProvider } from "@/providers/flashcard-session";
 import { HistoryProvider } from "@/providers/history";
 import { trpc } from "@/utils/trpc";
+import { useIsClient } from "@uidotdev/usehooks";
 import { PropsWithChildren } from "react";
 
 function ClientLayout({ children }: PropsWithChildren<{}>) {
+  // We can't use the useMediaQuery hook without this
+  // See https://github.com/uidotdev/usehooks/issues/218
+  const isClient = useIsClient();
+  if (!isClient) return null;
+
   return (
     <HistoryProvider>
       <FlashcardSessionProvider>
