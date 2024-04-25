@@ -1,3 +1,4 @@
+import { THRESHOLD_CARDS_FOR_REFETCH } from "@/common";
 import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { isBefore } from "date-fns";
@@ -5,8 +6,6 @@ import { toast } from "sonner";
 
 type SuspendCardMutationOptions = ReactQueryOptions["card"]["suspend"];
 type SuspendMutation = ReturnType<typeof trpc.card.suspend.useMutation>;
-
-const THRESHOLD_FOR_REFETCH = 10;
 
 export function useSuspendCard(
   options?: SuspendCardMutationOptions,
@@ -32,7 +31,7 @@ export function useSuspendCard(
       if (
         !sessionData ||
         sessionData.reviewCards.length + sessionData.newCards.length >
-          THRESHOLD_FOR_REFETCH
+          THRESHOLD_CARDS_FOR_REFETCH
       )
         return;
 

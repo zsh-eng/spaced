@@ -21,23 +21,19 @@ export function EditableFlashcard({ form, setOpen, open, editing }: Props) {
     if (milkdown) milkdown.focus();
   };
 
+  const editorContainerClasses = cn(
+    "col-span-8 flex h-full min-h-80 w-full items-center justify-center overflow-y-auto rounded-md border border-input transition duration-300 sm:col-span-4 sm:min-h-96",
+    editing ? "bg-muted/70" : "",
+  );
+
   return (
     <Form {...form}>
-      <div
-        className={cn(
-          "col-span-8 flex h-full min-h-80 w-full items-center justify-center overflow-y-auto rounded-md border border-input sm:col-span-4 sm:min-h-96",
-          editing ? "bg-muted" : "",
-        )}
-        onClick={onContainerFocus}
-      >
+      <div className={cn(editorContainerClasses)} onClick={onContainerFocus}>
         <FormMarkdownEditor name="question" form={form} disabled={!editing} />
       </div>
 
       <div
-        className={cn(
-          "relative col-span-8 flex h-full min-h-80 w-full items-center justify-center rounded-md border border-input sm:col-span-4 sm:min-h-96",
-          editing ? "bg-muted" : "",
-        )}
+        className={cn(editorContainerClasses, "relative")}
         onClick={onContainerFocus}
       >
         <div

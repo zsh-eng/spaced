@@ -1,4 +1,6 @@
+import { RATING_TO_KEY } from "@/common";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -17,7 +19,7 @@ type Props = {
   setOpen: (open: boolean) => void;
 };
 
-function AnswerButton({
+function RatingButton({
   rating,
   onRating,
   dateString,
@@ -28,6 +30,7 @@ function AnswerButton({
   onRating: (rating: Rating) => void;
   dateString: string;
 }) {
+  const key = RATING_TO_KEY[rating] ?? "";
   return (
     <TooltipProvider key={rating}>
       <Tooltip>
@@ -41,7 +44,8 @@ function AnswerButton({
             <div className="sm:hidden">{dateString}</div>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="flex items-center">
+          <Kbd className="text-md mr-2">{key}</Kbd>
           <p>{dateString}</p>
         </TooltipContent>
       </Tooltip>
@@ -50,9 +54,9 @@ function AnswerButton({
 }
 
 /**
- * The buttons to answer a flashcard.
+ * The buttons to rate a flashcard.
  */
-export default function AnswerButtons({
+export default function RatingButtons({
   schemaRatingToReviewDay,
   onRating,
   open,
@@ -70,7 +74,7 @@ export default function AnswerButtons({
       {open ? (
         ratingsToShow.map((rating) => {
           return (
-            <AnswerButton
+            <RatingButton
               key={rating}
               rating={rating}
               onRating={onRating}
@@ -95,4 +99,4 @@ export default function AnswerButtons({
   );
 }
 
-AnswerButtons.displayName = "AnswerButtons";
+RatingButtons.displayName = "RatingButtons";

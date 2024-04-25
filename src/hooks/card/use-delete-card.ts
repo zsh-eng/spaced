@@ -1,11 +1,10 @@
+import { THRESHOLD_CARDS_FOR_REFETCH } from "@/common";
 import { type Card } from "@/schema";
 import { removeCardFromSessionData } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 
 type DeleteMutationOptions = ReactQueryOptions["card"]["delete"];
 type DeleteMutation = ReturnType<typeof trpc.card.delete.useMutation>;
-
-const THRESHOLD_FOR_REFETCH = 10;
 
 /**
  * Hook to delete a {@link Card}.
@@ -50,7 +49,7 @@ export function useDeleteCard(options?: DeleteMutationOptions): DeleteMutation {
       if (
         !sessionData ||
         sessionData.reviewCards.length + sessionData.newCards.length >
-          THRESHOLD_FOR_REFETCH
+          THRESHOLD_CARDS_FOR_REFETCH
       )
         return;
       await utils.card.sessionData.invalidate();

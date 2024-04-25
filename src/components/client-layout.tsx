@@ -1,4 +1,5 @@
 "use client";
+import { FetchIndicator } from "@/components/fetch-indicator";
 // See https://stackoverflow.com/questions/74992326/does-use-client-in-next-js-13-root-layout-make-whole-routes-client-component
 
 import { NavigationBar } from "@/components/nav-bar";
@@ -27,6 +28,7 @@ function ClientLayout({ children }: PropsWithChildren<{}>) {
               duration: 1000,
             }}
           />
+          <FetchIndicator />
         </ThemeProvider>
       </FlashcardSessionProvider>
     </HistoryProvider>

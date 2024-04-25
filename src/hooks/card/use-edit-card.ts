@@ -1,4 +1,3 @@
-import { getSessionCardWithContentId } from "@/utils/session";
 import { ReactQueryOptions, trpc } from "@/utils/trpc";
 import { produce } from "immer";
 import { toast } from "sonner";

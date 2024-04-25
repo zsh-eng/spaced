@@ -1,3 +1,4 @@
+import { KEY_TO_RATING } from "@/common";
 import { Rating, ratings } from "@/schema";
 import { useEffect } from "react";
 
@@ -15,27 +16,16 @@ export default function useKeydownRating(
         onOpen();
         return;
       }
-
-      switch (event.key) {
-        case "1":
-          onRating(ratings[1]);
-          break;
-        case "2":
-          onRating(ratings[2]);
-          break;
-        case "3":
-        case " ":
-          onRating(ratings[3]);
-          break;
-        case "4":
-          onRating(ratings[4]);
-          break;
+      const rating = KEY_TO_RATING[event.key];
+      if (!rating) {
+        return;
       }
+      onRating(rating);
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyDown);
     };
   }, [onRating, open, onOpen]);
 }

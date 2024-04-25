@@ -192,6 +192,7 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
       document.removeEventListener("keydown", handler);
     };
   });
+
   const state = {
     entries,
     add,
