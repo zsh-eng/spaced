@@ -17,7 +17,7 @@ type Props = {
   setOpen: (open: boolean) => void;
 };
 
-function AnswerButton({
+function RatingButton({
   rating,
   onRating,
   dateString,
@@ -50,9 +50,9 @@ function AnswerButton({
 }
 
 /**
- * The buttons to answer a flashcard.
+ * The buttons to rate a flashcard.
  */
-export default function AnswerButtons({
+export default function RatingButtons({
   schemaRatingToReviewDay,
   onRating,
   open,
@@ -70,7 +70,7 @@ export default function AnswerButtons({
       {open ? (
         ratingsToShow.map((rating) => {
           return (
-            <AnswerButton
+            <RatingButton
               key={rating}
               rating={rating}
               onRating={onRating}
@@ -95,4 +95,4 @@ export default function AnswerButtons({
   );
 }
 
-AnswerButtons.displayName = "AnswerButtons";
+RatingButtons.displayName = "RatingButtons";

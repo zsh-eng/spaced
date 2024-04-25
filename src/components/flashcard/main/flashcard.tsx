@@ -1,6 +1,6 @@
 "use client";
 
-import AnswerButtons from "@/components/flashcard/main/answer-buttons";
+import RatingButtons from "@/components/flashcard/main/rating-buttons";
 import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
 import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
 import { SwipeActionText } from "@/components/flashcard/main/swipe-action";
@@ -292,7 +292,7 @@ export default function Flashcard({
         className="z-20 mb-6 mt-2 w-full sm:static sm:mx-auto sm:w-max"
         ref={answerButtonsContainerRef}
       >
-        <AnswerButtons
+        <RatingButtons
           schemaRatingToReviewDay={schemaRatingToReviewDay}
           onRating={onRating}
           open={open}
