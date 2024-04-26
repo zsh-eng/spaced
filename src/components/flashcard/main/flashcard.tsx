@@ -87,7 +87,7 @@ function translateCardToThreshold(card: HTMLElement, x: number, y: number) {
 }
 
 function revertCardFromTranslation(card: HTMLElement) {
-  card.style.transition = `transform ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+  card.style.transition = `transform ${ANIMATION_DURATION}ms ease-out`;
   card.style.transform = "translateX(0)";
 }
 
