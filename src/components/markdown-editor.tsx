@@ -93,7 +93,7 @@ const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
   };
 
   const editorClasses = cn(
-    "mx-auto outline-none px-3 py-2",
+    "mx-auto outline-none px-3 py-2 animate__animated animate__fadeIn animate__faster",
     border && "border border-input rounded-sm",
   );
 

@@ -41,6 +41,16 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import { useEffect, useState } from "react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { format, intlFormatDistance } from "date-fns";
 
 type Props = {
   card: SessionCard;
@@ -154,17 +164,17 @@ export function FlashcardMenuBar({
         </Tooltip>
       </TooltipProvider>
 
-      <Dialog>
+      <Drawer direction="right">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="cursor-text">
-              <DialogTrigger
+              <DrawerTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
                 )}
               >
                 <Info className="h-4 w-4" />
-              </DialogTrigger>
+              </DrawerTrigger>
             </TooltipTrigger>
             <TooltipContent>
               <p>Show card info</p>
@@ -172,20 +182,25 @@ export function FlashcardMenuBar({
           </Tooltip>
         </TooltipProvider>
 
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Stats</DialogTitle>
+        <DrawerContent className="h-full" direction="right">
+          <DrawerHeader>
+            <DrawerTitle>Card Info</DrawerTitle>
+          </DrawerHeader>
+          <DialogDescription className="px-4">
             {sessionCard &&
               Object.entries(sessionCard.cards).map(([k, v]) => {
                 return (
-                  <DialogDescription key={k}>
-                    {_.upperFirst(k)}: {v?.toString()}
-                  </DialogDescription>
+                  <div key={k}>
+                    {_.upperFirst(k)}:{" "}
+                    {v instanceof Date
+                      ? format(v, "yyyy-MM-dd HH:mm:ss")
+                      : v?.toString()}
+                  </div>
                 );
               })}
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+          </DialogDescription>
+        </DrawerContent>
+      </Drawer>
 
       <Dialog open={cardFormOpen} onOpenChange={setCardFormOpen}>
         <TooltipProvider>

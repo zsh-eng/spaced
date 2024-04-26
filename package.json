@@ -47,6 +47,7 @@
     "@trpc/server": "11.0.0-rc.332",
     "@types/better-sqlite3": "^7.6.9",
     "@uidotdev/usehooks": "^2.4.1",
+    "animate.css": "^4.1.1",
     "better-sqlite3": "^9.4.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",

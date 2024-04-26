@@ -1,11 +1,12 @@
 // See https://stackoverflow.com/questions/74992326/does-use-client-in-next-js-13-root-layout-make-whole-routes-client-component
 
 import ClientLayout from "@/components/client-layout";
+import { baseGrid } from "@/components/ui/grid";
 import { cn } from "@/utils/ui";
+import "animate.css";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { baseGrid } from "@/components/ui/grid";
 
 export const metadata: Metadata = {
   title: "Spaced",

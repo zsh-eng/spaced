@@ -39,14 +39,16 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
     direction?: "top" | "right" | "bottom" | "left";
   }
->(({ className, children, direction = 'bottom', ...props }, ref) => (
+>(({ className, children, direction = "bottom", ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col border bg-background",
+        "fixed bottom-0 z-50 mt-24 flex h-auto flex-col border bg-background",
         direction === "bottom" ? "rounded-t-[10px]" : "",
+        direction === "right" && "right-0 h-full max-w-lg pt-4",
+        direction === "left" && "left-0 h-full max-w-lg pt-4",
         className,
       )}
       {...props}
