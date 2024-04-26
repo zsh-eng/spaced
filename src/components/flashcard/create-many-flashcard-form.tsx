@@ -5,6 +5,7 @@ import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import { UiCard } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { gridChildGrid } from "@/components/ui/grid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -88,78 +89,76 @@ export default function CreateManyFlashcardForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="">
-        <div className="flex flex-col items-center gap-y-6">
-          <div className="flex flex-col gap-y-2">
-            {/* Import markdown file input */}
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="markdownFile">Markdown File Upload</Label>
-              <Input
-                id="markdownFile"
-                type="file"
-                accept=".md"
-                onChange={handleFileUpload}
-              />
-            </div>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn(gridChildGrid)}
+      >
+        <div className="top-12 col-span-12 mb-4 flex flex-col gap-y-2 justify-self-center 2xl:sticky 2xl:col-span-3 2xl:justify-self-end">
+          {/* Import markdown file input */}
+          <div className="mb-2 text-xl font-bold">Bulk Create Cards</div>
 
-            {/* Buttons for managing the many cards */}
-            <div className="flex w-full min-w-80 flex-col  justify-center gap-x-2 gap-y-2 md:flex-row">
-              <Button
-                onClick={() =>
-                  append({
-                    ...cardContentDefaultValues,
-                  })
-                }
-                variant="outline"
-                disabled={isLoading}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add
-              </Button>
+          <FormSelect
+            name="deckIds"
+            label="Deck"
+            form={form}
+            disabled={isLoading}
+            multiple={true}
+            data={deckSelectData}
+          />
 
-              <Button
-                variant="outline"
-                disabled={
-                  form.getValues("cardInputs").length === 0 || isLoading
-                }
-                type="submit"
-              >
-                <SendHorizonal className="mr-2 h-4 w-4" />
-                Create All
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => handleDeleteAll()}
-                disabled={
-                  form.getValues("cardInputs").length === 0 || isLoading
-                }
-              >
-                <TrashIcon className="mr-2 h-4 w-4" />
-                Delete All
-              </Button>
-            </div>
-
-            <FormSelect
-              name="deckIds"
-              label="Deck"
-              form={form}
-              disabled={isLoading}
-              multiple={true}
-              data={deckSelectData}
+          <div className="mt-2 grid w-full items-center gap-1.5">
+            <Label htmlFor="markdownFile">Markdown File Upload</Label>
+            <Input
+              id="markdownFile"
+              type="file"
+              accept=".md"
+              onChange={handleFileUpload}
             />
           </div>
 
+          {/* Buttons for managing the many cards */}
+          <div className="flex w-full flex-col flex-wrap justify-start gap-x-2 gap-y-2 md:flex-row">
+            <Button
+              onClick={() =>
+                append({
+                  ...cardContentDefaultValues,
+                })
+              }
+              variant="outline"
+              disabled={isLoading}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add
+            </Button>
+
+            <Button
+              variant="outline"
+              disabled={form.getValues("cardInputs").length === 0 || isLoading}
+              type="submit"
+            >
+              <SendHorizonal className="mr-2 h-4 w-4" />
+              Create All
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => handleDeleteAll()}
+              disabled={form.getValues("cardInputs").length === 0 || isLoading}
+            >
+              <TrashIcon className="mr-2 h-4 w-4" />
+              Delete All
+            </Button>
+          </div>
+        </div>
+
+        <div className={cn("col-start-1 col-end-13 gap-y-6 2xl:col-start-4")}>
           {/* Card inputs */}
           <section
             className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 2xl:grid-cols-3"
             onKeyDown={(e) => e.stopPropagation()}
           >
             {fields.map((item, index) => (
-              <UiCard
-                className={cn("flex w-96 flex-col px-4 py-4")}
-                key={item.id}
-              >
+              <UiCard className={cn("flex flex-col px-4 py-4")} key={item.id}>
                 <FormTextarea
                   className="h-40 resize-none border-0"
                   name={`cardInputs.${index}.question`}
