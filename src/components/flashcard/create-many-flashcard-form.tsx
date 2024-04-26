@@ -2,6 +2,7 @@
 
 import { FormSelect } from "@/components/form/form-select";
 import { FormTextarea } from "@/components/form/form-textarea";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UiCard } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -124,6 +125,7 @@ export default function CreateManyFlashcardForm() {
                   ...cardContentDefaultValues,
                 })
               }
+              type="button"
               variant="outline"
               disabled={isLoading}
             >
@@ -143,12 +145,16 @@ export default function CreateManyFlashcardForm() {
             <Button
               variant="outline"
               onClick={() => handleDeleteAll()}
+              type="button"
               disabled={form.getValues("cardInputs").length === 0 || isLoading}
             >
               <TrashIcon className="mr-2 h-4 w-4" />
               Delete All
             </Button>
           </div>
+          <Badge variant="outline" className="mt-2 w-max">
+            {fields.length} cards
+          </Badge>
         </div>
 
         <div className={cn("col-start-1 col-end-13 gap-y-6 2xl:col-start-4")}>
@@ -182,6 +188,7 @@ export default function CreateManyFlashcardForm() {
                   className="mt-2"
                   size="icon"
                   variant="outline"
+                  type="button"
                   onClick={() => remove(index)}
                 >
                   <Trash className="h-4 w-4" />
