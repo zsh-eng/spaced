@@ -118,7 +118,7 @@ export function NavigationBar() {
   const session = useSession();
 
   return (
-    <NavigationMenu className="col-start-1 col-end-13 h-16 px-4 md:px-6 xl:col-start-3 xl:col-end-11">
+    <NavigationMenu className="col-start-1 col-end-13 h-16 px-4 md:px-0 xl:col-start-3 xl:col-end-11">
       <MenuDrawer />
 
       <NavigationMenuList className="hidden md:flex">
