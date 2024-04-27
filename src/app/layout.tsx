@@ -7,6 +7,7 @@ import "animate.css";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { SignIn } from "@/components/sign-in";
 
 export const metadata: Metadata = {
   title: "Spaced",
@@ -31,6 +32,7 @@ function RootLayout({
         )}
       >
         <ClientLayout>{children}</ClientLayout>
+        <SignIn />
       </body>
     </html>
   );
