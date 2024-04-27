@@ -281,7 +281,7 @@ export const cardRouter = router({
 
       console.log(`Adding ${cardInputs.length} cards`);
       const cardWithContents = cardInputs.map(({ question, answer }) =>
-        newCardWithContent(question, answer),
+        newCardWithContent(user.id, question, answer),
       );
 
       const cardsToInsert = cardWithContents.map(({ card }) => card);
