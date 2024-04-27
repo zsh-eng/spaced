@@ -7,7 +7,8 @@ import "animate.css";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SignIn } from "@/components/sign-in";
+import { auth } from "@/auth";
+import { AuthSessionProvider } from "@/providers/auth-session";
 
 export const metadata: Metadata = {
   title: "Spaced",
@@ -17,11 +18,12 @@ export const metadata: Metadata = {
 // See https://ui.shadcn.com/docs/installation/next
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-function RootLayout({
+async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -31,8 +33,9 @@ function RootLayout({
           inter.variable,
         )}
       >
-        <ClientLayout>{children}</ClientLayout>
-        <SignIn />
+        <AuthSessionProvider session={session}>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthSessionProvider>
       </body>
     </html>
   );

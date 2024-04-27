@@ -1,15 +1,14 @@
-"use server";
-import { signIn } from "@/auth";
+"use client";
 
-export async function SignIn() {
+import { Button } from "@/components/ui/button";
+import { Github } from "lucide-react";
+import { signIn } from "next-auth/react";
+
+export function SignIn() {
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signIn("github");
-      }}
-    >
-      <button type="submit">Signin with GitHub</button>
-    </form>
+    <Button variant="outline" onClick={() => signIn("github")}>
+      <Github className="mr-2 h-4 w-4" />
+      Sign in
+    </Button>
   );
 }

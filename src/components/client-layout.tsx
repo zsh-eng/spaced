@@ -1,8 +1,8 @@
 "use client";
 import { FetchIndicator } from "@/components/fetch-indicator";
+import { NavigationBar } from "@/components/nav-bar";
 // See https://stackoverflow.com/questions/74992326/does-use-client-in-next-js-13-root-layout-make-whole-routes-client-component
 
-import { NavigationBar } from "@/components/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { FlashcardSessionProvider } from "@/providers/flashcard-session";

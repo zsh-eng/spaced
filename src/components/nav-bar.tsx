@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import * as React from "react";
 
@@ -21,6 +19,9 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
+import { SignIn } from "@/components/sign-in";
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
 // And refactor it
@@ -28,6 +29,7 @@ import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
 // For mobile navigation
 function MenuDrawer() {
   const [open, setOpen] = React.useState(false);
+
   return (
     <Drawer
       direction="left"
@@ -98,6 +100,8 @@ function MenuDrawer() {
 }
 
 export function NavigationBar() {
+  const session = useSession();
+
   return (
     <NavigationMenu className="col-start-1 col-end-13 h-16 xl:col-start-3 xl:col-end-11">
       <MenuDrawer />
@@ -148,16 +152,30 @@ export function NavigationBar() {
         <NavigationMenuIndicator />
       </NavigationMenuList>
 
-      <Button size="icon" variant="link" asChild>
-        <a
-          className="ml-auto"
-          href="https://github.com/zsh-eng/spaced"
-          target="_blank"
-        >
-          <Github className="h-5 w-5" />
-        </a>
-      </Button>
-      <ThemeToggle />
+      <div className="ml-auto flex items-center gap-2">
+        <Button size="icon" variant="link" asChild>
+          <a href="https://github.com/zsh-eng/spaced" target="_blank">
+            <Github className="h-5 w-5" />
+          </a>
+        </Button>
+        <ThemeToggle />
+
+        {session ? (
+          <Avatar className="ml-2 h-8 w-8">
+            <AvatarImage src={session.data?.user?.image ?? ""} />
+            <AvatarFallback>
+              {session.data?.user?.name
+                ?.split(" ")
+                .map((s) => s[0] ?? "")
+                .slice(0, 2)
+                .join()
+                .toUpperCase() ?? ""}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <SignIn />
+        )}
+      </div>
     </NavigationMenu>
   );
 }
