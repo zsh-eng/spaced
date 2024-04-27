@@ -106,7 +106,7 @@ export default function Flashcard({
   const { card_contents: initialCardContent } = sessionCard;
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const cardContainerRef = useRef<HTMLDivElement | null>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
 
   const answerButtonsContainerRef = useRef<HTMLDivElement>(null);
@@ -200,6 +200,15 @@ export default function Flashcard({
     preventScrollOnSwipe: true,
   });
 
+  // https://www.npmjs.com/package/react-swipeable#how-to-share-ref-from-useswipeable
+  const cardContainerRefPassthrough = (el: HTMLDivElement | null) => {
+    handlers.ref(el);
+    if (!el) {
+      return;
+    }
+    cardContainerRef.current = el;
+  };
+
   useKeydownRating(onRating, open && !editing, () => setOpen(true));
   useClickOutside({
     ref: cardContainerRef,
@@ -218,10 +227,7 @@ export default function Flashcard({
   }, [open]);
 
   return (
-    <div
-      className="relative col-span-12 flex flex-col gap-x-4 gap-y-2 overflow-hidden"
-      ref={cardContainerRef}
-    >
+    <div className="relative col-span-12 flex flex-col gap-x-4 gap-y-2 overflow-hidden">
       {currentlyFocusedRating === "Good" && (
         <ThumbsUp className="absolute bottom-0 left-0 right-0 top-0 z-20 mx-auto my-auto h-12 w-12 animate-tada text-primary" />
       )}
@@ -275,6 +281,7 @@ export default function Flashcard({
             onRating("Good");
           }, 600);
         }}
+        ref={cardContainerRefPassthrough}
       >
         <EditableFlashcard
           form={form}
