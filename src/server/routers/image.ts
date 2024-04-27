@@ -1,4 +1,4 @@
-import { publicProcedure, router } from "@/server/trpc";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -37,7 +37,8 @@ if (!token) {
 
 export const imageRouter = router({
   // Image uploads from the markdown editor
-  upload: publicProcedure
+  // TODO add uploaded image links to the database to track usage
+  upload: protectedProcedure
     .input(
       z.object({
         base64String: z.string(),

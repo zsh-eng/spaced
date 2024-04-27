@@ -22,6 +22,11 @@ const schema = z.object({
 });
 
 async function main() {
+  const userId = process.env.SEED_USER_ID;
+  if (!userId) {
+    throw new Error("SEED_USER_ID is not set");
+  }
+
   const stat = await fs.stat(filename);
   if (!stat.isFile()) {
     throw new Error(`File ${filename} does not exist`);
@@ -33,6 +38,7 @@ async function main() {
 
   console.log(`Importing ${parsed.decks.length} decks`);
   const decksToInsert = parsed.decks.map((deck) => ({
+    userId,
     id: crypto.randomUUID(),
     name: deck,
   })) satisfies NewDeck[];
@@ -56,7 +62,7 @@ async function main() {
     const slicedCards = randomisedCards.slice(i, i + batchSize);
 
     const cardWithContents = slicedCards.map((card) => ({
-      ...newCardWithContent(card.question, card.answer),
+      ...newCardWithContent(userId, card.question, card.answer),
       deckNames: card.deckIds,
     }));
     const cardsToInsert = cardWithContents.map(({ card }) => card);

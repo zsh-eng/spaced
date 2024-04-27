@@ -1,8 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import * as React from "react";
 
+import { ProfileButton } from "@/components/profile-button";
+import { SignIn } from "@/components/sign-in";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,13 +21,14 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
 // And refactor it
-
 // For mobile navigation
 function MenuDrawer() {
   const [open, setOpen] = React.useState(false);
+
   return (
     <Drawer
       direction="left"
@@ -81,25 +82,43 @@ function MenuDrawer() {
               Many cards
             </Link>
           </div>
-
-          <div className="flex flex-col gap-y-4">
-            <a
-              href="https://github.com/zsh-eng/spaced"
-              target="_blank"
-              onClick={() => setOpen(false)}
-            >
-              GitHub
-            </a>
-          </div>
         </div>
       </DrawerContent>
     </Drawer>
   );
 }
 
-export function NavigationBar() {
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
   return (
-    <NavigationMenu className="col-start-1 col-end-13 h-16 xl:col-start-3 xl:col-end-11">
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className,
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
+
+export function NavigationBar() {
+  const session = useSession();
+
+  return (
+    <NavigationMenu className="col-start-1 col-end-13 h-16 px-4 md:px-6 xl:col-start-3 xl:col-end-11">
       <MenuDrawer />
 
       <NavigationMenuList className="hidden md:flex">
@@ -148,42 +167,21 @@ export function NavigationBar() {
         <NavigationMenuIndicator />
       </NavigationMenuList>
 
-      <Button size="icon" variant="link" asChild>
-        <a
-          className="ml-auto"
-          href="https://github.com/zsh-eng/spaced"
-          target="_blank"
-        >
-          <Github className="h-5 w-5" />
-        </a>
-      </Button>
-      <ThemeToggle />
+      <div className="ml-auto flex items-center gap-2">
+        <Button size="icon" variant="link" asChild>
+          <a href="https://github.com/zsh-eng/spaced" target="_blank">
+            <Github className="h-5 w-5" />
+          </a>
+        </Button>
+        <ThemeToggle />
+        {session.data ? (
+          <ProfileButton user={session?.data?.user} />
+        ) : (
+          <SignIn />
+        )}
+      </div>
     </NavigationMenu>
   );
 }
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className,
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-ListItem.displayName = "ListItem";
+NavigationBar.displayName = "NavigationBar";

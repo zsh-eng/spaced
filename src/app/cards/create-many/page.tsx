@@ -1,8 +1,15 @@
 import CreateManyFlashcardForm from "@/components/flashcard/create-many-flashcard-form";
 import { gridChildGrid } from "@/components/ui/grid";
 import { cn } from "@/utils/ui";
+import { auth } from "@/auth";
+import { PleaseSignIn } from "@/components/please-sign-in";
 
-export default function CreateManyFlashcardsPage() {
+export default async function CreateManyFlashcardsPage() {
+  const session = await auth();
+  if (!session) {
+    return <PleaseSignIn />;
+  }
+
   return (
     <main
       className={cn(

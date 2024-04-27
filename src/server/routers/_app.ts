@@ -1,7 +1,7 @@
 import { cardRouter } from "@/server/routers/card";
 import { deckRouter } from "@/server/routers/deck";
 import { imageRouter } from "@/server/routers/image";
-import { router, publicProcedure } from "@/server/trpc";
+import { publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { z } from "zod";
 

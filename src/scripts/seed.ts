@@ -24,30 +24,6 @@ import { wipeDatabase } from "@/scripts/utils";
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/
 
-function generateNewCard(newCard?: Partial<NewCard>): NewCard {
-  return {
-    id: crypto.randomUUID(),
-    stability: faker.number.float({ min: 0, max: 1 }),
-    difficulty: faker.number.float({ min: 0, max: 1 }),
-    elapsed_days: faker.number.int({ min: 0, max: 100 }),
-    scheduled_days: faker.number.int({ min: 0, max: 100 }),
-    reps: faker.number.int({ min: 0, max: 100 }),
-    lapses: faker.number.int({ min: 0, max: 100 }),
-    state: faker.helpers.arrayElement(states),
-    // Last review date is necesary in `f.repeat`
-    // as the `elapsed_days` for the `SchedulingCard` is calculated based on the last review date.
-    last_review: new Date(
-      faker.date
-        .between({
-          from: new Date("2024-01-01"),
-          to: new Date(),
-        })
-        .getTime(),
-    ),
-    ...newCard,
-  };
-}
-
 function generateNewCardContent(
   cardId: string,
   newCardContent?: Partial<NewCardContent>,
@@ -63,28 +39,7 @@ function generateNewCardContent(
   };
 }
 
-function generateNewReviewLog(
-  cardId: string,
-  newReviewLog?: Partial<NewReviewLog>,
-): NewReviewLog {
-  return {
-    id: crypto.randomUUID(),
-    cardId,
-    grade: faker.helpers.arrayElement(ratings),
-    state: faker.helpers.arrayElement(states),
-
-    due: new Date(faker.date.recent().getTime()),
-    stability: faker.number.float({ min: 0, max: 1 }),
-    difficulty: faker.number.float({ min: 0, max: 1 }),
-    elapsed_days: faker.number.int({ min: 0, max: 100 }),
-    last_elapsed_days: faker.number.int({ min: 0, max: 100 }),
-    scheduled_days: faker.number.int({ min: 0, max: 100 }),
-    review: new Date(faker.date.recent().getTime()),
-    ...newReviewLog,
-  };
-}
-
-function generateNewDeck(newDeck?: Partial<NewDeck>): NewDeck {
+function generateNewDeck(userId: string, newDeck?: Partial<NewDeck>): NewDeck {
   return {
     id: crypto.randomUUID(),
     name: faker.lorem.word({
@@ -92,6 +47,7 @@ function generateNewDeck(newDeck?: Partial<NewDeck>): NewDeck {
     }),
     description: faker.lorem.paragraph(),
     ...newDeck,
+    userId: userId,
   };
 }
 
@@ -100,8 +56,11 @@ function generateNewDeck(newDeck?: Partial<NewDeck>): NewDeck {
  * @returns A tuple of the card and the review logs for the card.
  *
  */
-function simulateNewCardAndReviews(id: string): [Card, NewReviewLog[]] {
-  const seedCard: Card = newCardToCard(newCard());
+function simulateNewCardAndReviews(
+  id: string,
+  userId: string,
+): [Card, NewReviewLog[]] {
+  const seedCard: Card = newCardToCard(newCard(userId));
   const cardCreatedDate = faker.date.past({ years: 1 });
   seedCard.createdAt = cardCreatedDate;
   seedCard.id = id;
@@ -151,11 +110,15 @@ function simulateNewCardAndReviews(id: string): [Card, NewReviewLog[]] {
  */
 async function main() {
   await wipeDatabase();
+  const userId = process.env.SEED_USER_ID;
+  if (!userId) {
+    throw new Error("SEED_USER_ID environment variable is not set");
+  }
 
   console.log("Seeding database with 10 decks");
   const decksToCreate = 10;
   const decksToInsert = Array.from({ length: decksToCreate }, () =>
-    generateNewDeck(),
+    generateNewDeck(userId),
   );
   await db.insert(decks).values(decksToInsert);
   console.log(success`Seeded database with ${decksToCreate} decks`);
@@ -176,7 +139,7 @@ async function main() {
 
     for (let j = 0; j < Math.min(skip, itemsToCreate); j++) {
       const id = cardIds[i + j];
-      const [card, reviewLogs] = simulateNewCardAndReviews(id);
+      const [card, reviewLogs] = simulateNewCardAndReviews(id, userId);
       const cardContent = generateNewCardContent(card.id);
 
       cardsToInsert.push(card);

@@ -1,17 +1,38 @@
-import { publicProcedure, router } from "@/server/trpc";
 import db from "@/db";
-import { cardContents, cards, cardsToDecks, decks } from "@/schema";
-import { z } from "zod";
-import { newDeck } from "@/utils/deck";
-import { and, asc, eq, gt, or, sql } from "drizzle-orm";
-import { success } from "@/utils/format";
+import {
+  User,
+  cardContents,
+  cards,
+  cardsToDecks,
+  decks,
+  users,
+} from "@/schema";
 import { MAX_CARDS_TO_FETCH } from "@/server/routers/card";
+import { protectedProcedure, router } from "@/server/trpc";
+import { newDeck } from "@/utils/deck";
+import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
+import { and, asc, eq, gt, or, sql } from "drizzle-orm";
+import { z } from "zod";
 
 const ALL_CARDS = "ALL_CARDS";
 
+export async function checkIfDeckBelongsToUser(
+  user: User,
+  deckId: string,
+): Promise<boolean> {
+  // Allow for fetching all decks
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.id, deckId), eq(decks.userId, user.id)),
+  });
+
+  return !!deck;
+}
+
 export const deckRouter = router({
-  all: publicProcedure.query(async ({}) => {
+  all: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx;
+
     console.log("Fetching decks");
     const rows = await db
       .select({
@@ -23,6 +44,8 @@ export const deckRouter = router({
       })
       .from(decks)
       .leftJoin(cardsToDecks, eq(cardsToDecks.deckId, decks.id))
+      .leftJoin(users, eq(decks.userId, users.id))
+      .where(and(eq(users.id, user.id), eq(decks.deleted, false)))
       .groupBy(decks.id)
       .all();
     console.log(success`Fetched ${rows.length} decks`);
@@ -31,7 +54,7 @@ export const deckRouter = router({
   }),
 
   // See https://trpc.io/docs/client/react/useInfiniteQuery
-  infiniteCards: publicProcedure
+  infiniteCards: protectedProcedure
     .input(
       z.object({
         deckId: z.string().uuid().optional().default(ALL_CARDS),
@@ -44,7 +67,8 @@ export const deckRouter = router({
           .nullish(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx;
       const { deckId } = input;
       const limit = input.limit ?? MAX_CARDS_TO_FETCH;
       const cursor = input.cursor;
@@ -55,7 +79,11 @@ export const deckRouter = router({
         isFetchingAllCards ||
         !!(await db.query.decks.findFirst({
           columns: { id: true },
-          where: and(eq(decks.id, deckId), eq(decks.deleted, false)),
+          where: and(
+            eq(decks.id, deckId),
+            eq(decks.deleted, false),
+            eq(decks.userId, user.id),
+          ),
         }));
 
       if (!exists) {
@@ -86,8 +114,10 @@ export const deckRouter = router({
         .from(cards)
         .leftJoin(cardsToDecks, eq(cardsToDecks.cardId, cards.id))
         .leftJoin(cardContents, eq(cardContents.cardId, cards.id))
+        .leftJoin(users, eq(cards.userId, users.id))
         .where(
           and(
+            eq(users.id, user.id),
             isFetchingAllCards ? undefined : eq(cardsToDecks.deckId, deckId),
             eq(cards.deleted, false),
             eq(cardContents.deleted, false),
@@ -125,27 +155,40 @@ export const deckRouter = router({
       };
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
         description: z.string().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx;
       console.log("Creating deck");
-      const deck = newDeck(input);
+      const deck = newDeck(user.id, input);
       await db.insert(decks).values(deck);
       console.log(success`Created deck ${deck.id}`);
     }),
 
-  delete: publicProcedure.input(z.string()).mutation(async ({ input }) => {
-    console.log("Deleting deck", input);
-    await db.delete(decks).where(eq(decks.id, input));
-    console.log(success`Deleted deck ${input}`);
-  }),
+  delete: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: deckId }) => {
+      const { user } = ctx;
+      const belongsToUser = await checkIfDeckBelongsToUser(user, deckId);
 
-  edit: publicProcedure
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Deck not found",
+          code: "NOT_FOUND",
+        });
+      }
+
+      console.log("Deleting deck", deckId);
+      await db.delete(decks).where(eq(decks.id, deckId));
+      console.log(success`Deleted deck ${deckId}`);
+    }),
+
+  edit: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -153,7 +196,16 @@ export const deckRouter = router({
         description: z.string().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx;
+      const belongsToUser = await checkIfDeckBelongsToUser(user, input.id);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Deck not found",
+          code: "NOT_FOUND",
+        });
+      }
+
       console.log("Editing deck", input.id);
       await db
         .update(decks)
