@@ -1,6 +1,7 @@
 import Link from "next/link";
 import * as React from "react";
 
+import { SignIn } from "@/components/sign-in";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +18,10 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { ProfileButton } from "@/components/profile-button";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
-import { SignIn } from "@/components/sign-in";
 import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
 // And refactor it
@@ -83,16 +83,6 @@ function MenuDrawer() {
               Many cards
             </Link>
           </div>
-
-          <div className="flex flex-col gap-y-4">
-            <a
-              href="https://github.com/zsh-eng/spaced"
-              target="_blank"
-              onClick={() => setOpen(false)}
-            >
-              GitHub
-            </a>
-          </div>
         </div>
       </DrawerContent>
     </Drawer>
@@ -103,7 +93,7 @@ export function NavigationBar() {
   const session = useSession();
 
   return (
-    <NavigationMenu className="col-start-1 col-end-13 h-16 xl:col-start-3 xl:col-end-11">
+    <NavigationMenu className="col-start-1 col-end-13 h-16 px-4 md:px-6 xl:col-start-3 xl:col-end-11">
       <MenuDrawer />
 
       <NavigationMenuList className="hidden md:flex">
@@ -159,19 +149,8 @@ export function NavigationBar() {
           </a>
         </Button>
         <ThemeToggle />
-
-        {session ? (
-          <Avatar className="ml-2 h-8 w-8">
-            <AvatarImage src={session.data?.user?.image ?? ""} />
-            <AvatarFallback>
-              {session.data?.user?.name
-                ?.split(" ")
-                .map((s) => s[0] ?? "")
-                .slice(0, 2)
-                .join()
-                .toUpperCase() ?? ""}
-            </AvatarFallback>
-          </Avatar>
+        {session.data ? (
+          <ProfileButton user={session?.data?.user} />
         ) : (
           <SignIn />
         )}
