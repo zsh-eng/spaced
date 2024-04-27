@@ -125,6 +125,8 @@ export const cards = sqliteTable("cards", {
     .notNull()
     .default(sql`(unixepoch())`),
 
+  userId: text("user_id").notNull(),
+
   // revlogs logs
   deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
@@ -169,6 +171,7 @@ export const decks = sqliteTable("decks", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
+  userId: text("user_id").notNull(),
 });
 
 export type Deck = typeof decks.$inferSelect;
@@ -203,6 +206,10 @@ export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
 export const cardsRelations = relations(cards, ({ one, many }) => ({
   reviewLogs: many(reviewLogs),
   cardsToDecks: many(cardsToDecks),
+  users: one(users, {
+    fields: [cards.userId],
+    references: [users.id],
+  }),
 }));
 
 export const cardContentsRelations = relations(cardContents, ({ one }) => ({
@@ -212,8 +219,12 @@ export const cardContentsRelations = relations(cardContents, ({ one }) => ({
   }),
 }));
 
-export const decksRelations = relations(decks, ({ many }) => ({
+export const decksRelations = relations(decks, ({ one, many }) => ({
   cardsToDecks: many(cardsToDecks),
+  users: one(users, {
+    fields: [decks.userId],
+    references: [users.id],
+  }),
 }));
 
 export const cardsToDecksRelations = relations(cardsToDecks, ({ one }) => ({
