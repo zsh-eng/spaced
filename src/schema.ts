@@ -26,6 +26,7 @@ export const users = sqliteTable("user", {
 });
 
 export type NewUser = typeof users.$inferInsert;
+export type User = Omit<typeof users.$inferSelect, 'emailVerified'>;
 
 export const accounts = sqliteTable(
   "account",

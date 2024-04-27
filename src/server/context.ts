@@ -1,5 +1,7 @@
-import db from '@/db';
-import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
+import { auth } from "@/auth";
+import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { z } from "zod";
+import { User } from "@/schema";
 
 // See https://trpc.io/docs/server/context#inner-and-outer-context
 
@@ -19,28 +21,37 @@ export interface CreateInnerContextOptions
  *
  * @link https://trpc.io/docs/v11/context#inner-and-outer-context
  */
-export async function createContextInner(opts?: CreateInnerContextOptions) {
-  // Provide the database to the inner context
-  return {
-    db,
-  };
+export function createContextInner(opts?: CreateInnerContextOptions) {
+  // For now, we don't have any inner context
+  return {};
 }
+
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string(),
+  image: z.string().nullable(),
+});
 
 /**
  * Outer context. Used in the routers and will e.g. bring `req` & `res` to the context as "not `undefined`".
  *
  * @link https://trpc.io/docs/v11/context#inner-and-outer-context
  */
-export function createContext({
+export async function createContext({
   req,
   resHeaders,
 }: FetchCreateContextFnOptions) {
   const contextInner = createContextInner({});
+  const session = await auth();
+  const user: User | undefined = userSchema.optional().parse(session?.user);
+
   return {
     ...contextInner,
     req,
     resHeaders,
+    user,
   };
 }
 
-export type Context = Awaited<ReturnType<typeof createContextInner>>;
+export type Context = Awaited<ReturnType<typeof createContext>>;

@@ -2,17 +2,21 @@ import { SelectData } from "@/components/form/form-select";
 import { NewDeck } from "@/schema";
 import { RouterOutputs } from "@/utils/trpc";
 
-export function newDeck({
-  name,
-  description,
-}: {
-  name: string;
-  description?: string;
-}): NewDeck {
+export function newDeck(
+  userId: string,
+  {
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  },
+): NewDeck {
   return {
     id: crypto.randomUUID(),
     name,
     description: description ?? "",
+    userId,
   };
 }
 

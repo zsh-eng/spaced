@@ -6,26 +6,29 @@ import {
 } from "@/form";
 import {
   NewCardsToDecks,
+  User,
   cardContents,
   cards,
   cardsToDecks,
+  decks,
   ratings,
   reviewLogs,
   states,
+  users,
 } from "@/schema";
-import { publicProcedure, router } from "@/server/trpc";
+import { protectedProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { SessionCard, SessionData, SessionStats } from "@/utils/session";
 import { CardSorts } from "@/utils/sort";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lte, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const MAX_CARDS_TO_FETCH = 50;
 export const MAX_LEARN_PER_DAY = 20;
 
-async function getReviewCards(): Promise<SessionCard[]> {
+async function getReviewCards(user: User): Promise<SessionCard[]> {
   const now = new Date();
 
   console.log("Fetching review cards");
@@ -33,8 +36,10 @@ async function getReviewCards(): Promise<SessionCard[]> {
     .select()
     .from(cardContents)
     .leftJoin(cards, eq(cardContents.cardId, cards.id))
+    .leftJoin(users, eq(cards.userId, users.id))
     .where(
       and(
+        eq(users.id, user.id),
         // Filter out deleted cards
         eq(cardContents.deleted, false),
         eq(cards.deleted, false),
@@ -58,7 +63,7 @@ async function getReviewCards(): Promise<SessionCard[]> {
  * New cards have a state of "New" and a difficulty of "0",
  * so we have to spread them out amongst the reviews.
  */
-async function getNewCards(): Promise<SessionCard[]> {
+async function getNewCards(user: User): Promise<SessionCard[]> {
   const now = new Date();
 
   console.log("Fetching new cards");
@@ -67,7 +72,15 @@ async function getNewCards(): Promise<SessionCard[]> {
       total: sql<number>`cast(count(*) as int)`,
     })
     .from(reviewLogs)
-    .where(and(lte(reviewLogs.createdAt, now), eq(reviewLogs.state, states[0])))
+    .leftJoin(cards, eq(reviewLogs.cardId, cards.id))
+    .leftJoin(users, eq(cards.userId, users.id))
+    .where(
+      and(
+        eq(users.id, user.id),
+        lte(reviewLogs.createdAt, now),
+        eq(reviewLogs.state, states[0]),
+      ),
+    )
     .orderBy(desc(reviewLogs.createdAt))
     .groupBy(reviewLogs.cardId);
 
@@ -92,8 +105,10 @@ async function getNewCards(): Promise<SessionCard[]> {
     .select()
     .from(cardContents)
     .leftJoin(cards, eq(cardContents.cardId, cards.id))
+    .leftJoin(users, eq(cards.userId, users.id))
     .where(
       and(
+        eq(users.id, user.id),
         // Filter out deleted cards
         eq(cardContents.deleted, false),
         eq(cards.deleted, false),
@@ -111,7 +126,7 @@ async function getNewCards(): Promise<SessionCard[]> {
   return cardWithContents as SessionCard[];
 }
 
-async function getStats(): Promise<SessionStats> {
+async function getStats(user: User): Promise<SessionStats> {
   console.log("Fetching stats");
   const now = new Date();
 
@@ -129,8 +144,10 @@ async function getStats(): Promise<SessionStats> {
         ) as int)`,
     })
     .from(cards)
+    .leftJoin(users, eq(cards.userId, users.id))
     .where(
       and(
+        eq(users.id, user.id),
         eq(cards.deleted, false),
         lte(cards.due, now),
         lte(cards.suspended, now),
@@ -141,13 +158,47 @@ async function getStats(): Promise<SessionStats> {
   return stats[0];
 }
 
+async function checkIfDecksBelongToUser(
+  user: User,
+  deckIds?: string[],
+): Promise<boolean> {
+  if (!deckIds) return true;
+
+  const foundDecks = await db.query.decks.findMany({
+    where: and(
+      eq(users.id, user.id),
+      inArray(decks.id, deckIds),
+      eq(decks.deleted, false),
+    ),
+  });
+
+  const foundDecksSet = new Set(foundDecks.map((deck) => deck.id));
+  const allDecksFound = deckIds.every((deckId) => foundDecksSet.has(deckId));
+
+  if (allDecksFound) return true;
+  return false;
+}
+
+async function checkIfCardBelongsToUser(
+  user: User,
+  cardId: string,
+): Promise<boolean> {
+  // We allow for deleted, since the user might want to undo delete
+  const card = await db.query.cards.findFirst({
+    where: and(eq(cards.id, cardId), eq(cards.userId, user.id)),
+  });
+
+  return !!card;
+}
+
 export const cardRouter = router({
   // Get all the cards for the session
-  sessionData: publicProcedure.query(async ({ ctx }) => {
+  sessionData: protectedProcedure.query(async ({ ctx }) => {
+    const { user } = ctx;
     const [reviewCards, newCards, stats] = await Promise.all([
-      getReviewCards(),
-      getNewCards(),
-      getStats(),
+      getReviewCards(user),
+      getNewCards(user),
+      getStats(user),
     ]);
     return {
       newCards: newCards,
@@ -157,12 +208,29 @@ export const cardRouter = router({
   }),
 
   // Create a new card with content
-  create: publicProcedure
+  create: protectedProcedure
     .input(createCardFormSchema)
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
+
+      const allDecksBelongToUser = await checkIfDecksBelongToUser(
+        user,
+        input.deckIds,
+      );
+      if (!allDecksBelongToUser) {
+        throw new TRPCError({
+          message: "Some decks do not belong to the user",
+          code: "FORBIDDEN",
+        });
+      }
+
       console.log("Adding card");
       const { question, answer, deckIds } = input;
-      const { card, cardContent } = newCardWithContent(question, answer);
+      const { card, cardContent } = newCardWithContent(
+        user.id,
+        question,
+        answer,
+      );
 
       const res = await db.transaction(async (tx) => {
         const insertedCard = await tx.insert(cards).values(card).returning();
@@ -188,17 +256,29 @@ export const cardRouter = router({
           card_contents: insertedCardContent[0],
         };
       });
-
       console.log(success`Added card: ${card.id}`);
 
       return res;
     }),
 
   // Create many cards
-  createMany: publicProcedure
+  createMany: protectedProcedure
     .input(createManyCardsFormSchema)
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
       const { cardInputs, deckIds } = input;
+
+      const allDecksBelongToUser = await checkIfDecksBelongToUser(
+        user,
+        deckIds,
+      );
+      if (!allDecksBelongToUser) {
+        throw new TRPCError({
+          message: "Some decks do not belong to the user",
+          code: "FORBIDDEN",
+        });
+      }
+
       console.log(`Adding ${cardInputs.length} cards`);
       const cardWithContents = cardInputs.map(({ question, answer }) =>
         newCardWithContent(question, answer),
@@ -245,7 +325,7 @@ export const cardRouter = router({
     }),
 
   // Delete a card
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
@@ -253,7 +333,16 @@ export const cardRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
       const { id, deleted = true } = input;
+
+      const belongsToUser = await checkIfCardBelongsToUser(user, id);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Card does not belong to the user",
+          code: "FORBIDDEN",
+        });
+      }
 
       console.log(`Setting card as deleted: ${deleted}`);
       await db.transaction(async (tx) => {
@@ -267,9 +356,10 @@ export const cardRouter = router({
       console.log(success`Set card ${id} as deleted: ${deleted}`);
     }),
 
-  undoDelete: publicProcedure
+  undoDelete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
       const card = await db.query.cards.findFirst({
         where: eq(cards.id, input),
       });
@@ -277,6 +367,14 @@ export const cardRouter = router({
         throw new TRPCError({
           message: "Card not found",
           code: "BAD_REQUEST",
+        });
+      }
+
+      const belongsToUser = await checkIfCardBelongsToUser(user, input);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Card does not belong to the user",
+          code: "FORBIDDEN",
         });
       }
 
@@ -295,7 +393,7 @@ export const cardRouter = router({
     }),
 
   // Edit card content
-  edit: publicProcedure
+  edit: protectedProcedure
     .input(
       z.object({
         cardContentId: z.string(),
@@ -304,6 +402,26 @@ export const cardRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
+
+      const card = await db.query.cardContents.findFirst({
+        where: eq(cardContents.id, input.cardContentId),
+      });
+      if (!card) {
+        throw new TRPCError({
+          message: "Card not found",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      const belongsToUser = await checkIfCardBelongsToUser(user, card.cardId);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Card does not belong to the user",
+          code: "FORBIDDEN",
+        });
+      }
+
       console.log("Editing card content");
       const { cardContentId: id, question, answer } = input;
       await db
@@ -318,7 +436,7 @@ export const cardRouter = router({
     }),
 
   // Grade a card
-  grade: publicProcedure
+  grade: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -326,9 +444,10 @@ export const cardRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
       console.log("Grading card");
       const card = await db.query.cards.findFirst({
-        where: eq(cards.id, input.id),
+        where: and(eq(cards.id, input.id), eq(cards.userId, user.id)),
       });
 
       if (!card) {
@@ -349,16 +468,18 @@ export const cardRouter = router({
     }),
 
   // Manually grade a card
-  manualGrade: publicProcedure
+  manualGrade: protectedProcedure
     .input(
       z.object({
         card: cardSchema,
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
       const { card } = input;
+
       const currentCard = await db.query.cards.findFirst({
-        where: eq(cards.id, card.id),
+        where: and(eq(cards.id, card.id), eq(cards.userId, user.id)),
       });
 
       if (!currentCard) {
@@ -381,7 +502,7 @@ export const cardRouter = router({
     }),
 
   // Suspend a card
-  suspend: publicProcedure
+  suspend: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
@@ -389,6 +510,16 @@ export const cardRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
+
+      const belongsToUser = await checkIfCardBelongsToUser(user, input.id);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Card does not belong to the user",
+          code: "FORBIDDEN",
+        });
+      }
+
       console.log("Suspending card");
       const { id, suspendUntil } = input;
 

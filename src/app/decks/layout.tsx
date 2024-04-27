@@ -7,7 +7,9 @@ function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className={cn(gridChildContentGrid, "pb-12 pt-6")}>{children}</main>
+    <main className={cn(gridChildContentGrid, "h-full pb-12 pt-6")}>
+      {children}
+    </main>
   );
 }
 

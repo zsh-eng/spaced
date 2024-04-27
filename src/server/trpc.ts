@@ -1,6 +1,6 @@
 import { Context } from "@/server/context";
-import { initTRPC } from "@trpc/server";
-import { transformer } from '@/utils/trpc';
+import { TRPCError, initTRPC } from "@trpc/server";
+import { transformer } from "@/utils/trpc";
 
 // See https://trpc.io/docs/quickstart#1-create-a-router-instance
 
@@ -18,3 +18,28 @@ const t = initTRPC.context<Context>().create({
  */
 export const router = t.router;
 export const publicProcedure = t.procedure;
+
+// See https://trpc.io/docs/server/authorization#option-2-authorize-using-middleware
+export const protectedProcedure = t.procedure.use(
+  async function isAuthed(opts) {
+    const { ctx } = opts;
+    if (!ctx.user) {
+      //     ^?
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    if (!ctx.user.id) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "User is missing an ID",
+      });
+    }
+
+    return opts.next({
+      ctx: {
+        user: ctx.user,
+        // ^?
+      },
+    });
+  },
+);

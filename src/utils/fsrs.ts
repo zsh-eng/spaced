@@ -98,13 +98,14 @@ export function mergeFsrsCard(fsrsCard: FSRSCard, card: Card): Card {
   };
 }
 
-export function newCard(): NewCard {
+export function newCard(userId: string): NewCard {
   const emptyCard = createEmptyCard();
   const id = crypto.randomUUID();
   return {
     ...emptyCard,
     state: fsrsStateToState(emptyCard.state),
     id,
+    userId,
   };
 }
 
@@ -123,13 +124,14 @@ export function newCardContent(
 }
 
 export function newCardWithContent(
+  userId: string,
   question?: string,
   answer?: string,
 ): {
   card: Card;
   cardContent: CardContent;
 } {
-  const card = newCard();
+  const card = newCard(userId);
   const cardContent = newCardContent(card.id, question ?? "", answer ?? "");
   return {
     card: newCardToCard(card),
