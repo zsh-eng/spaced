@@ -1,6 +1,7 @@
 import Link from "next/link";
 import * as React from "react";
 
+import { ProfileButton } from "@/components/profile-button";
 import { SignIn } from "@/components/sign-in";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { ProfileButton } from "@/components/profile-button";
 import { cn } from "@/utils/ui";
 import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";

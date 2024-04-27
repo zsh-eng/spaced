@@ -1,12 +1,12 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
-import * as schema from '@/schema';
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
+import * as schema from "@/schema";
 
 const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url || !authToken) {
-  throw new Error('Database URL and auth token must be provided.');
+  throw new Error("Database URL and auth token must be provided.");
 }
 
 const client = createClient({
@@ -14,6 +14,6 @@ const client = createClient({
   authToken,
 });
 
-const db = drizzle(client, { schema });
+const db = drizzle(client, { schema, logger: true });
 
 export default db;

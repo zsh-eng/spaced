@@ -25,6 +25,8 @@ export const users = sqliteTable("user", {
   image: text("image"),
 });
 
+export type NewUser = typeof users.$inferInsert;
+
 export const accounts = sqliteTable(
   "account",
   {
@@ -49,6 +51,8 @@ export const accounts = sqliteTable(
   }),
 );
 
+export type NewAccount = typeof accounts.$inferInsert;
+
 export const sessions = sqliteTable("session", {
   sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
@@ -56,6 +60,8 @@ export const sessions = sqliteTable("session", {
     .references(() => users.id, { onDelete: "cascade" }),
   expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
 });
+
+export type NewSession = typeof sessions.$inferInsert;
 
 export const verificationTokens = sqliteTable(
   "verificationToken",
