@@ -9,6 +9,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
 import { AuthSessionProvider } from "@/providers/auth-session";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Spaced",
@@ -33,6 +34,7 @@ async function RootLayout({
           inter.variable,
         )}
       >
+        <SpeedInsights />
         <AuthSessionProvider session={session}>
           <ClientLayout>{children}</ClientLayout>
         </AuthSessionProvider>
