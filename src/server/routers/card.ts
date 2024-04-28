@@ -26,9 +26,53 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
-async function getReviewCards(user: User): Promise<SessionCard[]> {
-  const now = new Date();
+/**
+ * Retrieves the number of cards left to learn today.
+ * Each day, we set a limit to the number of new cards that can be learned.
+ */
+async function getNumberLeftToLearnToday(
+  user: User,
+  now: Date,
+): Promise<number> {
+  const numLearnTodayRes = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(reviewLogs)
+    .leftJoin(cards, eq(reviewLogs.cardId, cards.id))
+    .leftJoin(users, eq(cards.userId, users.id))
+    .where(
+      and(
+        eq(users.id, user.id),
+        lte(reviewLogs.createdAt, now),
+        eq(reviewLogs.state, states[0]),
+      ),
+    )
+    .orderBy(desc(reviewLogs.createdAt))
+    .groupBy(reviewLogs.cardId);
 
+  const numLearnToday = numLearnTodayRes[0]?.total ?? 0;
+  if (typeof numLearnToday !== "number") {
+    throw new TRPCError({
+      message: "Failed to get the number of cards learned today",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+
+  const numLeft = MAX_LEARN_PER_DAY - numLearnToday;
+
+  // Assertion to catch for any bugs
+  if (numLeft < 0) {
+    throw new TRPCError({
+      message: "Number of cards learned today is more than the limit",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+
+  return numLeft;
+}
+
+async function getReviewCards(user: User, now: Date): Promise<SessionCard[]> {
   console.log("Fetching review cards");
   const cardWithContents = await db
     .select()
@@ -61,44 +105,20 @@ async function getReviewCards(user: User): Promise<SessionCard[]> {
  * New cards have a state of "New" and a difficulty of "0",
  * so we have to spread them out amongst the reviews.
  */
-async function getNewCards(user: User): Promise<SessionCard[]> {
-  const now = new Date();
-
-  console.log("Fetching new cards");
-  const numLearnTodayRes = await db
-    .select({
-      total: sql<number>`cast(count(*) as int)`,
-    })
-    .from(reviewLogs)
-    .leftJoin(cards, eq(reviewLogs.cardId, cards.id))
-    .leftJoin(users, eq(cards.userId, users.id))
-    .where(
-      and(
-        eq(users.id, user.id),
-        lte(reviewLogs.createdAt, now),
-        eq(reviewLogs.state, states[0]),
-      ),
-    )
-    .orderBy(desc(reviewLogs.createdAt))
-    .groupBy(reviewLogs.cardId);
-
-  const numLearnToday = numLearnTodayRes[0]?.total ?? 0;
-  if (typeof numLearnToday !== "number") {
-    throw new TRPCError({
-      message: "Failed to get the number of cards learned today",
-      code: "INTERNAL_SERVER_ERROR",
-    });
-  }
-
-  if (numLearnToday >= MAX_LEARN_PER_DAY) {
-    console.log(`Already learnt ${numLearnToday} cards today.`);
+async function getNewCards(
+  user: User,
+  now: Date,
+  numLeftToLearn: number,
+): Promise<SessionCard[]> {
+  if (numLeftToLearn <= 0) {
     return [];
   }
 
-  const numLeft = MAX_LEARN_PER_DAY - numLearnToday;
-  const limit = Math.min(numLeft, MAX_CARDS_TO_FETCH);
+  console.log("Fetching new cards");
+  // In case the user can learn more cards than the limit cards to fetch
+  const limit = Math.min(numLeftToLearn, MAX_CARDS_TO_FETCH);
 
-  console.log(`User can still learn ${numLeft} cards today`);
+  console.log(`User can still learn ${numLeftToLearn} cards today`);
   const cardWithContents = await db
     .select()
     .from(cardContents)
@@ -124,10 +144,14 @@ async function getNewCards(user: User): Promise<SessionCard[]> {
   return cardWithContents as SessionCard[];
 }
 
-async function getStats(user: User): Promise<SessionStats> {
+async function getStats(
+  user: User,
+  now: Date,
+  numLeftToLearn: number,
+): Promise<SessionStats> {
   console.log("Fetching stats");
-  const now = new Date();
-
+  // Note that the total value still reflects all the cards to be reviewed,
+  // and doesn't care about the limit of new cards to learn today.
   const stats = await db
     .select({
       total: sql<number>`cast(count(*) as int)`,
@@ -151,9 +175,12 @@ async function getStats(user: User): Promise<SessionStats> {
         lte(cards.suspended, now),
       ),
     );
-
   console.log(success`Fetched stats`);
-  return stats[0];
+  const stat = stats[0];
+  return {
+    ...stat,
+    new: Math.min(numLeftToLearn, stat.new),
+  };
 }
 
 async function checkIfDecksBelongToUser(
@@ -193,10 +220,13 @@ export const cardRouter = router({
   // Get all the cards for the session
   sessionData: protectedProcedure.query(async ({ ctx }) => {
     const { user } = ctx;
+    const now = new Date();
+
+    const numLeftToLearn = await getNumberLeftToLearnToday(user, now);
     const [reviewCards, newCards, stats] = await Promise.all([
-      getReviewCards(user),
-      getNewCards(user),
-      getStats(user),
+      getReviewCards(user, now),
+      getNewCards(user, now, numLeftToLearn),
+      getStats(user, now, numLeftToLearn),
     ]);
     return {
       newCards: newCards,
