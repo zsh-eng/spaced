@@ -1,6 +1,6 @@
 "use client";
 
-import { FormSelect } from "@/components/form/form-select";
+import { FormMultiSelect } from "@/components/form/form-multi-select";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ import {
   createManyCardsFormSchema,
 } from "@/form";
 import { useCreateManyCard } from "@/hooks/card/use-create-many-card";
-import { allDeckDataToSelectData } from "@/utils/deck";
 import { extractCardContentFromMarkdownString } from "@/utils/obsidian-parse";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
@@ -29,7 +28,10 @@ import { toast } from "sonner";
 export default function CreateManyFlashcardForm() {
   const { data: decks = [], isLoading: isLoadingDeck } =
     trpc.deck.all.useQuery();
-  const deckSelectData = allDeckDataToSelectData(decks);
+  const deckSelectData = decks.map((deck) => ({
+    value: deck.id,
+    label: deck.name,
+  }));
 
   const form = useForm<CreateManyCardsFormValues>({
     resolver: zodResolver(createManyCardsFormSchema),
@@ -94,16 +96,15 @@ export default function CreateManyFlashcardForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(gridChildGrid)}
       >
-        <div className="top-12 col-span-12 mb-4 flex flex-col gap-y-2 justify-self-center 2xl:sticky 2xl:col-span-3 2xl:justify-self-end">
+        <div className="top-12 col-span-12 mb-4 flex max-w-lg flex-col gap-y-2 justify-self-center 2xl:sticky 2xl:col-span-3 2xl:justify-self-end">
           {/* Import markdown file input */}
           <div className="mb-2 text-xl font-bold">Bulk Create Cards</div>
 
-          <FormSelect
+          <FormMultiSelect
             name="deckIds"
             label="Deck"
             form={form}
             disabled={isLoading}
-            multiple={true}
             data={deckSelectData}
           />
 

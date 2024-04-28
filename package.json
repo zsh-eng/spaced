@@ -68,6 +68,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.3",
+    "react-select": "^5.8.0",
     "react-swipeable": "^7.0.1",
     "sonner": "^1.4.41",
     "superjson": "^2.2.1",

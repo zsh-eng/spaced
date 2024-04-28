@@ -46,10 +46,6 @@ type FormSelectProps<TFieldValues extends FieldValues> =
      * The data of the select input.
      */
     data: SelectData;
-    /**
-     * If true, the select input will allow multiple selections.
-     */
-    multiple?: boolean;
   };
 
 function isGroupData(
@@ -90,7 +86,6 @@ export function FormSelect<TFieldValues extends FieldValues>({
   placeholder,
   description,
   data,
-  multiple,
 }: FormSelectProps<TFieldValues>) {
   return (
     <FormField
@@ -102,11 +97,9 @@ export function FormSelect<TFieldValues extends FieldValues>({
           {label && <FormLabel>{label}</FormLabel>}
           <Select
             onValueChange={(value) => {
-              // TODO implement true multi select using react-select library
-              // The implementation is going to be non-trivial
-              field.onChange(() => (multiple ? [value] : value));
+              field.onChange(() => value);
             }}
-            defaultValue={multiple ? field.value[0] : field.value}
+            defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger>

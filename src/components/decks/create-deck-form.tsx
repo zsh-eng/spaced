@@ -12,6 +12,7 @@ import {
   UiCardTitle,
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { DeckFormValues, deckDefaultValues, deckFormSchema } from "@/form";
 import { useCreateDeck } from "@/hooks/deck/use-create-deck";
 import { zodResolver } from "@hookform/resolvers/zod";
