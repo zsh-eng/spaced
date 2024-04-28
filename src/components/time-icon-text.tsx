@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { format, intlFormatDistance } from "date-fns";
 import { Clock } from "lucide-react";
 
@@ -15,10 +16,10 @@ export function TimeIconText({ date, dateFormat: dateFormat = "date" }: Props) {
         : format(date, "MMM d, yyyy hh:mm a");
 
   return (
-    <div className="flex items-center">
+    <Badge variant="secondary" className="flex items-center rounded-sm">
       <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
       <span className="text-sm text-muted-foreground">{dateString}</span>
-    </div>
+    </Badge>
   );
 }
 

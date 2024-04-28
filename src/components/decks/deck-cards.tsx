@@ -23,8 +23,8 @@ function Title({ title }: { title: string }) {
       <h1 className="text-4xl font-bold md:text-5xl">{title}</h1>
       <Diamond className="ml-3 h-8 w-8 text-accent-foreground md:h-10 md:w-10" />
 
-      <Link href="/decks" className="ml-auto">
-        <ArrowLeft className="ml-4 h-8 w-8 text-accent-foreground transition duration-300 hover:-translate-x-4" />
+      <Link href="/decks" legacyBehavior passHref>
+        <ArrowLeft className="ml-auto h-8 w-8 cursor-pointer text-accent-foreground transition duration-300 hover:-translate-x-4" />
       </Link>
     </div>
   );

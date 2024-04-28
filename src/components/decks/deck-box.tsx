@@ -5,7 +5,7 @@ import { trpc } from "@/utils/trpc";
 import { Diamond } from "lucide-react";
 
 const sectionClasses =
-  "col-span-12 grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2";
+  "col-span-12 flex flex-wrap gap-x-4 gap-y-4 justify-center mt-6";
 
 function Title() {
   return (
@@ -24,6 +24,8 @@ export default function Deckbox() {
       <>
         <Title />
         <section className={sectionClasses}>
+          <DeckSkeleton />
+          <DeckSkeleton />
           <DeckSkeleton />
           <DeckSkeleton />
           <DeckSkeleton />
