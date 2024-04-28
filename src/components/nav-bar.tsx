@@ -20,7 +20,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/utils/ui";
-import { Github, MenuIcon, Telescope, XIcon } from "lucide-react";
+import { SiGithub } from "@icons-pack/react-simple-icons";
+import { MenuIcon, Telescope, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 // TODO This nav menu is a bit of a mess, we should extract the links
@@ -170,7 +171,7 @@ export function NavigationBar() {
       <div className="ml-auto flex items-center gap-2">
         <Button size="icon" variant="link" asChild>
           <a href="https://github.com/zsh-eng/spaced" target="_blank">
-            <Github className="h-5 w-5" />
+            <SiGithub className="h-5 w-5" />
           </a>
         </Button>
         <ThemeToggle />
