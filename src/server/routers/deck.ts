@@ -7,7 +7,7 @@ import {
   decks,
   users,
 } from "@/schema";
-import { MAX_CARDS_TO_FETCH } from "@/server/routers/card";
+import { MAX_CARDS_TO_FETCH } from "@/common";
 import { protectedProcedure, router } from "@/server/trpc";
 import { newDeck } from "@/utils/deck";
 import { success } from "@/utils/format";

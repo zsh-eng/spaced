@@ -8,7 +8,7 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <main className={cn(gridChildContentGrid, "place-self-stretch")}>
+    <main className={cn(gridChildContentGrid, "place-self-stretch px-4")}>
       {session ? <FlashcardBox /> : <PleaseSignIn />}
     </main>
   );

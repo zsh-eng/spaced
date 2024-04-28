@@ -1,7 +1,7 @@
 "use client";
 
 import { FormMarkdownEditor } from "@/components/form/form-markdown-editor";
-import { FormSelect } from "@/components/form/form-select";
+import { FormMultiSelect } from "@/components/form/form-multi-select";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import {
@@ -12,7 +12,6 @@ import {
 import { useCreateCard } from "@/hooks/card/use-create-card";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useHistory } from "@/providers/history";
-import { allDeckDataToSelectData } from "@/utils/deck";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -23,7 +22,10 @@ import { toast } from "sonner";
 export default function CreateFlashcardForm() {
   const { data: decks = [], isLoading: isLoadingDeck } =
     trpc.deck.all.useQuery();
-  const deckSelectData = allDeckDataToSelectData(decks);
+  const deckSelectData = decks.map((deck) => ({
+    value: deck.id,
+    label: deck.name,
+  }));
 
   const form = useForm<CreateCardFormValues>({
     resolver: zodResolver(createCardFormSchema),
@@ -79,12 +81,11 @@ export default function CreateFlashcardForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-y-4"
       >
-        <FormSelect
+        <FormMultiSelect
           name="deckIds"
           label="Deck"
           form={form}
           disabled={isLoading}
-          multiple={true}
           data={deckSelectData}
         />
 
