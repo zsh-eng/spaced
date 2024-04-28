@@ -19,15 +19,11 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { cn } from "@/utils/ui";
 import { SiGithub } from "@icons-pack/react-simple-icons";
 import { MenuIcon, Telescope, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-// TODO This nav menu is a bit of a mess, we should extract the links
-// And refactor it
-// For mobile navigation
-function MenuDrawer() {
+function MobileMenuDrawer() {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -89,38 +85,12 @@ function MenuDrawer() {
   );
 }
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className,
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-ListItem.displayName = "ListItem";
-
 export function NavigationBar() {
   const session = useSession();
 
   return (
     <NavigationMenu className="col-start-1 col-end-13 h-16 px-4 md:px-0 xl:col-start-3 xl:col-end-11">
-      <MenuDrawer />
+      <MobileMenuDrawer />
 
       <NavigationMenuList className="hidden md:flex">
         <NavigationMenuItem>
@@ -174,7 +144,9 @@ export function NavigationBar() {
             <SiGithub className="h-5 w-5" />
           </a>
         </Button>
+
         <ThemeToggle />
+
         {session.data ? (
           <ProfileButton user={session?.data?.user} />
         ) : (
