@@ -4,7 +4,7 @@
 import { cn } from "@/utils/ui";
 
 export const grid = "grid grid-cols-12 gap-x-6 items-start";
-export const baseGrid = cn(grid, "px-2 md:px-4 xl:px-0");
+export const baseGrid = cn(grid, "px-2 md:px-0");
 export const gridChild = "col-start-1 col-end-13";
 
 /**
