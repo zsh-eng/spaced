@@ -1,3 +1,4 @@
+import { MAX_CARDS_TO_FETCH, MAX_LEARN_PER_DAY } from "@/common";
 import db from "@/db";
 import {
   cardSchema,
@@ -24,9 +25,6 @@ import { CardSorts } from "@/utils/sort";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-
-export const MAX_CARDS_TO_FETCH = 50;
-export const MAX_LEARN_PER_DAY = 20;
 
 async function getReviewCards(user: User): Promise<SessionCard[]> {
   const now = new Date();
