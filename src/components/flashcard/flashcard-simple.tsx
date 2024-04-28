@@ -1,7 +1,6 @@
 import FlashcardState from "@/components/flashcard/flashcard-state";
 import { TimeIconText } from "@/components/time-icon-text";
 import { UiCard, UiCardContent, UiCardFooter } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/schema";
 
@@ -17,23 +16,21 @@ export function FlashcardSimpleSkeleton() {
 export default function FlashcardSimple({ card, cardContent }: Props) {
   return (
     <UiCard className="flex w-full flex-col gap-y-4">
-      <UiCardContent className="mt-6 h-72 overflow-y-auto py-0">
+      <UiCardContent className="mt-6 h-60 overflow-y-auto py-0">
         <div>
-          <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Question</h2>
           <p className="text-md">{cardContent.question}</p>
         </div>
 
         <hr className="mx-auto my-6 w-16" />
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold lg:text-2xl">Answer</h2>
           <p className="text-md">{cardContent.answer}</p>
         </div>
       </UiCardContent>
 
-      <UiCardFooter className="flex">
+      <UiCardFooter className="flex gap-2">
+        <FlashcardState className="rounded-sm" state={card.state} />
         <TimeIconText date={card.createdAt} />
-        <FlashcardState className="ml-auto" state={card.state} />
       </UiCardFooter>
     </UiCard>
   );
