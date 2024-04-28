@@ -97,7 +97,6 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
     // The re-render might take some time
     // We do this to avoid the odd behaviour of the toast updating
     // but the card not yet updating
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
   const undoCreate = async (entry: HistoryStateEntry) => {

@@ -100,7 +100,7 @@ export function FlashcardMenuBar({
     return () => {
       document.removeEventListener("keydown", handler);
     };
-  });
+  }, [disabled, onSkip, onDelete, setCardFormOpen, editing, setEditing]);
 
   return (
     <div className="col-span-8 flex h-24 flex-wrap items-end justify-center gap-x-2">
@@ -116,13 +116,21 @@ export function FlashcardMenuBar({
       {/* Separator */}
       <div className="mr-auto w-screen sm:w-0"></div>
 
-      {/* Icons */}
+      {/* Undo Button */}
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="cursor-text" onClick={onUndo}>
-            <Button variant="ghost" size="icon" disabled={disabled}>
-              <Undo className="h-6 w-6" strokeWidth={1.5} />
-            </Button>
+          <TooltipTrigger
+            onClick={onUndo}
+            className={cn(
+              "cursor-text",
+              buttonVariants({
+                variant: "ghost",
+                size: "icon",
+              }),
+            )}
+            disabled={disabled}
+          >
+            <Undo className="h-6 w-6" strokeWidth={1.5} />
           </TooltipTrigger>
           <TooltipContent className="flex flex-col items-center">
             <p>Undo</p>
@@ -131,12 +139,21 @@ export function FlashcardMenuBar({
         </Tooltip>
       </TooltipProvider>
 
+      {/* Suspend Button */}
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="cursor-text" onClick={onSkip}>
-            <Button variant="ghost" size="icon" disabled={disabled}>
-              <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
-            </Button>
+          <TooltipTrigger
+            onClick={onSkip}
+            className={cn(
+              "cursor-text",
+              buttonVariants({
+                variant: "ghost",
+                size: "icon",
+              }),
+            )}
+            disabled={disabled}
+          >
+            <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
           </TooltipTrigger>
           <TooltipContent className="flex flex-col items-center">
             <p>Suspend</p>
@@ -147,7 +164,7 @@ export function FlashcardMenuBar({
 
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="cursor-text">
+          <TooltipTrigger className="cursor-text" asChild>
             <Toggle
               aria-label="toggle edit"
               disabled={disabled}
@@ -170,10 +187,11 @@ export function FlashcardMenuBar({
         </Tooltip>
       </TooltipProvider>
 
+      {/* Info Button */}
       <Drawer direction="right">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text">
+            <TooltipTrigger className="cursor-text" asChild>
               <DrawerTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
@@ -209,10 +227,11 @@ export function FlashcardMenuBar({
         </DrawerContent>
       </Drawer>
 
+      {/* New Card Button */}
       <Dialog open={cardFormOpen} onOpenChange={setCardFormOpen}>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text">
+            <TooltipTrigger className="cursor-text" asChild>
               <DialogTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
@@ -240,10 +259,11 @@ export function FlashcardMenuBar({
         </DialogContent>
       </Dialog>
 
+      {/* Delete Button */}
       <AlertDialog>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text">
+            <TooltipTrigger className="cursor-text" asChild>
               <AlertDialogTrigger
                 className={cn(
                   buttonVariants({ variant: "outline", size: "icon" }),
