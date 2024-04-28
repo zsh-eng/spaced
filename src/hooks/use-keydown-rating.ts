@@ -7,15 +7,20 @@ import { useEffect } from "react";
  */
 export default function useKeydownRating(
   onRating: (rating: Rating) => void,
-  open: boolean,
+  disabled: boolean,
   onOpen: () => void,
 ) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!open && event.key === " ") {
+      if (disabled && event.key === " ") {
         onOpen();
         return;
       }
+
+      if (disabled) {
+        return;
+      }
+
       const rating = KEY_TO_RATING[event.key];
       if (!rating) {
         return;
@@ -27,5 +32,5 @@ export default function useKeydownRating(
     return () => {
       window.removeEventListener("keyup", handleKeyDown);
     };
-  }, [onRating, open, onOpen]);
+  }, [onRating, disabled, onOpen]);
 }

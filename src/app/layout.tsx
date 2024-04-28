@@ -34,10 +34,10 @@ async function RootLayout({
           inter.variable,
         )}
       >
-        <SpeedInsights />
         <AuthSessionProvider session={session}>
           <ClientLayout>{children}</ClientLayout>
         </AuthSessionProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

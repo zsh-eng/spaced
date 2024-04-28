@@ -166,7 +166,7 @@ async function checkIfDecksBelongToUser(
 
   const foundDecks = await db.query.decks.findMany({
     where: and(
-      eq(users.id, user.id),
+      eq(decks.userId, user.id),
       inArray(decks.id, deckIds),
       eq(decks.deleted, false),
     ),

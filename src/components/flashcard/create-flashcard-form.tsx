@@ -68,6 +68,7 @@ export default function CreateFlashcardForm() {
       form.reset();
       setMarkdownEditorKey(crypto.randomUUID());
     } catch (err) {
+      console.error(err);
       toast.error("Failed to create card");
     }
   };

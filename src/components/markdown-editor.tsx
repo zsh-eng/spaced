@@ -25,7 +25,7 @@ import {
 import { gfm } from "@milkdown/preset-gfm";
 import type { Node } from "@milkdown/prose/model";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 
 type Props = {
   value: string;
@@ -202,12 +202,12 @@ const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
 
 MilkdownEditor.displayName = "MilkdownEditor";
 
-export const MarkdownEditor = (props: Props) => {
+export const MarkdownEditor = forwardRef((props: Props, _ref) => {
   return (
     <MilkdownProvider>
       <MilkdownEditor {...props} />
     </MilkdownProvider>
   );
-};
+});
 
 MarkdownEditor.displayName = "MarkdownEditor";

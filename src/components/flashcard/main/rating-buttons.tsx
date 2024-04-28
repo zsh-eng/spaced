@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useKeydownRating from "@/hooks/use-keydown-rating";
 import { Rating } from "@/schema";
 import { cn } from "@/utils/ui";
 import { intlFormatDistance } from "date-fns";
@@ -17,6 +18,7 @@ type Props = {
   onRating: (rating: Rating) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  disabled: boolean;
 };
 
 function RatingButton({
@@ -62,8 +64,10 @@ export default function RatingButtons({
   open,
   setOpen,
   focusedRating: beforeRating,
+  disabled
 }: Props) {
   const ratingsToShow: Rating[] = ["Again", "Hard", "Good", "Easy"];
+  useKeydownRating(onRating, disabled, () => setOpen(true));
 
   return (
     <div
