@@ -1,5 +1,6 @@
-import CardCountBadge from "@/components/flashcard/main/card-count-badge";
+import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import FlashcardState from "@/components/flashcard/flashcard-state";
+import CardCountBadge from "@/components/flashcard/main/card-count-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Kbd } from "@/components/ui/kbd";
 import { Toggle } from "@/components/ui/toggle";
 import {
   Tooltip,
@@ -27,8 +36,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useHistory } from "@/providers/history";
 import { SessionCard, SessionStats } from "@/utils/session";
 import { cn } from "@/utils/ui";
+import { format } from "date-fns";
 import _ from "lodash";
 import {
   ChevronsRight,
@@ -38,19 +49,7 @@ import {
   TrashIcon,
   Undo,
 } from "lucide-react";
-import { Kbd } from "@/components/ui/kbd";
-import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import { useEffect, useState } from "react";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { format, intlFormatDistance } from "date-fns";
 
 type Props = {
   card: SessionCard;
@@ -75,8 +74,14 @@ export function FlashcardMenuBar({
   onUndo,
 }: Props) {
   const [cardFormOpen, setCardFormOpen] = useState(false);
+  const { isUndoing } = useHistory();
+  const disabled = isUndoing;
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (disabled) {
+        return;
+      }
       if (e.shiftKey && e.key === "ArrowRight") {
         onSkip();
       }
@@ -115,7 +120,7 @@ export function FlashcardMenuBar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text" onClick={onUndo}>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" disabled={disabled}>
               <Undo className="h-6 w-6" strokeWidth={1.5} />
             </Button>
           </TooltipTrigger>
@@ -129,7 +134,7 @@ export function FlashcardMenuBar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger className="cursor-text" onClick={onSkip}>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" disabled={disabled}>
               <ChevronsRight className="h-6 w-6" strokeWidth={1.5} />
             </Button>
           </TooltipTrigger>
@@ -145,6 +150,7 @@ export function FlashcardMenuBar({
           <TooltipTrigger className="cursor-text">
             <Toggle
               aria-label="toggle edit"
+              disabled={disabled}
               pressed={editing}
               onPressedChange={(isEditing) => {
                 if (!isEditing) {
@@ -172,6 +178,7 @@ export function FlashcardMenuBar({
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
                 )}
+                disabled={disabled}
               >
                 <Info className="h-4 w-4" />
               </DrawerTrigger>
@@ -210,6 +217,7 @@ export function FlashcardMenuBar({
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
                 )}
+                disabled={disabled}
               >
                 <Plus className="h-4 w-4" />
               </DialogTrigger>
@@ -240,6 +248,7 @@ export function FlashcardMenuBar({
                 className={cn(
                   buttonVariants({ variant: "outline", size: "icon" }),
                 )}
+                disabled={disabled}
               >
                 <TrashIcon className="h-4 w-4" strokeWidth={1.5} />
               </AlertDialogTrigger>

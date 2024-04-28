@@ -2,7 +2,8 @@ import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useManualGradeCard } from "@/hooks/card/use-manual-grade-card";
 import { useSuspendCard } from "@/hooks/card/use-suspend.card";
-import { SessionCard } from "@/utils/session";
+import { SessionCard, updateCardInSessionData } from "@/utils/session";
+import { trpc } from "@/utils/trpc";
 import {
   PropsWithChildren,
   createContext,
@@ -26,6 +27,7 @@ type HistoryState = {
   readonly entries: ReadonlyArray<HistoryStateEntry>;
   add: (type: ChangeType, previousCard: SessionCard) => string;
   undo: (id?: string) => void;
+  isUndoing: boolean;
 };
 
 const HistoryContext = createContext<HistoryState | undefined>(undefined);
@@ -54,6 +56,7 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
   const deleteCardMutation = useDeleteCard();
   const manualGradeCardMutation = useManualGradeCard();
   const suspendCardMutation = useSuspendCard();
+  const utils = trpc.useUtils();
 
   const add = (type: ChangeType, card: SessionCard): string => {
     const id = crypto.randomUUID();
@@ -82,39 +85,70 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
     return entriesRef.current[index];
   };
 
-  // We only implement the undo operations here
-  // Optimistic updates and managing of session data is handled
-  // by the individual hooks
-  // TODO check if mutate will throw an error on Error
+  const updateSessionData = async (card: SessionCard) => {
+    await utils.card.sessionData.cancel();
+    const sessionData = utils.card.sessionData.getData();
+    if (!sessionData) {
+      return;
+    }
+
+    const nextSessionData = updateCardInSessionData(sessionData, card);
+    utils.card.sessionData.setData(undefined, nextSessionData);
+    // The re-render might take some time
+    // We do this to avoid the odd behaviour of the toast updating
+    // but the card not yet updating
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+
   const undoCreate = async (entry: HistoryStateEntry) => {
-    await deleteCardMutation.mutateAsync({
+    setIsUndoing(true);
+    // Delete card already handles optimistic updates
+    deleteCardMutation.mutate({
       id: entry.card.cards.id,
       deleted: true,
     });
+    setIsUndoing(false);
   };
   const undoGrade = async (entry: HistoryStateEntry) => {
-    await manualGradeCardMutation.mutateAsync({
+    setIsUndoing(true);
+    manualGradeCardMutation.mutate({
       card: entry.card.cards,
     });
+
+    try {
+      await updateSessionData(entry.card);
+    } catch (err) {
+      console.error(err);
+    }
+    setIsUndoing(false);
   };
   const undoDelete = async (entry: HistoryStateEntry) => {
-    await deleteCardMutation.mutateAsync({
+    setIsUndoing(true);
+    deleteCardMutation.mutate({
       id: entry.card.cards.id,
       deleted: false,
     });
+    await updateSessionData(entry.card);
+    setIsUndoing(false);
   };
   const undoEdit = async (entry: HistoryStateEntry) => {
-    await editCardMutation.mutateAsync({
+    setIsUndoing(true);
+    editCardMutation.mutate({
       cardContentId: entry.card.card_contents.id,
       question: entry.card.card_contents.question,
       answer: entry.card.card_contents.answer,
     });
+    await updateSessionData(entry.card);
+    setIsUndoing(false);
   };
   const undoSuspend = async (entry: HistoryStateEntry) => {
-    await suspendCardMutation.mutateAsync({
+    setIsUndoing(true);
+    suspendCardMutation.mutate({
       id: entry.card.cards.id,
       suspendUntil: new Date(entry.card.cards.suspended),
     });
+    await updateSessionData(entry.card);
+    setIsUndoing(false);
   };
 
   const undo = (id?: string) => {
@@ -133,7 +167,6 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
       return;
     }
 
-    setIsUndoing(true);
     switch (entry.type) {
       case "create":
         toast.promise(undoCreate(entry), {
@@ -175,7 +208,6 @@ export function HistoryProvider({ children }: PropsWithChildren<{}>) {
     }
 
     setEntries((entries) => entries.filter((e) => e.id !== entry.id));
-    setIsUndoing(false);
   };
 
   useEffect(() => {

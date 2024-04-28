@@ -33,7 +33,6 @@ export type SessionData = {
 /**
  * Computes the next session data after grading a card.
  *
- * Preconditions: The card is in the session data.
  * If the card's state is `New`, then the card exists in `newCards`.
  * If the card is any oher state, then the card exists in `reviewCards`.
  *
@@ -48,7 +47,7 @@ export function removeCardFromSessionData(
   // As such, we can assume that we won't see the card again in the current deck.
   const card = getSessionCard(data, cardId);
   if (!card) {
-    throw new Error(`Card with id ${cardId} not found in session data`);
+    return data;
   }
 
   const nextData = produce(data, (draft) => {
@@ -86,9 +85,15 @@ function addCardToSessionData(
 ): SessionData {
   const nextData = produce(data, (draft) => {
     if (card.cards.state === "New") {
-      draft.newCards.push(card);
+      const positionToInsert = draft.newCards.findIndex(
+        (draftCard) => draftCard.cards.createdAt >= card.cards.createdAt,
+      );
+      draft.newCards.splice(positionToInsert, 0, card);
     } else {
-      draft.reviewCards.push(card);
+      const positionToInsert = draft.reviewCards.findIndex(
+        (draftCard) => draftCard.cards.difficulty >= card.cards.difficulty,
+      );
+      draft.reviewCards.splice(positionToInsert, 0, card);
     }
 
     switch (card.cards.state) {
