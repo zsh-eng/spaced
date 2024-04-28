@@ -209,7 +209,6 @@ export default function Flashcard({
     cardContainerRef.current = el;
   };
 
-  useKeydownRating(onRating, open && !editing, () => setOpen(true));
   useClickOutside({
     ref: cardContainerRef,
     enabled: editing,
@@ -305,6 +304,7 @@ export default function Flashcard({
           open={open}
           setOpen={setOpen}
           focusedRating={currentlyFocusedRating}
+          disabled={editing || !open}
         />
       </div>
     </div>
