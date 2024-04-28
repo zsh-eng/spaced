@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -122,7 +122,6 @@ export function FlashcardMenuBar({
           <TooltipTrigger
             onClick={onUndo}
             className={cn(
-              "cursor-text",
               buttonVariants({
                 variant: "ghost",
                 size: "icon",
@@ -145,7 +144,6 @@ export function FlashcardMenuBar({
           <TooltipTrigger
             onClick={onSkip}
             className={cn(
-              "cursor-text",
               buttonVariants({
                 variant: "ghost",
                 size: "icon",
@@ -164,7 +162,7 @@ export function FlashcardMenuBar({
 
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className="cursor-text" asChild>
+          <TooltipTrigger asChild>
             <Toggle
               aria-label="toggle edit"
               disabled={disabled}
@@ -191,7 +189,7 @@ export function FlashcardMenuBar({
       <Drawer direction="right">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text" asChild>
+            <TooltipTrigger asChild>
               <DrawerTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
@@ -231,7 +229,7 @@ export function FlashcardMenuBar({
       <Dialog open={cardFormOpen} onOpenChange={setCardFormOpen}>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text" asChild>
+            <TooltipTrigger asChild>
               <DialogTrigger
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
@@ -263,7 +261,7 @@ export function FlashcardMenuBar({
       <AlertDialog>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="cursor-text" asChild>
+            <TooltipTrigger asChild>
               <AlertDialogTrigger
                 className={cn(
                   buttonVariants({ variant: "outline", size: "icon" }),
