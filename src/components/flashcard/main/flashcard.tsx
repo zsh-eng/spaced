@@ -1,12 +1,11 @@
 "use client";
 
-import RatingButtons from "@/components/flashcard/main/rating-buttons";
 import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
 import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
+import RatingButtons from "@/components/flashcard/main/rating-buttons";
 import { SwipeActionText } from "@/components/flashcard/main/swipe-action";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import useKeydownRating from "@/hooks/use-keydown-rating";
 import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";

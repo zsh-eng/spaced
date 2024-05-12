@@ -1,3 +1,4 @@
+import { OBSIDIAN_ORIGIN, isMessageEventFromObsidian } from "@/utils/obsidian";
 import { CardContentFormValues } from "@/form";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
@@ -9,8 +10,9 @@ import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { SessionCard, SessionData } from "@/utils/session";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { toast } from "sonner";
+import { useSubscribeObsidian } from "@/hooks/use-subscribe-obsidian";
 
 type FlashcardSession = {
   data: SessionData;
@@ -181,6 +183,15 @@ export function FlashcardSessionProvider({
       },
     });
   };
+
+  const action = "get-current-card";
+  useSubscribeObsidian(action, () => {
+    return {
+      success: true,
+      action,
+      data: currentCard,
+    };
+  });
 
   return (
     <FlashcardSessionContext.Provider

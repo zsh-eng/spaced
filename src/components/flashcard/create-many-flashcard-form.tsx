@@ -16,6 +16,7 @@ import {
   createManyCardsFormSchema,
 } from "@/form";
 import { useCreateManyCard } from "@/hooks/card/use-create-many-card";
+import { useSubscribeObsidian } from "@/hooks/use-subscribe-obsidian";
 import { extractCardContentFromMarkdownString } from "@/utils/obsidian-parse";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
@@ -89,6 +90,24 @@ export default function CreateManyFlashcardForm() {
     };
     reader.readAsText(file);
   };
+
+  const action = "insert-cards";
+  useSubscribeObsidian(action, async (content: unknown) => {
+    if (!(typeof content === "string")) {
+      return {
+        success: false,
+        action,
+        data: "Invalid content type",
+      };
+    }
+    const contents = extractCardContentFromMarkdownString(content);
+    append(contents);
+
+    return {
+      success: true,
+      action,
+    };
+  });
 
   return (
     <Form {...form}>
