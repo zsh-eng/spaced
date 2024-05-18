@@ -1,12 +1,11 @@
 "use client";
 
-import RatingButtons from "@/components/flashcard/main/rating-buttons";
 import { EditableFlashcard } from "@/components/flashcard/main/editable-flashcard";
 import { FlashcardMenuBar } from "@/components/flashcard/main/flashcard-menu-bar";
+import RatingButtons from "@/components/flashcard/main/rating-buttons";
 import { SwipeActionText } from "@/components/flashcard/main/swipe-action";
 import { CardContentFormValues, cardContentFormSchema } from "@/form";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import useKeydownRating from "@/hooks/use-keydown-rating";
 import { useHistory } from "@/providers/history";
 import { Rating, type Card } from "@/schema";
 import { SessionCard, SessionStats } from "@/utils/session";
@@ -19,7 +18,7 @@ import {
   ThumbsUp,
   Undo,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
 
@@ -32,6 +31,9 @@ type Props = {
   onEdit: (content: CardContentFormValues) => void;
   onSkip: () => void;
   onDelete: () => void;
+
+  open: boolean;
+  setOpen: (open: boolean) => void;
 };
 
 const SWIPE_THRESHOLD = 60;
@@ -102,9 +104,10 @@ export default function Flashcard({
   onEdit,
   onDelete,
   onSkip,
+  open,
+  setOpen,
 }: Props) {
   const { card_contents: initialCardContent } = sessionCard;
-  const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement | null>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
@@ -217,13 +220,6 @@ export default function Flashcard({
       setEditing(false);
     },
   });
-
-  useEffect(() => {
-    if (!open) return;
-    answerButtonsContainerRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [open]);
 
   return (
     <div className="relative col-span-12 flex flex-col gap-x-4 gap-y-2 overflow-hidden">

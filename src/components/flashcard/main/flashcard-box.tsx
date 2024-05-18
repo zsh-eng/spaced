@@ -4,6 +4,7 @@ import Flashcard from "@/components/flashcard/main/flashcard";
 import { useFlashcardSession } from "@/providers/flashcard-session";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
 import { Bug, Telescope } from "lucide-react";
+import { useState } from "react";
 
 type Props = {};
 
@@ -18,6 +19,7 @@ export default function FlashcardBox({}: Props) {
     onSkip,
     onDelete,
   } = useFlashcardSession();
+  const [open, setOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -53,20 +55,28 @@ export default function FlashcardBox({}: Props) {
   const card = currentCard;
   const schemaRatingToReviewDay = getReviewDateForEachRating(card.cards);
 
+  // TODO created an updated_at field instead
+  const key = `${card.cards.id}-${card.card_contents.question}-${card.card_contents.answer}`;
+
   return (
     <>
       {
         // We trigger a full re-render when the card changes
         // Currently, there's no need to optimise the rendering
         <Flashcard
-          key={card.cards.id}
+          key={key}
           stats={stats}
           card={card}
           schemaRatingToReviewDay={schemaRatingToReviewDay}
-          onRating={(rating) => onRating(rating, card)}
+          onRating={(rating) => {
+            onRating(rating, card);
+            setOpen(false);
+          }}
           onEdit={(content) => onEdit(content, card)}
           onDelete={() => onDelete(card)}
           onSkip={() => onSkip(card)}
+          open={open}
+          setOpen={setOpen}
         />
       }
     </>
