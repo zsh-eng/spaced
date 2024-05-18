@@ -1,10 +1,13 @@
 import {
   OBSIDIAN_ORIGIN,
   ObsidianActionResponse,
+  ObsidianActionType,
   isMessageEventFromObsidian,
   obsidianActionSchema,
 } from "@/utils/obsidian";
 import { useEffect } from "react";
+
+type ResponseWithoutType = Omit<ObsidianActionResponse, "action">;
 
 /**
  * Subscribe to an action called from Obsidian.
@@ -12,10 +15,10 @@ import { useEffect } from "react";
  * @param callback The callback to call when the action is received
  */
 export function useSubscribeObsidian(
-  actionType: string,
+  actionType: ObsidianActionType,
   callback: (
     eventData: unknown,
-  ) => Promise<ObsidianActionResponse> | ObsidianActionResponse,
+  ) => Promise<ResponseWithoutType> | ResponseWithoutType,
 ) {
   useEffect(() => {
     const listener = async (event: MessageEvent) => {
@@ -28,6 +31,7 @@ export function useSubscribeObsidian(
         const errorResponse = {
           success: false,
           data: parsed.error,
+          action: actionType,
         };
         event.source.postMessage(errorResponse, {
           targetOrigin: OBSIDIAN_ORIGIN,
@@ -42,7 +46,8 @@ export function useSubscribeObsidian(
       }
 
       const response = await callback(data.data);
-      event.source.postMessage(response, {
+      const responseWithType = { ...response, action: actionType };
+      event.source.postMessage(responseWithType, {
         targetOrigin: OBSIDIAN_ORIGIN,
       });
     };

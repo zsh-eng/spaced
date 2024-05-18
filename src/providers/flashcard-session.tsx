@@ -191,7 +191,6 @@ export function FlashcardSessionProvider({
   useSubscribeObsidian(OBSIDIAN_ACTION.GET_CURRENT_CARD, () => {
     return {
       success: true,
-      action: OBSIDIAN_ACTION.GET_CURRENT_CARD,
       data: currentCard,
     };
   });

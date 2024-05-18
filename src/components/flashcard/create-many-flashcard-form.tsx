@@ -98,7 +98,6 @@ export default function CreateManyFlashcardForm() {
       if (!(typeof content === "string")) {
         return {
           success: false,
-          action: OBSIDIAN_ACTION.INSERT_CARDS,
           data: "Invalid content type",
         };
       }
@@ -107,7 +106,6 @@ export default function CreateManyFlashcardForm() {
 
       return {
         success: true,
-        action: OBSIDIAN_ACTION.INSERT_CARDS,
       };
     },
   );
