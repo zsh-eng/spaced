@@ -217,13 +217,6 @@ export default function Flashcard({
     },
   });
 
-  useEffect(() => {
-    if (!open) return;
-    answerButtonsContainerRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [open]);
-
   return (
     <div className="relative col-span-12 flex flex-col gap-x-4 gap-y-2 overflow-hidden">
       {currentlyFocusedRating === "Good" && (
