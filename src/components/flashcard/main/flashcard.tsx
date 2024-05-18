@@ -18,7 +18,7 @@ import {
   ThumbsUp,
   Undo,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSwipeable } from "react-swipeable";
 
@@ -31,6 +31,9 @@ type Props = {
   onEdit: (content: CardContentFormValues) => void;
   onSkip: () => void;
   onDelete: () => void;
+
+  open: boolean;
+  setOpen: (open: boolean) => void;
 };
 
 const SWIPE_THRESHOLD = 60;
@@ -101,9 +104,10 @@ export default function Flashcard({
   onEdit,
   onDelete,
   onSkip,
+  open,
+  setOpen,
 }: Props) {
   const { card_contents: initialCardContent } = sessionCard;
-  const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement | null>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
