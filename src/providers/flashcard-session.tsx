@@ -1,4 +1,8 @@
-import { OBSIDIAN_ORIGIN, isMessageEventFromObsidian } from "@/utils/obsidian";
+import {
+  OBSIDIAN_ACTION,
+  OBSIDIAN_ORIGIN,
+  isMessageEventFromObsidian,
+} from "@/utils/obsidian";
 import { CardContentFormValues } from "@/form";
 import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
@@ -184,11 +188,10 @@ export function FlashcardSessionProvider({
     });
   };
 
-  const action = "get-current-card";
-  useSubscribeObsidian(action, () => {
+  useSubscribeObsidian(OBSIDIAN_ACTION.GET_CURRENT_CARD, () => {
     return {
       success: true,
-      action,
+      action: OBSIDIAN_ACTION.GET_CURRENT_CARD,
       data: currentCard,
     };
   });
