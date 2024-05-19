@@ -1,9 +1,10 @@
 import {
   OBSIDIAN_ORIGIN,
+  ObsidianActionRequest,
   ObsidianActionResponse,
-  ObsidianActionType,
+  ObsidianAction,
   isMessageEventFromObsidian,
-  obsidianActionSchema,
+  obsidianActionRequestSchema,
 } from "@/utils/obsidian";
 import { useEffect } from "react";
 
@@ -14,10 +15,10 @@ type ResponseWithoutType = Omit<ObsidianActionResponse, "action">;
  * @param actionType The action type to subscribe to
  * @param callback The callback to call when the action is received
  */
-export function useSubscribeObsidian(
-  actionType: ObsidianActionType,
+export function useSubscribeObsidian<TActionKey extends ObsidianAction>(
+  actionType: TActionKey,
   callback: (
-    eventData: unknown,
+    eventData: Extract<ObsidianActionRequest, { action: TActionKey }>["data"],
   ) => Promise<ResponseWithoutType> | ResponseWithoutType,
 ) {
   useEffect(() => {
@@ -26,7 +27,11 @@ export function useSubscribeObsidian(
         return;
       }
 
-      const parsed = obsidianActionSchema.safeParse(event.data);
+      if (event.data?.action !== actionType) {
+        return;
+      }
+
+      const parsed = obsidianActionRequestSchema.safeParse(event.data);
       if (!parsed.success) {
         const errorResponse = {
           success: false,
@@ -39,13 +44,9 @@ export function useSubscribeObsidian(
         return;
       }
 
-      // We don't want to handle actions that are not the one we're looking for
-      const data = parsed.data;
-      if (!(data.action === actionType)) {
-        return;
-      }
-
-      const response = await callback(data.data);
+      const data = parsed.data.data;
+      // @ts-expect-error We know that the action is the one we're looking for
+      const response = await callback(data);
       const responseWithType = { ...response, action: actionType };
       event.source.postMessage(responseWithType, {
         targetOrigin: OBSIDIAN_ORIGIN,

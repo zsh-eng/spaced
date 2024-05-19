@@ -6,6 +6,23 @@ import { z } from "zod";
 
 const MAX_INPUT_LENGTH = 20000;
 
+export type ObsidianCardMetadata = {
+  tags: string[];
+  filename: string;
+  source: "obsidian";
+};
+
+export const obsidianCardMetadataSchema = z.object({
+  tags: z.array(z.string()),
+  filename: z.string(),
+  source: z.literal("obsidian"),
+});
+
+export const cardMetadataSchema = z.discriminatedUnion("source", [
+  obsidianCardMetadataSchema,
+]);
+export type CardMetadata = z.infer<typeof cardMetadataSchema>;
+
 // Card Content
 export const cardContentFormSchema = z.object({
   question: z
@@ -36,6 +53,7 @@ export const cardContentDefaultValues = {
 // Create Card
 export const createCardFormSchema = cardContentFormSchema.extend({
   deckIds: z.array(z.string().uuid()).optional(),
+  metadata: cardMetadataSchema.optional(),
 });
 
 export type CreateCardFormValues = z.infer<typeof createCardFormSchema>;
@@ -49,6 +67,7 @@ export const createCardDefaultValues = {
 export const createManyCardsFormSchema = z.object({
   cardInputs: z.array(cardContentFormSchema).min(1),
   deckIds: z.array(z.string().uuid()).optional(),
+  metadata: cardMetadataSchema.optional(),
 });
 
 export type CreateManyCardsFormValues = z.infer<

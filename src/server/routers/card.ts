@@ -253,11 +253,13 @@ export const cardRouter = router({
       }
 
       console.log("Adding card");
-      const { question, answer, deckIds } = input;
+      const { question, answer, deckIds, metadata } = input;
       const { card, cardContent } = newCardWithContent(
         user.id,
         question,
         answer,
+        metadata?.source,
+        metadata,
       );
 
       const res = await db.transaction(async (tx) => {
@@ -294,7 +296,7 @@ export const cardRouter = router({
     .input(createManyCardsFormSchema)
     .mutation(async ({ ctx, input }) => {
       const { user } = ctx;
-      const { cardInputs, deckIds } = input;
+      const { cardInputs, deckIds, metadata } = input;
 
       const allDecksBelongToUser = await checkIfDecksBelongToUser(
         user,
@@ -309,7 +311,13 @@ export const cardRouter = router({
 
       console.log(`Adding ${cardInputs.length} cards`);
       const cardWithContents = cardInputs.map(({ question, answer }) =>
-        newCardWithContent(user.id, question, answer),
+        newCardWithContent(
+          user.id,
+          question,
+          answer,
+          metadata?.source,
+          metadata,
+        ),
       );
 
       const cardsToInsert = cardWithContents.map(({ card }) => card);
