@@ -235,6 +235,24 @@ export const cardRouter = router({
     } satisfies SessionData;
   }),
 
+  getAllBySourceId: protectedProcedure
+    .input(
+      z.object({
+        sourceId: z.string().uuid(),
+      }),
+    )
+    .query(async ({ input }) => {
+      console.log("Fetching card by source ID:", input.sourceId);
+      const cardWithContents = await db
+        .select()
+        .from(cardContents)
+        .leftJoin(cards, eq(cardContents.cardId, cards.id))
+        .where(eq(cardContents.sourceId, input.sourceId));
+
+      console.log(success`Fetched card by source ID: ${input.sourceId}`);
+      return cardWithContents as SessionCard[];
+    }),
+
   // Create a new card with content
   create: protectedProcedure
     .input(createCardFormSchema)

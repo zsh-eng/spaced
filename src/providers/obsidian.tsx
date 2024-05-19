@@ -88,7 +88,6 @@ export function ObsidianProvider({ children }: { children: React.ReactNode }) {
   });
 
   useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_CONTEXT, async (context) => {
-    console.log(context);
     setObsidianContext((previous) => {
       return {
         ...previous,
@@ -98,6 +97,13 @@ export function ObsidianProvider({ children }: { children: React.ReactNode }) {
 
     return {
       success: true,
+    };
+  });
+
+  useSubscribeObsidian(OBSIDIAN_ACTION.GET_CARDS_BY_SOURCE_ID, async () => {
+    return {
+      success: true,
+      data,
     };
   });
 

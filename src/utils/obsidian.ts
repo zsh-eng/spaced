@@ -28,6 +28,7 @@ export function isMessageEventFromObsidian(
 
 export const OBSIDIAN_ACTION = {
   GET_CURRENT_CARD: "get-current-card",
+  GET_CARDS_BY_SOURCE_ID: "get-cards-by-source-id",
   INSERT_CARDS: "insert-cards",
   UPDATE_FRONT: "update-front",
   UPDATE_BACK: "update-back",
@@ -36,6 +37,7 @@ export const OBSIDIAN_ACTION = {
 
 const OBSIDIAN_ACTION_TYPES = [
   OBSIDIAN_ACTION.GET_CURRENT_CARD,
+  OBSIDIAN_ACTION.GET_CARDS_BY_SOURCE_ID,
   OBSIDIAN_ACTION.INSERT_CARDS,
   OBSIDIAN_ACTION.UPDATE_FRONT,
   OBSIDIAN_ACTION.UPDATE_BACK,
@@ -47,6 +49,10 @@ export type ObsidianAction = (typeof OBSIDIAN_ACTION_TYPES)[number];
 // Input schema for each action
 const getCurrentCardSchema = z.object({
   action: z.literal(OBSIDIAN_ACTION.GET_CURRENT_CARD),
+  data: z.unknown().optional(),
+});
+const getCardsBySourceIdSchema = z.object({
+  action: z.literal(OBSIDIAN_ACTION.GET_CARDS_BY_SOURCE_ID),
   data: z.unknown().optional(),
 });
 const insertCardsSchema = z.object({
@@ -75,6 +81,7 @@ const updateContextSchema = z.object({
 
 export const obsidianActionRequestSchema = z.discriminatedUnion("action", [
   getCurrentCardSchema,
+  getCardsBySourceIdSchema,
   insertCardsSchema,
   updateFrontSchema,
   updateBackSchema,
