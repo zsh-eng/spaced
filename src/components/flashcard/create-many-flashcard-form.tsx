@@ -180,9 +180,19 @@ export default function CreateManyFlashcardForm() {
               {fields.length} cards
             </Badge>
             {metadata && (
-              <Badge variant="dot" className="w-max">
-                {metadata.source}
-              </Badge>
+              <>
+                <Badge variant="dot" className="w-max">
+                  {metadata.source}
+                </Badge>
+                <Badge variant="outline" className="w-max">
+                  {metadata.filename}
+                </Badge>
+                {metadata.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="w-max">
+                    {tag}
+                  </Badge>
+                ))}
+              </>
             )}
           </div>
         </div>
