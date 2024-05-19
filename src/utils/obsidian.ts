@@ -46,9 +46,13 @@ const getCurrentCardSchema = z.object({
   action: z.literal(OBSIDIAN_ACTION.GET_CURRENT_CARD),
   data: z.unknown().optional(),
 });
-const insertCardSchema = z.object({
+const insertCardsSchema = z.object({
   action: z.literal(OBSIDIAN_ACTION.INSERT_CARDS),
-  data: z.string(),
+  data: z.object({
+    content: z.string(),
+    filename: z.string(),
+    tags: z.array(z.string()),
+  }),
 });
 const updateFrontSchema = z.object({
   action: z.literal(OBSIDIAN_ACTION.UPDATE_FRONT),
@@ -61,7 +65,7 @@ const updateBackSchema = z.object({
 
 export const obsidianActionRequestSchema = z.discriminatedUnion("action", [
   getCurrentCardSchema,
-  insertCardSchema,
+  insertCardsSchema,
   updateFrontSchema,
   updateBackSchema,
 ]);
