@@ -52,6 +52,7 @@ const insertCardsSchema = z.object({
     content: z.string(),
     filename: z.string(),
     tags: z.array(z.string()),
+    id: z.string(),
   }),
 });
 const updateFrontSchema = z.object({

@@ -132,6 +132,7 @@ export function newCardWithContent(
   question?: string,
   answer?: string,
   source?: string,
+  sourceId?: string,
   metadata?: Record<string, unknown>,
 ): {
   card: Card;

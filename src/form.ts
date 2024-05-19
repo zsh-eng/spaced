@@ -10,12 +10,14 @@ export type ObsidianCardMetadata = {
   tags: string[];
   filename: string;
   source: "obsidian";
+  sourceId: string;
 };
 
 export const obsidianCardMetadataSchema = z.object({
   tags: z.array(z.string()),
   filename: z.string(),
   source: z.literal("obsidian"),
+  sourceId: z.string(),
 });
 
 export const cardMetadataSchema = z.discriminatedUnion("source", [
