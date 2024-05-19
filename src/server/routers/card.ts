@@ -187,7 +187,7 @@ async function checkIfDecksBelongToUser(
   user: User,
   deckIds?: string[],
 ): Promise<boolean> {
-  if (!deckIds) return true;
+  if (!deckIds || deckIds.length === 0) return true;
 
   const foundDecks = await db.query.decks.findMany({
     where: and(
@@ -235,6 +235,24 @@ export const cardRouter = router({
     } satisfies SessionData;
   }),
 
+  getAllBySourceId: protectedProcedure
+    .input(
+      z.object({
+        sourceId: z.string().uuid(),
+      }),
+    )
+    .query(async ({ input }) => {
+      console.log("Fetching card by source ID:", input.sourceId);
+      const cardWithContents = await db
+        .select()
+        .from(cardContents)
+        .leftJoin(cards, eq(cardContents.cardId, cards.id))
+        .where(eq(cardContents.sourceId, input.sourceId));
+
+      console.log(success`Fetched card by source ID: ${input.sourceId}`);
+      return cardWithContents as SessionCard[];
+    }),
+
   // Create a new card with content
   create: protectedProcedure
     .input(createCardFormSchema)
@@ -259,6 +277,7 @@ export const cardRouter = router({
         question,
         answer,
         metadata?.source,
+        metadata?.sourceId,
         metadata,
       );
 
@@ -309,13 +328,13 @@ export const cardRouter = router({
         });
       }
 
-      console.log(`Adding ${cardInputs.length} cards`);
       const cardWithContents = cardInputs.map(({ question, answer }) =>
         newCardWithContent(
           user.id,
           question,
           answer,
           metadata?.source,
+          metadata?.sourceId,
           metadata,
         ),
       );

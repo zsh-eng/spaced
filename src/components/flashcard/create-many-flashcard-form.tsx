@@ -101,6 +101,7 @@ export default function CreateManyFlashcardForm() {
       source: "obsidian",
       tags: data.tags,
       filename: data.filename,
+      sourceId: data.id,
     };
     form.setValue("metadata", metadata);
 

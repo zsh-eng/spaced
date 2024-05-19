@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { FlashcardSessionProvider } from "@/providers/flashcard-session";
 import { HistoryProvider } from "@/providers/history";
+import { ObsidianProvider } from "@/providers/obsidian";
 import { trpc } from "@/utils/trpc";
 import { useIsClient } from "@uidotdev/usehooks";
 import { PropsWithChildren } from "react";
@@ -20,22 +21,24 @@ function ClientLayout({ children }: PropsWithChildren<{}>) {
   return (
     <HistoryProvider>
       <FlashcardSessionProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NavigationBar />
-          {children}
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              duration: 1000,
-            }}
-          />
-          <FetchIndicator />
-        </ThemeProvider>
+        <ObsidianProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NavigationBar />
+            {children}
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 1000,
+              }}
+            />
+            <FetchIndicator />
+          </ThemeProvider>
+        </ObsidianProvider>
       </FlashcardSessionProvider>
     </HistoryProvider>
   );

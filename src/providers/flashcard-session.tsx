@@ -3,11 +3,9 @@ import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useEditCard } from "@/hooks/card/use-edit-card";
 import { useGradeCard } from "@/hooks/card/use-grade-card";
 import { useSuspendCard } from "@/hooks/card/use-suspend.card";
-import { useSubscribeObsidian } from "@/hooks/use-subscribe-obsidian";
 import { useHistory } from "@/providers/history";
 import { Rating } from "@/schema";
 import { getReviewDateForEachRating } from "@/utils/fsrs";
-import { OBSIDIAN_ACTION } from "@/utils/obsidian";
 import { SessionCard, SessionData } from "@/utils/session";
 import { trpc } from "@/utils/trpc";
 import { intlFormatDistance } from "date-fns";
@@ -189,55 +187,6 @@ export function FlashcardSessionProvider({
       },
     });
   };
-
-  useSubscribeObsidian(OBSIDIAN_ACTION.GET_CURRENT_CARD, () => {
-    return {
-      success: true,
-      data: currentCard,
-    };
-  });
-
-  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_FRONT, async (content) => {
-    if (!currentCard) {
-      return {
-        success: false,
-        data: "No card to update",
-      };
-    }
-
-    onEdit(
-      {
-        question: content,
-        answer: currentCard?.card_contents.answer,
-      },
-      currentCard,
-    );
-
-    return {
-      success: true,
-    };
-  });
-
-  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_BACK, async (content) => {
-    if (!currentCard) {
-      return {
-        success: false,
-        data: "No card to update",
-      };
-    }
-
-    onEdit(
-      {
-        question: currentCard.card_contents.question,
-        answer: content,
-      },
-      currentCard,
-    );
-
-    return {
-      success: true,
-    };
-  });
 
   return (
     <FlashcardSessionContext.Provider

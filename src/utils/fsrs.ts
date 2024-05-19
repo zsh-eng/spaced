@@ -114,6 +114,7 @@ export function newCardContent(
   question: string,
   answer: string,
   source?: string,
+  sourceId?: string,
   metadata?: Record<string, unknown>,
 ): NewCardContent {
   const id = crypto.randomUUID();
@@ -123,6 +124,7 @@ export function newCardContent(
     question,
     answer,
     source,
+    sourceId,
     extend: metadata,
   };
 }
@@ -132,6 +134,7 @@ export function newCardWithContent(
   question?: string,
   answer?: string,
   source?: string,
+  sourceId?: string,
   metadata?: Record<string, unknown>,
 ): {
   card: Card;
@@ -143,6 +146,7 @@ export function newCardWithContent(
     question ?? "",
     answer ?? "",
     source,
+    sourceId,
     metadata,
   );
   return {
