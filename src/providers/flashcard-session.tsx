@@ -190,55 +190,6 @@ export function FlashcardSessionProvider({
     });
   };
 
-  useSubscribeObsidian(OBSIDIAN_ACTION.GET_CURRENT_CARD, () => {
-    return {
-      success: true,
-      data: currentCard,
-    };
-  });
-
-  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_FRONT, async (content) => {
-    if (!currentCard) {
-      return {
-        success: false,
-        data: "No card to update",
-      };
-    }
-
-    onEdit(
-      {
-        question: content,
-        answer: currentCard?.card_contents.answer,
-      },
-      currentCard,
-    );
-
-    return {
-      success: true,
-    };
-  });
-
-  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_BACK, async (content) => {
-    if (!currentCard) {
-      return {
-        success: false,
-        data: "No card to update",
-      };
-    }
-
-    onEdit(
-      {
-        question: currentCard.card_contents.question,
-        answer: content,
-      },
-      currentCard,
-    );
-
-    return {
-      success: true,
-    };
-  });
-
   return (
     <FlashcardSessionContext.Provider
       value={{
