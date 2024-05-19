@@ -7,6 +7,7 @@ export default {
   schema: './src/schema.ts',
   out: './drizzle',
   driver: 'turso', // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
+  dialect: 'sqlite',
   dbCredentials: {
     url: process.env.TURSO_DATABASE_URL ?? '',
     authToken: process.env.TURSO_AUTH_TOKEN ?? '',
