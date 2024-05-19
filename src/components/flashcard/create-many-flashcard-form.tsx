@@ -93,29 +93,20 @@ export default function CreateManyFlashcardForm() {
     reader.readAsText(file);
   };
 
-  useSubscribeObsidian(
-    OBSIDIAN_ACTION.INSERT_CARDS,
-    async (content: unknown) => {
-      if (!(typeof content === "string")) {
-        return {
-          success: false,
-          data: "Invalid content type",
-        };
-      }
-      const contents = extractCardContentFromMarkdownString(content);
-      append(contents);
-      const metadata: ObsidianCardMetadata = {
-        source: "obsidian",
-        tags: [],
-        filename: "test",
-      };
-      form.setValue("metadata", metadata);
+  useSubscribeObsidian(OBSIDIAN_ACTION.INSERT_CARDS, async (content) => {
+    const contents = extractCardContentFromMarkdownString(content);
+    append(contents);
+    const metadata: ObsidianCardMetadata = {
+      source: "obsidian",
+      tags: [],
+      filename: "test",
+    };
+    form.setValue("metadata", metadata);
 
-      return {
-        success: true,
-      };
-    },
-  );
+    return {
+      success: true,
+    };
+  });
 
   const metadata = form.getValues("metadata");
 

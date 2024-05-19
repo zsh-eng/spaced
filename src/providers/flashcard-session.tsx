@@ -197,67 +197,47 @@ export function FlashcardSessionProvider({
     };
   });
 
-  useSubscribeObsidian(
-    OBSIDIAN_ACTION.UPDATE_FRONT,
-    async (content: unknown) => {
-      if (!currentCard) {
-        return {
-          success: false,
-          data: "No card to update",
-        };
-      }
-
-      if (!(typeof content === "string")) {
-        return {
-          success: false,
-          data: "Invalid content type",
-        };
-      }
-
-      onEdit(
-        {
-          question: content,
-          answer: currentCard?.card_contents.answer,
-        },
-        currentCard,
-      );
-
+  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_FRONT, async (content) => {
+    if (!currentCard) {
       return {
-        success: true,
+        success: false,
+        data: "No card to update",
       };
-    },
-  );
+    }
 
-  useSubscribeObsidian(
-    OBSIDIAN_ACTION.UPDATE_BACK,
-    async (content: unknown) => {
-      if (!currentCard) {
-        return {
-          success: false,
-          data: "No card to update",
-        };
-      }
+    onEdit(
+      {
+        question: content,
+        answer: currentCard?.card_contents.answer,
+      },
+      currentCard,
+    );
 
-      if (!(typeof content === "string")) {
-        return {
-          success: false,
-          data: "Invalid content type",
-        };
-      }
+    return {
+      success: true,
+    };
+  });
 
-      onEdit(
-        {
-          question: currentCard.card_contents.question,
-          answer: content,
-        },
-        currentCard,
-      );
-
+  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_BACK, async (content) => {
+    if (!currentCard) {
       return {
-        success: true,
+        success: false,
+        data: "No card to update",
       };
-    },
-  );
+    }
+
+    onEdit(
+      {
+        question: currentCard.card_contents.question,
+        answer: content,
+      },
+      currentCard,
+    );
+
+    return {
+      success: true,
+    };
+  });
 
   return (
     <FlashcardSessionContext.Provider

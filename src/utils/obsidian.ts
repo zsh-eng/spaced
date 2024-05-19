@@ -1,4 +1,3 @@
-import { CardMetadata } from "@/form";
 import { z } from "zod";
 
 /**
@@ -41,14 +40,33 @@ const OBSIDIAN_ACTION_TYPES = [
   OBSIDIAN_ACTION.UPDATE_BACK,
 ] as const;
 
-export type ObsidianActionType = (typeof OBSIDIAN_ACTION_TYPES)[number];
+export type ObsidianAction = (typeof OBSIDIAN_ACTION_TYPES)[number];
 
-export const obsidianActionSchema = z.object({
-  action: z.enum(OBSIDIAN_ACTION_TYPES),
-  data: z.unknown(),
+const getCurrentCardSchema = z.object({
+  action: z.literal(OBSIDIAN_ACTION.GET_CURRENT_CARD),
+  data: z.unknown().optional(),
+});
+const insertCardSchema = z.object({
+  action: z.literal(OBSIDIAN_ACTION.INSERT_CARDS),
+  data: z.string(),
+});
+const updateFrontSchema = z.object({
+  action: z.literal(OBSIDIAN_ACTION.UPDATE_FRONT),
+  data: z.string(),
+});
+const updateBackSchema = z.object({
+  action: z.literal(OBSIDIAN_ACTION.UPDATE_BACK),
+  data: z.string(),
 });
 
-export type ObsidianAction = z.infer<typeof obsidianActionSchema>;
+export const obsidianActionRequestSchema = z.discriminatedUnion("action", [
+  getCurrentCardSchema,
+  insertCardSchema,
+  updateFrontSchema,
+  updateBackSchema,
+]);
+
+export type ObsidianActionRequest = z.infer<typeof obsidianActionRequestSchema>;
 
 export const obsidianActionResponseSchema = z.object({
   success: z.boolean(),
