@@ -1,9 +1,13 @@
 import { useSubscribeObsidian } from "@/hooks/use-subscribe-obsidian";
 import { useFlashcardSession } from "@/providers/flashcard-session";
 import { OBSIDIAN_ACTION } from "@/utils/obsidian";
-import { createContext, useContext } from "react";
+import { trpc } from "@/utils/trpc";
+import { skipToken } from "@tanstack/react-query";
+import { createContext, useContext, useEffect, useState } from "react";
 
-type ObsidianContextValue = {};
+type ObsidianContextValue = {
+  sourceId?: string;
+};
 
 // Currently, we don't need any context value for Obsidian, so we just create an empty context.
 // Eventually, we might want to expose certain data such as the currently selected file
@@ -22,8 +26,17 @@ export function useObsidianContext() {
   return context;
 }
 
+const DEFAULT_CONTEXT = {};
+
 export function ObsidianProvider({ children }: { children: React.ReactNode }) {
   const { onEdit, currentCard } = useFlashcardSession();
+  const [obsidianContext, setObsidianContext] =
+    useState<ObsidianContextValue>(DEFAULT_CONTEXT);
+  const { data = [] } = trpc.card.getAllBySourceId.useQuery(
+    obsidianContext.sourceId
+      ? { sourceId: obsidianContext.sourceId }
+      : skipToken,
+  );
 
   useSubscribeObsidian(OBSIDIAN_ACTION.GET_CURRENT_CARD, () => {
     return {
@@ -73,6 +86,24 @@ export function ObsidianProvider({ children }: { children: React.ReactNode }) {
       success: true,
     };
   });
+
+  useSubscribeObsidian(OBSIDIAN_ACTION.UPDATE_CONTEXT, async (context) => {
+    console.log(context);
+    setObsidianContext((previous) => {
+      return {
+        ...previous,
+        ...context,
+      };
+    });
+
+    return {
+      success: true,
+    };
+  });
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   return (
     <ObsidianContext.Provider value={{}}>{children}</ObsidianContext.Provider>
