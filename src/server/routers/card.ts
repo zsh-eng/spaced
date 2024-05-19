@@ -187,7 +187,7 @@ async function checkIfDecksBelongToUser(
   user: User,
   deckIds?: string[],
 ): Promise<boolean> {
-  if (!deckIds) return true;
+  if (!deckIds || deckIds.length === 0) return true;
 
   const foundDecks = await db.query.decks.findMany({
     where: and(
