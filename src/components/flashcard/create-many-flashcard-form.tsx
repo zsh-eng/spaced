@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   CreateManyCardsFormValues,
+  ObsidianCardMetadata,
   cardContentDefaultValues,
   createManyCardsDefaultValues,
   createManyCardsFormSchema,
@@ -103,12 +104,20 @@ export default function CreateManyFlashcardForm() {
       }
       const contents = extractCardContentFromMarkdownString(content);
       append(contents);
+      const metadata: ObsidianCardMetadata = {
+        source: "obsidian",
+        tags: [],
+        filename: "test",
+      };
+      form.setValue("metadata", metadata);
 
       return {
         success: true,
       };
     },
   );
+
+  const metadata = form.getValues("metadata");
 
   return (
     <Form {...form}>
@@ -173,9 +182,17 @@ export default function CreateManyFlashcardForm() {
               Delete All
             </Button>
           </div>
-          <Badge variant="outline" className="mt-2 w-max">
-            {fields.length} cards
-          </Badge>
+
+          <div className="flexm mt-2">
+            <Badge variant="outline" className="w-max">
+              {fields.length} cards
+            </Badge>
+            {metadata && (
+              <Badge variant="dot" className="w-max">
+                {metadata.source}
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className={cn("col-start-1 col-end-13 gap-y-6 2xl:col-start-4")}>
