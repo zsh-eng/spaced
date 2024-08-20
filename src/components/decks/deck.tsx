@@ -4,7 +4,7 @@ import { UiCard, UiCardDescription, UiCardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RouterOutputs } from "@/utils/trpc";
 import { format } from "date-fns";
-import { BookIcon, Clock } from "lucide-react";
+import { BookIcon, Clock, Trash } from "lucide-react";
 import Link from "next/link";
 
 type Deck = RouterOutputs["deck"]["all"][0];

@@ -4,10 +4,18 @@ import FlashcardSimple, {
   FlashcardSimpleSkeleton,
 } from "@/components/flashcard/flashcard-simple";
 import { Button } from "@/components/ui/button";
+import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import { format } from "date-fns";
-import { ArrowLeft, Clock, Diamond, Loader2, NotebookTabs } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Diamond,
+  Loader2,
+  NotebookTabs,
+  Trash,
+} from "lucide-react";
 import Link from "next/link";
 
 type Props = {
@@ -50,6 +58,7 @@ export default function DeckCards({ deckId }: Props) {
   );
   const { data: deckData, isLoading: isDeckLoading } = trpc.deck.all.useQuery();
   const deck = deckData?.find((d) => d.id === deckId);
+  const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
 
   if (isLoading || isDeckLoading || !data) {
     return (
@@ -84,6 +93,26 @@ export default function DeckCards({ deckId }: Props) {
           <p className="flex items-center text-xl">
             <Clock className="mr-2 h-6 w-6" />
             {format(deck.createdAt, "MMM d, yyyy")}
+          </p>
+          <p>
+            <Button
+              size={"icon"}
+              variant={"ghost"}
+              className="mr-2"
+              onClick={async () => {
+                // After deleting, we should go to the decks page
+                // This should be a confirmation dialog
+                return deleteDeck({
+                  deckId: deck.id,
+                });
+              }}
+            >
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash className="" />
+              )}
+            </Button>
           </p>
         </div>
       </section>

@@ -12,7 +12,7 @@ import { protectedProcedure, router } from "@/server/trpc";
 import { newDeck } from "@/utils/deck";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, or, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 const ALL_CARDS = "ALL_CARDS";
@@ -171,8 +171,14 @@ export const deckRouter = router({
     }),
 
   delete: protectedProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input: deckId }) => {
+    .input(
+      z.object({
+        deckId: z.string(),
+        deleteCards: z.boolean().optional().default(false),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { deckId, deleteCards } = input;
       const { user } = ctx;
       const belongsToUser = await checkIfDeckBelongsToUser(user, deckId);
 
@@ -183,8 +189,39 @@ export const deckRouter = router({
         });
       }
 
+      // We leave the card to deck relations around - there's no need to delete them
+      // since we can tell if something is deleted based on the foreign key object.
+      if (deleteCards) {
+        console.log("Deleting cards for deck", deckId);
+        const numCards = await db
+          .update(cards)
+          .set({
+            deleted: true,
+          })
+          .where(
+            inArray(
+              cards.id,
+              sql`select ${cards.id} from ${cardsToDecks} where ${eq(
+                cardsToDecks.deckId,
+                deckId,
+              )}`,
+            ),
+          )
+          .returning({
+            id: cards.id,
+          });
+        console.log(
+          success`Deleted ${numCards.length} cards for deck ${deckId}`,
+        );
+      }
+
       console.log("Deleting deck", deckId);
-      await db.delete(decks).where(eq(decks.id, deckId));
+      await db
+        .update(decks)
+        .set({
+          deleted: true,
+        })
+        .where(eq(decks.id, deckId));
       console.log(success`Deleted deck ${deckId}`);
     }),
 

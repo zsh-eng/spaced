@@ -26,7 +26,7 @@ export const users = sqliteTable("user", {
 });
 
 export type NewUser = typeof users.$inferInsert;
-export type User = Omit<typeof users.$inferSelect, 'emailVerified'>;
+export type User = Omit<typeof users.$inferSelect, "emailVerified">;
 
 export const accounts = sqliteTable(
   "account",
@@ -189,8 +189,12 @@ export type NewDeck = typeof decks.$inferInsert;
 export const cardsToDecks = sqliteTable(
   "cards_to_decks",
   {
-    cardId: text("card_id").notNull(),
-    deckId: text("deck_id").notNull(),
+    cardId: text("card_id")
+      .notNull()
+      .references(() => cards.id, { onDelete: "cascade" }),
+    deckId: text("deck_id").notNull().references(() => decks.id, {
+      onDelete: "cascade",
+    }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
