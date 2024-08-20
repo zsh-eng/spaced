@@ -62,7 +62,7 @@ export default function DeckCards({ deckId }: Props) {
   );
   const { data: deckData, isLoading: isDeckLoading } = trpc.deck.all.useQuery();
   const deck = deckData?.find((d) => d.id === deckId);
-  const { mutate: deleteDeck, isPending: isDeleting } = useDeleteDeck();
+  const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
   const router = useRouter();
 
   if (isLoading || isDeckLoading || !data) {
@@ -124,7 +124,7 @@ export default function DeckCards({ deckId }: Props) {
                   onClick={async () => {
                     // After deleting, we should go to the decks page
                     // This should be a confirmation dialog
-                    deleteDeck({
+                    await deleteDeck({
                       deckId: deck.id,
                       deleteCards: true,
                     });

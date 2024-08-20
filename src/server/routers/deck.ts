@@ -191,28 +191,38 @@ export const deckRouter = router({
 
       // We leave the card to deck relations around - there's no need to delete them
       // since we can tell if something is deleted based on the foreign key object.
+
+      // TODO: this should be a transaction
       if (deleteCards) {
         console.log("Deleting cards for deck", deckId);
-        const numCards = await db
-          .update(cards)
-          .set({
-            deleted: true,
-          })
-          .where(
-            inArray(
-              cards.id,
-              sql`select ${cards.id} from ${cardsToDecks} where ${eq(
-                cardsToDecks.deckId,
-                deckId,
-              )}`,
-            ),
-          )
-          .returning({
-            id: cards.id,
-          });
-        console.log(
-          success`Deleted ${numCards.length} cards for deck ${deckId}`,
-        );
+        try {
+          const subquery = db
+            .select({
+              id: cardsToDecks.cardId,
+            })
+            .from(cardsToDecks)
+            .where(eq(cardsToDecks.deckId, deckId));
+          const numCards = await db
+            .update(cards)
+            .set({
+              deleted: true,
+            })
+            .where(
+              inArray(
+                cards.id,
+                sql`(${subquery})`,
+              ),
+            )
+            .returning({
+              id: cards.id,
+            });
+          console.log(
+            success`Deleted ${numCards.length} cards for deck ${deckId}`,
+          );
+        } catch (e) {
+          console.error(e);
+          throw e;
+        }
       }
 
       console.log("Deleting deck", deckId);
