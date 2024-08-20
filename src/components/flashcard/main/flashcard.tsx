@@ -189,6 +189,7 @@ export default function Flashcard({
         onSkip();
         return;
       }
+      navigator.vibrate(50);
       currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     onSwipedLeft: () => {
@@ -196,6 +197,7 @@ export default function Flashcard({
         history.undo();
         return;
       }
+      navigator.vibrate(50);
       currentlyFocusedRating && onRating(currentlyFocusedRating);
     },
     delta: SWIPE_THRESHOLD,
