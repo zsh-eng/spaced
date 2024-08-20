@@ -3,6 +3,17 @@
 import FlashcardSimple, {
   FlashcardSimpleSkeleton,
 } from "@/components/flashcard/flashcard-simple";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { trpc } from "@/utils/trpc";
@@ -88,25 +99,43 @@ export default function DeckCards({ deckId }: Props) {
             <Clock className="mr-2 h-5 w-5" />
             {format(deck.createdAt, "MMM d, yyyy")}
           </p>
-          <Button
-            size={"icon"}
-            variant={"ghost"}
-            className="ml-auto"
-            onClick={async () => {
-              // After deleting, we should go to the decks page
-              // This should be a confirmation dialog
-              deleteDeck({
-                deckId: deck.id,
-              });
-              router.push("/decks");
-            }}
-          >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash className="" />
-            )}
-          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size={"icon"} variant={"ghost"} className="ml-auto">
+                {isDeleting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Trash className="h-5 w-5" />
+                )}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will delete the deck and all the cards in it (
+                  <span className="font-bold">{deck.cardCount} cards</span>).
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    // After deleting, we should go to the decks page
+                    // This should be a confirmation dialog
+                    deleteDeck({
+                      deckId: deck.id,
+                      deleteCards: true,
+                    });
+                    router.push("/decks");
+                  }}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </section>
       {data.pages.map((group, i) => {
