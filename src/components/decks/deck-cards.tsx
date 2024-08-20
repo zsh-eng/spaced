@@ -28,8 +28,7 @@ const containerClasses =
 function Title({ title }: { title: string }) {
   return (
     <div className="col-span-12 mb-4 flex items-center pl-2">
-      <h1 className="text-4xl font-bold md:text-5xl">{title}</h1>
-      <Diamond className="ml-3 h-8 w-8 text-accent-foreground md:h-10 md:w-10" />
+      <h1 className="text-4xl">{title}</h1>
 
       <Link href="/decks" legacyBehavior passHref>
         <ArrowLeft className="ml-auto h-8 w-8 cursor-pointer text-accent-foreground transition duration-300 hover:-translate-x-4" />
