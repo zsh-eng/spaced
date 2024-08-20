@@ -24,7 +24,7 @@ import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, SendHorizonal, Trash, TrashIcon } from "lucide-react";
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, useEffect } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -111,6 +111,23 @@ export default function CreateManyFlashcardForm() {
   });
 
   const metadata = form.getValues("metadata");
+
+  useEffect(() => {
+    const shortcutListener = (e: KeyboardEvent) => {
+      // Use code because MacOS transforms the Option+Space to another key
+      if (e.code === "Space" && e.altKey) {
+        console.log("pressed alt + space");
+        append({
+          ...cardContentDefaultValues,
+        });
+      }
+    };
+
+    document.addEventListener("keydown", shortcutListener);
+    return () => {
+      document.removeEventListener("keydown", shortcutListener);
+    };
+  }, [append]);
 
   return (
     <Form {...form}>
@@ -201,11 +218,25 @@ export default function CreateManyFlashcardForm() {
         <div className={cn("col-start-1 col-end-13 gap-y-6 2xl:col-start-4")}>
           {/* Card inputs */}
           <section
-            className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 2xl:grid-cols-3"
+            className="grid grid-cols-1 gap-x-2 gap-y-2 md:grid-cols-2 lg:grid-cols-3 lg:px-4"
             onKeyDown={(e) => e.stopPropagation()}
           >
             {fields.map((item, index) => (
-              <UiCard className={cn("flex flex-col px-4 py-4")} key={item.id}>
+              <UiCard
+                className={cn("flex flex-col px-4 py-4 text-sm")}
+                key={item.id}
+                onKeyDown={(e) => {
+                  if (e.code === "KeyD" && e.altKey) {
+                    remove(index);
+                    if (index > 0) {
+                      form.setFocus(`cardInputs.${index-1}.question`);
+                    } else if (index === 0 && fields.length > 0) {
+                      form.setFocus(`cardInputs.${0}.question`);
+                    }
+                    e.preventDefault()
+                  }
+                }}
+              >
                 <FormTextarea
                   className="h-40 resize-none border-0"
                   name={`cardInputs.${index}.question`}
