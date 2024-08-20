@@ -70,6 +70,10 @@ function getNextCard(data: SessionData): SessionCard | undefined {
     return data.newCards[0];
   }
 
+  if (data.newCards.length === 0) {
+    return data.reviewCards[0];
+  }
+
   const newCard = data.newCards[0];
   const reviewCard = data.reviewCards[0];
 
