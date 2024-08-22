@@ -273,6 +273,7 @@ export default function Flashcard({
         onDoubleClick={() => {
           if (!open || editing || currentlyFocusedRating || !isMobile) return;
           setCurrentlyFocusedRating("Good");
+          navigator.vibrate(50);
           setTimeout(() => {
             setCurrentlyFocusedRating(undefined);
             onRating("Good");
