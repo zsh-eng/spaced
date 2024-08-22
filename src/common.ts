@@ -28,3 +28,5 @@ export const RATING_TO_KEY: Record<Rating, string | undefined> = {
 
 export const MAX_CARDS_TO_FETCH = 50;
 export const MAX_LEARN_PER_DAY = 50;
+
+export const MAX_DATE = new Date(9999, 11, 31);
