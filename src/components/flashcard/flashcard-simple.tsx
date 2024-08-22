@@ -3,9 +3,11 @@ import { TimeIconText } from "@/components/time-icon-text";
 import { UiCard, UiCardContent, UiCardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/schema";
+import { isCardPermanentlySuspended } from "@/utils/card";
+import { PauseCircle } from "lucide-react";
 
 type Props = {
-  card: Pick<Card, "state" | "createdAt" | "state">;
+  card: Pick<Card, "state" | "createdAt" | "state" | "suspended">;
   cardContent: Pick<CardContent, "id" | "question" | "answer" | "createdAt">;
 };
 
@@ -31,6 +33,16 @@ export default function FlashcardSimple({ card, cardContent }: Props) {
       <UiCardFooter className="flex gap-2">
         <FlashcardState className="rounded-sm" state={card.state} />
         <TimeIconText date={card.createdAt} />
+        {!isCardPermanentlySuspended(card) &&
+          card.suspended.getTime() > Date.now() && (
+            <>
+              Suspended until
+              <TimeIconText date={card.suspended} />
+            </>
+          )}
+        {isCardPermanentlySuspended(card) && (
+          <PauseCircle className="h-6 w-6 text-muted-foreground" />
+        )}
       </UiCardFooter>
     </UiCard>
   );

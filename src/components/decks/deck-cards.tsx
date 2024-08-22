@@ -14,12 +14,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipIconButton,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
+import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import { format } from "date-fns";
-import { ArrowLeft, Clock, Loader2, NotebookTabs, Trash } from "lucide-react";
+import {
+  ArrowLeft,
+  CirclePause,
+  CirclePlay,
+  Clock,
+  Loader2,
+  NotebookTabs,
+  Trash,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -63,6 +79,7 @@ export default function DeckCards({ deckId }: Props) {
   const { data: deckData, isLoading: isDeckLoading } = trpc.deck.all.useQuery();
   const deck = deckData?.find((d) => d.id === deckId);
   const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
+  const { mutate: pauseDeck } = usePauseDeck();
   const router = useRouter();
 
   if (isLoading || isDeckLoading || !data) {
@@ -100,9 +117,28 @@ export default function DeckCards({ deckId }: Props) {
             {format(deck.createdAt, "MMM d, yyyy")}
           </p>
 
+          <TooltipIconButton
+            className="ml-auto"
+            tooltipContent="Unsuspend all cards"
+            onClick={() => {
+              pauseDeck({ id: deck.id, pause: false });
+            }}
+          >
+            <CirclePlay className="h-6 w-6" strokeWidth={1.5} />
+          </TooltipIconButton>
+
+          <TooltipIconButton
+            tooltipContent="Suspend all cards"
+            onClick={() => {
+              pauseDeck({ id: deck.id });
+            }}
+          >
+            <CirclePause className="h-6 w-6" strokeWidth={1.5} />
+          </TooltipIconButton>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size={"icon"} variant={"ghost"} className="ml-auto">
+              <Button size={"icon"} variant={"ghost"} className="">
                 {isDeleting ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
@@ -138,6 +174,7 @@ export default function DeckCards({ deckId }: Props) {
           </AlertDialog>
         </div>
       </section>
+
       {data.pages.map((group, i) => {
         return (
           <div key={i} className={containerClasses}>

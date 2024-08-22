@@ -7,7 +7,7 @@ import {
   decks,
   users,
 } from "@/schema";
-import { MAX_CARDS_TO_FETCH } from "@/common";
+import { MAX_CARDS_TO_FETCH, MAX_DATE } from "@/common";
 import { protectedProcedure, router } from "@/server/trpc";
 import { newDeck } from "@/utils/deck";
 import { success } from "@/utils/format";
@@ -103,6 +103,7 @@ export const deckRouter = router({
             id: cards.id,
             createdAt: cards.createdAt,
             state: cards.state,
+            suspended: cards.suspended,
           },
           cardContents: {
             id: cardContents.id,
@@ -207,12 +208,7 @@ export const deckRouter = router({
             .set({
               deleted: true,
             })
-            .where(
-              inArray(
-                cards.id,
-                sql`(${subquery})`,
-              ),
-            )
+            .where(inArray(cards.id, sql`(${subquery})`))
             .returning({
               id: cards.id,
             });
@@ -262,5 +258,51 @@ export const deckRouter = router({
         })
         .where(eq(decks.id, input.id));
       console.log(success`Edited deck ${input.id}`);
+    }),
+  pause: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        pause: z.boolean().optional().default(true),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Put the cards in a deck on pause
+      const { user } = ctx;
+      const belongsToUser = await checkIfDeckBelongsToUser(user, input.id);
+      if (!belongsToUser) {
+        throw new TRPCError({
+          message: "Deck not found",
+          code: "NOT_FOUND",
+        });
+      }
+
+      const { id: deckId, pause } = input;
+      const subquery = db
+        .select({
+          id: cardsToDecks.cardId,
+        })
+        .from(cardsToDecks)
+        .where(eq(cardsToDecks.deckId, deckId));
+
+      if (pause) {
+        console.log("Pausing deck", input.id);
+        await db
+          .update(cards)
+          .set({
+            suspended: MAX_DATE,
+          })
+          .where(inArray(cards.id, sql`(${subquery})`));
+        console.log(success`Paused deck ${input.id}`);
+      } else {
+        console.log("Unpausing deck", input.id);
+        await db
+          .update(cards)
+          .set({
+            suspended: new Date(),
+          })
+          .where(inArray(cards.id, sql`(${subquery})`));
+        console.log(success`Unpaused deck ${input.id}`);
+      }
     }),
 });
