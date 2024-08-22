@@ -5,13 +5,13 @@ import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/utils/trpc";
 
 const sectionClasses =
-  "col-span-12 flex flex-wrap gap-x-4 gap-y-4 justify-start mt-6";
+  "col-span-12 flex flex-wrap gap-x-4 gap-y-4 justify-start items-stretch mt-6 px-2";
 
 function Title() {
   return (
-    <div className="col-span-12 mb-4 flex items-center pl-2">
+    <div className="col-span-12 sm:mb-4 flex items-center pl-2">
       <h1 className="text-4xl md:text-4xl">Decks</h1>
-      <Separator className="ml-2" />
+      <Separator className="ml-2 shrink" />
     </div>
   );
 }
