@@ -14,14 +14,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipIconButton,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { TooltipIconButton } from "@/components/ui/tooltip";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
 import { trpc } from "@/utils/trpc";
@@ -48,7 +42,7 @@ const containerClasses =
 
 function Title({ title }: { title: string }) {
   return (
-    <div className="col-span-12 mb-4 flex items-center pl-2">
+    <div className="flex items-center">
       <h1 className="text-4xl">{title}</h1>
 
       <Link href="/decks" legacyBehavior passHref>
@@ -105,8 +99,8 @@ export default function DeckCards({ deckId }: Props) {
 
   return (
     <>
-      <Title title={deck.name} />
       <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 pl-2">
+        <Title title={deck.name} />
         <div className="flex gap-x-4">
           <p className="flex items-center text-lg">
             <NotebookTabs className="mr-2 h-5 w-5" />
