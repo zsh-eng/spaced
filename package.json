@@ -17,6 +17,7 @@
     "obsidian:import": "tsx --env-file=.env src/scripts/import.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.53",
     "@auth/drizzle-adapter": "^1.4.2",
     "@hookform/resolvers": "^3.9.0",
     "@icons-pack/react-simple-icons": "^9.4.1",
@@ -53,6 +54,7 @@
     "@types/better-sqlite3": "^7.6.11",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/speed-insights": "^1.0.10",
+    "ai": "^3.3.16",
     "animate.css": "^4.1.1",
     "better-sqlite3": "^9.4.5",
     "class-variance-authority": "^0.7.0",

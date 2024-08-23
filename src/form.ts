@@ -34,7 +34,7 @@ export const cardContentFormSchema = z.object({
     })
     .max(MAX_INPUT_LENGTH, {
       message: "Question is too long.",
-    }),
+    }).describe("The question for the flashcard."),
   answer: z
     .string()
     .min(1, {
@@ -42,10 +42,18 @@ export const cardContentFormSchema = z.object({
     })
     .max(MAX_INPUT_LENGTH, {
       message: "Answer is too long.",
-    }),
+    }).describe("The answer for the flashcard."),
 });
 
 export type CardContentFormValues = z.infer<typeof cardContentFormSchema>;
+
+export const aiCardOutputSchema = z.object({
+  cards: z.array(cardContentFormSchema).describe("The flashcards to be generated.")
+})
+/**
+ * The output of the LLM generating flashcards.
+ */
+export type AICardOutput = z.infer<typeof aiCardOutputSchema>;
 
 export const cardContentDefaultValues = {
   question: "",

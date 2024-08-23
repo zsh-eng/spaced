@@ -1,5 +1,6 @@
 "use client";
 
+import AIGenerateFlashcardDialog from "@/components/flashcard/ai-generate-flashcard-dialog";
 import { FormMultiSelect } from "@/components/form/form-multi-select";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Badge } from "@/components/ui/badge";
@@ -191,6 +192,19 @@ export default function CreateManyFlashcardForm() {
               <TrashIcon className="mr-2 h-4 w-4" />
               Delete All
             </Button>
+            <AIGenerateFlashcardDialog
+              onGeneratedCards={({ cards }) => {
+                const previous = form.getValues("cardInputs");
+                append(cards);
+
+                toast.success(`Generated ${cards.length} cards with AI.`, {
+                  action: {
+                    label: "Undo",
+                    onClick: () => form.setValue("cardInputs", previous),
+                  },
+                });
+              }}
+            />
           </div>
 
           <div className="flexm mt-2">
@@ -229,11 +243,11 @@ export default function CreateManyFlashcardForm() {
                   if (e.code === "KeyD" && e.altKey) {
                     remove(index);
                     if (index > 0) {
-                      form.setFocus(`cardInputs.${index-1}.question`);
+                      form.setFocus(`cardInputs.${index - 1}.question`);
                     } else if (index === 0 && fields.length > 0) {
                       form.setFocus(`cardInputs.${0}.question`);
                     }
-                    e.preventDefault()
+                    e.preventDefault();
                   }
                 }}
               >
