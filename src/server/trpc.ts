@@ -19,8 +19,7 @@ const t = initTRPC.context<Context>().create({
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// See https://trpc.io/docs/server/authorization#option-2-authorize-using-middleware
-export const protectedProcedure = t.procedure.use(
+export const isAuthenticatedMiddleware = t.middleware(
   async function isAuthed(opts) {
     const { ctx } = opts;
     if (!ctx.user) {
@@ -43,3 +42,21 @@ export const protectedProcedure = t.procedure.use(
     });
   },
 );
+
+export const isPremiumOrAdminMiddleware = t.middleware(
+  async function isPremium(opts) {
+    const { ctx } = opts;
+    if (!["premium", "admin"].includes(ctx?.user?.role ?? "not-user")) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return opts.next(opts);
+  },
+);
+
+// See https://trpc.io/docs/server/authorization#option-2-authorize-using-middleware
+export const protectedProcedure = t.procedure.use(isAuthenticatedMiddleware);
+
+export const premiumProcedure = t.procedure
+  .use(isAuthenticatedMiddleware)
+  .use(isPremiumOrAdminMiddleware);

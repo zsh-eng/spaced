@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { z } from "zod";
-import { User } from "@/schema";
+import { User, userRoles } from "@/schema";
 
 // See https://trpc.io/docs/server/context#inner-and-outer-context
 
@@ -31,6 +31,7 @@ const userSchema = z.object({
   name: z.string().nullable(),
   email: z.string(),
   image: z.string().nullable(),
+  role: z.enum(userRoles)
 });
 
 /**
