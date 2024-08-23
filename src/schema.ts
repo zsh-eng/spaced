@@ -13,6 +13,9 @@ import type { AdapterAccount } from "next-auth/adapters";
 // The enum type is used for type inference, and not enforced in the database.
 // See https://orm.drizzle.team/docs/column-types/sqlite#text
 
+const userRoles = ["basic", "premium", "admin"] as const;
+type UserRole = (typeof userRoles)[number];
+
 // Accounts schema
 // See https://authjs.dev/getting-started/adapters/drizzle
 export const users = sqliteTable("user", {
@@ -23,6 +26,7 @@ export const users = sqliteTable("user", {
   email: text("email").notNull(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
+  role: text("role", { enum: userRoles }).notNull().default("basic"),
 });
 
 export type NewUser = typeof users.$inferInsert;
