@@ -1,6 +1,13 @@
 import db from "@/db";
-import { User as DBUser } from "@/schema";
+import {
+  accounts,
+  User as DBUser,
+  sessions,
+  users,
+  verificationTokens,
+} from "@/schema";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import NextAuth, { DefaultSession } from "next-auth";
 import { Provider } from "next-auth/providers";
 import GitHub from "next-auth/providers/github";
@@ -35,10 +42,16 @@ declare module "next-auth" {
 const providers: Provider[] = [GitHub, Google];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: DrizzleAdapter(db),
+  adapter: DrizzleAdapter(db, {
+    // pass in the custom users table as we have additional "role" property
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   providers,
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       return {
         ...session,
         user: {
