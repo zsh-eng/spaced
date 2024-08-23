@@ -46,11 +46,15 @@ export const isAuthenticatedMiddleware = t.middleware(
 export const isPremiumOrAdminMiddleware = t.middleware(
   async function isPremium(opts) {
     const { ctx } = opts;
-    if (!["premium", "admin"].includes(ctx?.user?.role ?? "not-user")) {
+    if (ctx?.user?.role !== "admin" && ctx?.user?.role !== "premium") {
       throw new TRPCError({ code: "FORBIDDEN" });
     }
 
-    return opts.next(opts);
+    return opts.next({
+      ctx: {
+        user: ctx.user,
+      }
+    });
   },
 );
 

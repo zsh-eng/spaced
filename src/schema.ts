@@ -196,9 +196,11 @@ export const cardsToDecks = sqliteTable(
     cardId: text("card_id")
       .notNull()
       .references(() => cards.id, { onDelete: "cascade" }),
-    deckId: text("deck_id").notNull().references(() => decks.id, {
-      onDelete: "cascade",
-    }),
+    deckId: text("deck_id")
+      .notNull()
+      .references(() => decks.id, {
+        onDelete: "cascade",
+      }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -210,6 +212,29 @@ export const cardsToDecks = sqliteTable(
 
 export type CardsToDecks = typeof cardsToDecks.$inferSelect;
 export type NewCardsToDecks = typeof cardsToDecks.$inferInsert;
+
+/**
+ * Keeps track of token usage for any LLM models. 
+ * Usage is tied to the user for billing purposes.
+ */
+export const aiModelUsages = sqliteTable("ai_model_usages", {
+  id: text("id").primaryKey(),
+  model: text("model").notNull(),
+  promptTokens: integer("prompt_tokens").notNull(),
+  completionTokens: integer("completion_tokens").notNull(),
+  totalTokens: integer("total_tokens").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
+});
+
+export type AIModelUsage = typeof aiModelUsages.$inferSelect;
+export type NewAIModelUsage = typeof aiModelUsages.$inferInsert;
 
 export const reviewLogsRelations = relations(reviewLogs, ({ one }) => ({
   card: one(cards, {
