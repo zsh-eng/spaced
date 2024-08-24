@@ -44,9 +44,9 @@ async function getNumberLeftToLearnToday(
     .select({
       total: sql<number>`cast(count(*) as int)`,
     })
-    .from(reviewLogs)
-    .leftJoin(cards, eq(reviewLogs.cardId, cards.id))
-    .leftJoin(users, eq(cards.userId, users.id))
+    .from(users)
+    .leftJoin(cards, eq(users.id, cards.userId))
+    .leftJoin(reviewLogs, eq(cards.id, reviewLogs.cardId))
     .where(
       and(
         eq(users.id, user.id),
@@ -82,8 +82,8 @@ async function getReviewCards(user: User, now: Date): Promise<SessionCard[]> {
   console.log("Fetching review cards");
   const cardWithContents = await db
     .select()
-    .from(cardContents)
-    .leftJoin(cards, eq(cardContents.cardId, cards.id))
+    .from(cards)
+    .leftJoin(cardContents, eq(cardContents.cardId, cards.id))
     .leftJoin(users, eq(cards.userId, users.id))
     .where(
       and(
@@ -125,6 +125,7 @@ async function getNewCards(
   const limit = Math.min(numLeftToLearn, MAX_CARDS_TO_FETCH);
 
   console.log(`User can still learn ${numLeftToLearn} cards today`);
+  // TODO: update this query - it always does a full scan of the card contents table
   const cardWithContents = await db
     .select()
     .from(cardContents)

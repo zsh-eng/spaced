@@ -1,10 +1,12 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  index,
   integer,
   primaryKey,
   real,
   sqliteTable,
   text,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
@@ -90,26 +92,35 @@ export type State = (typeof states)[number];
 export const ratings = ["Manual", "Again", "Hard", "Good", "Easy"] as const;
 export type Rating = (typeof ratings)[number];
 
-export const reviewLogs = sqliteTable("review_logs", {
-  id: text("id").primaryKey(),
-  cardId: text("card_id").notNull(),
-  grade: text("grade", { enum: ratings }).notNull(),
-  state: text("state", { enum: states }).notNull(),
+export const reviewLogs = sqliteTable(
+  "review_logs",
+  {
+    id: text("id").primaryKey(),
+    cardId: text("card_id").notNull(),
+    grade: text("grade", { enum: ratings }).notNull(),
+    state: text("state", { enum: states }).notNull(),
 
-  due: integer("due", { mode: "timestamp" }).notNull(),
-  stability: real("stability").notNull(),
-  difficulty: real("difficulty").notNull(),
-  elapsed_days: integer("elapsed_days").notNull(),
-  last_elapsed_days: integer("last_elapsed_days").notNull(),
-  scheduled_days: integer("scheduled_days").notNull(),
-  review: integer("review", { mode: "timestamp" }).notNull(),
-  duration: integer("duration").notNull().default(0),
-  deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+    due: integer("due", { mode: "timestamp" }).notNull(),
+    stability: real("stability").notNull(),
+    difficulty: real("difficulty").notNull(),
+    elapsed_days: integer("elapsed_days").notNull(),
+    last_elapsed_days: integer("last_elapsed_days").notNull(),
+    scheduled_days: integer("scheduled_days").notNull(),
+    review: integer("review", { mode: "timestamp" }).notNull(),
+    duration: integer("duration").notNull().default(0),
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => {
+    return {
+      reviewLogsCardIdIndx: index("review_logs_card_id_indx").on(table.cardId),
+      reviewLogsCreatedAtIndx: index("review_logs_created_at_indx").on(table.createdAt),
+    };
+  },
+);
 
 export type ReviewLog = typeof reviewLogs.$inferSelect;
 export type NewReviewLog = typeof reviewLogs.$inferInsert;
@@ -117,34 +128,44 @@ export type NewReviewLog = typeof reviewLogs.$inferInsert;
 // * For now we just copy the schema from the ts-fsrs-demo example
 // Note that some fields use snake case here for compatiblity with the ts-fsrs library
 // TODO standardise to using camelCase and write a converter
-export const cards = sqliteTable("cards", {
-  id: text("id").primaryKey(),
-  due: integer("due", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`), // https://orm.drizzle.team/learn/guides/timestamp-default-value
-  stability: real("stability").notNull(),
-  difficulty: real("difficulty").notNull(),
-  elapsed_days: integer("elapsed_days").notNull(),
-  scheduled_days: integer("scheduled_days").notNull(),
-  reps: integer("reps").notNull(),
-  lapses: integer("lapses").notNull(),
-  state: text("state", { enum: states }).notNull(),
-  last_review: integer("last_review", { mode: "timestamp" }),
+export const cards = sqliteTable(
+  "cards",
+  {
+    id: text("id").primaryKey(),
+    due: integer("due", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`), // https://orm.drizzle.team/learn/guides/timestamp-default-value
+    stability: real("stability").notNull(),
+    difficulty: real("difficulty").notNull(),
+    elapsed_days: integer("elapsed_days").notNull(),
+    scheduled_days: integer("scheduled_days").notNull(),
+    reps: integer("reps").notNull(),
+    lapses: integer("lapses").notNull(),
+    state: text("state", { enum: states }).notNull(),
+    last_review: integer("last_review", { mode: "timestamp" }),
 
-  // The time the card is suspended until
-  suspended: integer("suspended", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
+    // The time the card is suspended until
+    suspended: integer("suspended", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
 
-  userId: text("user_id").notNull(),
+    userId: text("user_id").notNull(),
 
-  // revlogs logs
-  deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+    // revlogs logs
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => {
+    return {
+      cardsUserIdIndx: index("cards_user_id_indx").on(table.userId),
+      cardsCreatedAtIndx: index("cards_created_at_indx").on(table.createdAt),
+      cardsDifficultyIndx: index("cards_difficulty_indx").on(table.difficulty),
+    };
+  },
+);
 // Benchmark performance to check if we should use indexes for difficulty and due
 // columns.
 
@@ -152,38 +173,53 @@ export type Card = typeof cards.$inferSelect;
 export type NewCard = typeof cards.$inferInsert;
 
 // TODO rename to camelCase
-export const cardContents = sqliteTable("card_contents", {
-  id: text("id").primaryKey(),
-  // card
-  cardId: text("card_id")
-    .notNull()
-    .references(() => cards.id, { onDelete: "cascade" }),
+export const cardContents = sqliteTable(
+  "card_contents",
+  {
+    id: text("id").primaryKey(),
+    // card
+    cardId: text("card_id")
+      .notNull()
+      .references(() => cards.id, { onDelete: "cascade" }),
 
-  question: text("question").notNull().default(""),
-  answer: text("answer").notNull().default(""),
-  source: text("source").notNull().default(""),
-  sourceId: text("sourceId"),
-  extend: text("extend", { mode: "json" }),
-  deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
-
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+    question: text("question").notNull().default(""),
+    answer: text("answer").notNull().default(""),
+    source: text("source").notNull().default(""),
+    sourceId: text("sourceId"),
+    extend: text("extend", { mode: "json" }),
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => {
+    return {
+      cardContentscardIdIndx: uniqueIndex("card_contents_card_id_indx").on(table.cardId),
+    };
+  },
+);
 
 export type CardContent = typeof cardContents.$inferSelect;
 export type NewCardContent = typeof cardContents.$inferInsert;
 
-export const decks = sqliteTable("decks", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description").notNull().default(""),
-  deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  userId: text("user_id").notNull(),
-});
+export const decks = sqliteTable(
+  "decks",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    userId: text("user_id").notNull(),
+  },
+  (table) => {
+    return {
+      decksUserIdIndx: index("decks_user_id_indx").on(table.userId),
+    };
+  },
+);
 
 export type Deck = typeof decks.$inferSelect;
 export type NewDeck = typeof decks.$inferInsert;
@@ -214,24 +250,32 @@ export type CardsToDecks = typeof cardsToDecks.$inferSelect;
 export type NewCardsToDecks = typeof cardsToDecks.$inferInsert;
 
 /**
- * Keeps track of token usage for any LLM models. 
+ * Keeps track of token usage for any LLM models.
  * Usage is tied to the user for billing purposes.
  */
-export const aiModelUsages = sqliteTable("ai_model_usages", {
-  id: text("id").primaryKey(),
-  model: text("model").notNull(),
-  promptTokens: integer("prompt_tokens").notNull(),
-  completionTokens: integer("completion_tokens").notNull(),
-  totalTokens: integer("total_tokens").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, {
-      onDelete: "cascade",
-    }),
-});
+export const aiModelUsages = sqliteTable(
+  "ai_model_usages",
+  {
+    id: text("id").primaryKey(),
+    model: text("model").notNull(),
+    promptTokens: integer("prompt_tokens").notNull(),
+    completionTokens: integer("completion_tokens").notNull(),
+    totalTokens: integer("total_tokens").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (table) => {
+    return {
+      aiModelUserIdIndx: index("ai_model_usage_user_id_indx").on(table.userId),
+    };
+  },
+);
 
 export type AIModelUsage = typeof aiModelUsages.$inferSelect;
 export type NewAIModelUsage = typeof aiModelUsages.$inferInsert;
