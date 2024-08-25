@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/envConfig';
 import type { Config } from 'drizzle-kit';
 
 // See https://orm.drizzle.team/docs/migrations#migrations
