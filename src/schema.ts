@@ -161,8 +161,9 @@ export const cards = sqliteTable(
   (table) => {
     return {
       cardsUserIdIndx: index("cards_user_id_indx").on(table.userId),
-      cardsCreatedAtIndx: index("cards_created_at_indx").on(table.createdAt),
-      cardsDifficultyIndx: index("cards_difficulty_indx").on(table.difficulty),
+      // cards are sorted by user ID first, then the others
+      cardsUserIdCreatedAtIndx: index("cards_user_id_created_at_indx").on(table.userId, table.createdAt),
+      cardsUserIdDifficultyIndx: index("cards_user_id_difficulty_indx").on(table.userId, table.difficulty),
     };
   },
 );
