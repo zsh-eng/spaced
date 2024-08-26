@@ -8,14 +8,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectLabel,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
 import { FieldValues } from "react-hook-form";
 
 type FormMultiSelectProps<TFieldValues extends FieldValues> =
@@ -35,6 +27,10 @@ type FormMultiSelectProps<TFieldValues extends FieldValues> =
       value: string;
       label: string;
     }>;
+    defaultValues?: Array<{
+      value: string;
+      label: string;
+    }>;
   };
 
 export function FormMultiSelect<TFieldValues extends FieldValues>({
@@ -44,6 +40,7 @@ export function FormMultiSelect<TFieldValues extends FieldValues>({
   description,
   disabled,
   data,
+  defaultValues = [],
 }: FormMultiSelectProps<TFieldValues>) {
   return (
     <FormField
@@ -57,6 +54,7 @@ export function FormMultiSelect<TFieldValues extends FieldValues>({
           <FormControl>
             <MultiSelect
               isMulti
+              defaultValue={defaultValues}
               onChange={(values) => {
                 field.onChange(() => values.map((v) => v.value));
               }}
