@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipIconButton } from "@/components/ui/tooltip";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
@@ -91,12 +92,15 @@ export default function DeckCards({ deckId }: Props) {
   if (isLoading || isDeckLoading || !data) {
     return (
       <>
-        <div className={containerClasses}>
-          <FlashcardSimpleSkeleton />
-          <FlashcardSimpleSkeleton />
-          <FlashcardSimpleSkeleton />
-          <FlashcardSimpleSkeleton />
-        </div>
+        <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 sm:pl-2">
+          <Skeleton className="flex h-28 w-full flex-col gap-y-4" />
+          <div className={containerClasses}>
+            <FlashcardSimpleSkeleton />
+            <FlashcardSimpleSkeleton />
+            <FlashcardSimpleSkeleton />
+            <FlashcardSimpleSkeleton />
+          </div>
+        </section>
       </>
     );
   }
