@@ -1,5 +1,6 @@
 "use client";
 
+import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import FlashcardSimple, {
   FlashcardSimpleSkeleton,
 } from "@/components/flashcard/flashcard-simple";
@@ -15,6 +16,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { TooltipIconButton } from "@/components/ui/tooltip";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
@@ -28,10 +37,12 @@ import {
   Clock,
   Loader2,
   NotebookTabs,
+  PlusCircle,
   Trash,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type Props = {
   deckId: string;
@@ -75,6 +86,7 @@ export default function DeckCards({ deckId }: Props) {
   const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
   const { mutate: pauseDeck } = usePauseDeck();
   const router = useRouter();
+  const [cardFormOpen, setCardFormOpen] = useState(false);
 
   if (isLoading || isDeckLoading || !data) {
     return (
@@ -102,7 +114,7 @@ export default function DeckCards({ deckId }: Props) {
       <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 pl-2">
         <Title title={deck.name} />
         <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
-          <div className="flex gap-2 justify-center sm:justify-start">
+          <div className="flex justify-center gap-2 sm:justify-start">
             <p className="flex items-center sm:text-lg">
               <NotebookTabs className="mr-1 h-5 w-5 sm:mr-2" />
               {deck.cardCount}
@@ -113,7 +125,7 @@ export default function DeckCards({ deckId }: Props) {
             </p>
           </div>
 
-          <div className="justify-center sm:ml-auto flex items-center gap-x-4 sm:gap-x-1">
+          <div className="flex items-center justify-center gap-x-4 sm:ml-auto sm:gap-x-1">
             <TooltipIconButton
               // className="ml-auto"
               tooltipContent="Unsuspend all cards"
@@ -130,8 +142,37 @@ export default function DeckCards({ deckId }: Props) {
                 pauseDeck({ id: deck.id });
               }}
             >
-              <CirclePause className="h-8 w-8 sm:h-6 sm:w-6" strokeWidth={1.5} />
+              <CirclePause
+                className="h-8 w-8 sm:h-6 sm:w-6"
+                strokeWidth={1.5}
+              />
             </TooltipIconButton>
+
+            <Dialog open={cardFormOpen} onOpenChange={setCardFormOpen}>
+              <DialogTrigger asChild>
+                <TooltipIconButton
+                  tooltipContent="New card"
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                  )}
+                >
+                  <PlusCircle
+                    className="h-8 w-8 sm:h-6 sm:w-6"
+                    strokeWidth={1.5}
+                  />
+                </TooltipIconButton>
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create</DialogTitle>
+                  <DialogDescription>
+                    Fill in the front and back to your flashcard.
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateFlashcardForm deckId={deck.id} />
+              </DialogContent>
+            </Dialog>
 
             <AlertDialog>
               <AlertDialogTrigger
@@ -145,7 +186,7 @@ export default function DeckCards({ deckId }: Props) {
                 )}
               >
                 {isDeleting ? (
-                  <Loader2 className="h-6 w-6 sm:h-5 sm:w-5 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin sm:h-5 sm:w-5" />
                 ) : (
                   <Trash className="h-6 w-6 sm:h-5 sm:w-5" />
                 )}

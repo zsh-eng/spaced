@@ -19,7 +19,13 @@ import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function CreateFlashcardForm() {
+type CreateFlashcardFormProps = {
+  deckId?: string;
+};
+
+export default function CreateFlashcardForm({
+  deckId,
+}: CreateFlashcardFormProps) {
   const { data: decks = [], isLoading: isLoadingDeck } =
     trpc.deck.all.useQuery();
   const deckSelectData = decks.map((deck) => ({
@@ -29,7 +35,10 @@ export default function CreateFlashcardForm() {
 
   const form = useForm<CreateCardFormValues>({
     resolver: zodResolver(createCardFormSchema),
-    defaultValues: createCardDefaultValues,
+    defaultValues: {
+      ...createCardDefaultValues,
+      deckIds: deckId ? [deckId] : createCardDefaultValues.deckIds,
+    },
   });
 
   // This is a hack to force the markdown editor to re-render
@@ -85,6 +94,9 @@ export default function CreateFlashcardForm() {
           name="deckIds"
           label="Deck"
           form={form}
+          defaultValues={deckSelectData.filter((deck) =>
+            (form.getValues("deckIds") ?? []).includes(deck.value),
+          )}
           disabled={isLoading}
           data={deckSelectData}
         />
