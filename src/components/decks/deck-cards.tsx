@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/ui/tooltip";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
@@ -101,71 +101,82 @@ export default function DeckCards({ deckId }: Props) {
     <>
       <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 pl-2">
         <Title title={deck.name} />
-        <div className="flex gap-x-4">
-          <p className="flex items-center text-lg">
-            <NotebookTabs className="mr-2 h-5 w-5" />
-            {deck.cardCount}
-          </p>
-          <p className="flex items-center text-lg">
-            <Clock className="mr-2 h-5 w-5" />
-            {format(deck.createdAt, "MMM d, yyyy")}
-          </p>
+        <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
+          <div className="flex gap-2 justify-center sm:justify-start">
+            <p className="flex items-center sm:text-lg">
+              <NotebookTabs className="mr-1 h-5 w-5 sm:mr-2" />
+              {deck.cardCount}
+            </p>
+            <p className="flex items-center sm:text-lg">
+              <Clock className="mr-1 h-5 w-5 sm:mr-2" />
+              {format(deck.createdAt, "MMM d, yyyy")}
+            </p>
+          </div>
 
-          <TooltipIconButton
-            className="ml-auto"
-            tooltipContent="Unsuspend all cards"
-            onClick={() => {
-              pauseDeck({ id: deck.id, pause: false });
-            }}
-          >
-            <CirclePlay className="h-6 w-6" strokeWidth={1.5} />
-          </TooltipIconButton>
+          <div className="justify-center sm:ml-auto flex items-center gap-x-4 sm:gap-x-1">
+            <TooltipIconButton
+              // className="ml-auto"
+              tooltipContent="Unsuspend all cards"
+              onClick={() => {
+                pauseDeck({ id: deck.id, pause: false });
+              }}
+            >
+              <CirclePlay className="h-8 w-8 sm:h-6 sm:w-6" strokeWidth={1.5} />
+            </TooltipIconButton>
 
-          <TooltipIconButton
-            tooltipContent="Suspend all cards"
-            onClick={() => {
-              pauseDeck({ id: deck.id });
-            }}
-          >
-            <CirclePause className="h-6 w-6" strokeWidth={1.5} />
-          </TooltipIconButton>
+            <TooltipIconButton
+              tooltipContent="Suspend all cards"
+              onClick={() => {
+                pauseDeck({ id: deck.id });
+              }}
+            >
+              <CirclePause className="h-8 w-8 sm:h-6 sm:w-6" strokeWidth={1.5} />
+            </TooltipIconButton>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size={"icon"} variant={"ghost"} className="">
-                {isDeleting ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Trash className="h-5 w-5" />
+            <AlertDialog>
+              <AlertDialogTrigger
+                type="button"
+                className={cn(
+                  buttonVariants({
+                    variant: "ghost",
+                    size: "icon",
+                  }),
+                  "m-0",
                 )}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action will delete the deck and all the cards in it (
-                  <span className="font-bold">{deck.cardCount} cards</span>).
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={async () => {
-                    // After deleting, we should go to the decks page
-                    // This should be a confirmation dialog
-                    await deleteDeck({
-                      deckId: deck.id,
-                      deleteCards: true,
-                    });
-                    router.push("/decks");
-                  }}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-6 w-6 sm:h-5 sm:w-5 animate-spin" />
+                ) : (
+                  <Trash className="h-6 w-6 sm:h-5 sm:w-5" />
+                )}
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will delete the deck and all the cards in it (
+                    <span className="font-bold">{deck.cardCount} cards</span>).
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      // After deleting, we should go to the decks page
+                      // This should be a confirmation dialog
+                      await deleteDeck({
+                        deckId: deck.id,
+                        deleteCards: true,
+                      });
+                      router.push("/decks");
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </section>
 
