@@ -13,7 +13,7 @@ export function isMessageEventFromObsidian(
   event: MessageEvent,
 ): event is MessageEventWithSource {
   if (event.origin !== OBSIDIAN_ORIGIN) {
-    console.warn("Received message from unknown origin:", event.origin);
+    // console.warn("Received message from unknown origin:", event.origin);
     return false;
   }
 

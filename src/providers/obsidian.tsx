@@ -107,10 +107,6 @@ export function ObsidianProvider({ children }: { children: React.ReactNode }) {
     };
   });
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   return (
     <ObsidianContext.Provider value={{}}>{children}</ObsidianContext.Provider>
   );
