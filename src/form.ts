@@ -68,6 +68,12 @@ export const createCardFormSchema = cardContentFormSchema.extend({
 
 export type CreateCardFormValues = z.infer<typeof createCardFormSchema>;
 
+export const updateCardFormSchema = cardContentFormSchema.extend({
+  cardContentId: z.string().uuid(),
+})
+
+export type UpdateCardFormValues = z.infer<typeof updateCardFormSchema>;
+
 export const createCardDefaultValues = {
   ...cardContentDefaultValues,
   deckIds: [],

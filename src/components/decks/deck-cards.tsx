@@ -4,6 +4,7 @@ import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import FlashcardSimple, {
   FlashcardSimpleSkeleton,
 } from "@/components/flashcard/flashcard-simple";
+import UpdateFlashcardForm from "@/components/flashcard/update-flashcard-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -82,12 +83,19 @@ export default function DeckCards({ deckId }: Props) {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+  const utils = trpc.useUtils();
   const { data: deckData, isLoading: isDeckLoading } = trpc.deck.all.useQuery();
   const deck = deckData?.find((d) => d.id === deckId);
   const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
   const { mutate: pauseDeck } = usePauseDeck();
   const router = useRouter();
   const [cardFormOpen, setCardFormOpen] = useState(false);
+  const [editCardFormOpen, setEditCardFormOpen] = useState(false);
+  const [editCardContent, setEditCardContent] = useState<{
+    cardContentId: string;
+    question: string;
+    answer: string;
+  } | null>(null);
 
   if (isLoading || isDeckLoading || !data) {
     return (
@@ -117,7 +125,7 @@ export default function DeckCards({ deckId }: Props) {
     <>
       <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 pl-2">
         <Title title={deck.name} />
-        <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
+        <div className="mt-2 grid grid-cols-1 gap-x-2 gap-y-4 sm:mt-0 sm:grid-cols-2 sm:gap-x-4">
           <div className="flex justify-center gap-2 sm:justify-start">
             <p className="flex items-center sm:text-lg">
               <NotebookTabs className="mr-1 h-5 w-5 sm:mr-2" />
@@ -225,12 +233,44 @@ export default function DeckCards({ deckId }: Props) {
         </div>
       </section>
 
+      <Dialog open={editCardFormOpen} onOpenChange={setEditCardFormOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit</DialogTitle>
+            <DialogDescription>
+              Fill in the front and back to your flashcard.
+            </DialogDescription>
+          </DialogHeader>
+          {editCardContent && (
+            <UpdateFlashcardForm
+              cardContentId={editCardContent.cardContentId}
+              question={editCardContent.question}
+              answer={editCardContent.answer}
+              onEdit={async () => {
+                setEditCardFormOpen(false);
+                await utils.deck.infiniteCards.invalidate()
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {data.pages.map((group, i) => {
         return (
           <div key={i} className={containerClasses}>
             {group.data.map((card) => {
               return (
                 <FlashcardSimple
+                  onEdit={() => {
+                    if (card?.cardContents) {
+                      setEditCardContent({
+                        cardContentId: card.cardContents.id,
+                        question: card.cardContents.question,
+                        answer: card.cardContents.answer,
+                      });
+                      setEditCardFormOpen(true);
+                    }
+                  }}
                   key={card.cards.id}
                   card={card.cards}
                   cardContent={card.cardContents!}
@@ -258,11 +298,9 @@ export default function DeckCards({ deckId }: Props) {
             : "Nothing more to load"}
       </Button>
 
-      <div>
+      <div className="col-span-12 mb-6 flex w-full flex-col gap-y-4 sm:pl-2">
         {isFetching && !isFetchingNextPage ? (
           <div className={containerClasses}>
-            <FlashcardSimpleSkeleton />
-            <FlashcardSimpleSkeleton />
             <FlashcardSimpleSkeleton />
             <FlashcardSimpleSkeleton />
           </div>

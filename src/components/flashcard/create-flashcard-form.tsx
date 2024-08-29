@@ -10,7 +10,6 @@ import {
   createCardFormSchema,
 } from "@/form";
 import { useCreateCard } from "@/hooks/card/use-create-card";
-import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useHistory } from "@/providers/history";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,9 +47,7 @@ export default function CreateFlashcardForm({
 
   const history = useHistory();
   const createCardMutation = useCreateCard();
-  const deleteCardMutation = useDeleteCard();
-  const isLoading =
-    createCardMutation.isPending || deleteCardMutation.isPending;
+  const isLoading = createCardMutation.isPending;
 
   const onSubmit: SubmitHandler<CreateCardFormValues> = async (data) => {
     try {
