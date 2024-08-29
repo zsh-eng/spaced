@@ -1,14 +1,11 @@
 import { MAX_CARDS_TO_FETCH, MAX_LEARN_PER_DAY } from "@/common";
 import db from "@/db";
 import {
-  AICardOutput,
   aiCardOutputSchema,
   cardSchema,
   createCardFormSchema,
   createManyCardsFormSchema,
 } from "@/form";
-import { openai } from "@ai-sdk/openai";
-import { generateObject } from "ai";
 import {
   NewCardsToDecks,
   User,
@@ -23,14 +20,16 @@ import {
   users,
 } from "@/schema";
 import { premiumProcedure, protectedProcedure, router } from "@/server/trpc";
+import { BASE_MODEL, GENERATE_FLASHCARD_PROMPT } from "@/utils/ai";
 import { success } from "@/utils/format";
 import { cardToReviewLog, gradeCard, newCardWithContent } from "@/utils/fsrs";
 import { SessionCard, SessionData, SessionStats } from "@/utils/session";
 import { CardSorts } from "@/utils/sort";
+import { openai } from "@ai-sdk/openai";
 import { TRPCError } from "@trpc/server";
+import { generateObject } from "ai";
 import { and, desc, eq, inArray, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { BASE_MODEL, GENERATE_FLASHCARD_PROMPT } from "@/utils/ai";
 
 /**
  * Retrieves the number of cards left to learn today.
