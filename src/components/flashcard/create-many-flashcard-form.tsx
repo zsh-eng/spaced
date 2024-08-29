@@ -1,5 +1,6 @@
 "use client";
 
+import { isSpecialDeck } from "@/common";
 import AIGenerateFlashcardDialog from "@/components/flashcard/ai-generate-flashcard-dialog";
 import { FormMultiSelect } from "@/components/form/form-multi-select";
 import { FormTextarea } from "@/components/form/form-textarea";
@@ -32,10 +33,12 @@ import { toast } from "sonner";
 export default function CreateManyFlashcardForm() {
   const { data: decks = [], isLoading: isLoadingDeck } =
     trpc.deck.all.useQuery();
-  const deckSelectData = decks.map((deck) => ({
-    value: deck.id,
-    label: deck.name,
-  }));
+  const deckSelectData = decks
+    .filter((deck) => !isSpecialDeck(deck.id))
+    .map((deck) => ({
+      value: deck.id,
+      label: deck.name,
+    }));
 
   const form = useForm<CreateManyCardsFormValues>({
     resolver: zodResolver(createManyCardsFormSchema),

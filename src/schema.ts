@@ -148,7 +148,7 @@ export const cards = sqliteTable(
     suspended: integer("suspended", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
-
+    
     userId: text("user_id").notNull(),
 
     // revlogs logs
