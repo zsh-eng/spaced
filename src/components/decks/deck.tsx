@@ -1,3 +1,4 @@
+import { isSpecialDeck } from "@/common";
 import { UiCard, UiCardDescription, UiCardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RouterOutputs } from "@/utils/trpc";
@@ -26,16 +27,21 @@ export default function Deck({ deck }: Props) {
         <UiCardDescription className="line-clamp-1">
           {deck.description}
         </UiCardDescription>
-        <div className="absolute bottom-3 left-4 flex items-center text-muted-foreground">
-          <Clock className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="text-xs sm:text-sm">
-            {format(deck.createdAt, "MMM d")}
-          </span>
-        </div>
-        <span className="absolute bottom-3 right-4 ml-auto mt-4 flex w-max items-center justify-center rounded-md text-xs text-muted-foreground sm:text-sm">
-          <BookIcon className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-          {deck.cardCount}
-        </span>
+        {!isSpecialDeck(deck.id) && (
+          <>
+            <div className="absolute bottom-3 left-4 flex items-center text-muted-foreground">
+              <Clock className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">
+                {format(deck.createdAt, "MMM d")}
+              </span>
+            </div>
+
+            <span className="absolute bottom-3 right-4 ml-auto mt-4 flex w-max items-center justify-center rounded-md text-xs text-muted-foreground sm:text-sm">
+              <BookIcon className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+              {deck.cardCount}
+            </span>
+          </>
+        )}
       </UiCard>
     </Link>
   );

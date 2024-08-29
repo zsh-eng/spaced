@@ -1,3 +1,9 @@
+import {
+  ALL_CARDS_DECK_ID,
+  MAX_CARDS_TO_FETCH,
+  MAX_DATE,
+  NO_DECK_ID,
+} from "@/common";
 import db from "@/db";
 import {
   User,
@@ -7,15 +13,23 @@ import {
   decks,
   users,
 } from "@/schema";
-import { MAX_CARDS_TO_FETCH, MAX_DATE } from "@/common";
 import { protectedProcedure, router } from "@/server/trpc";
 import { newDeck } from "@/utils/deck";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, or, sql, inArray, desc, lt } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  lt,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
-
-const ALL_CARDS = "ALL_CARDS";
 
 export async function checkIfDeckBelongsToUser(
   user: User,
@@ -50,14 +64,30 @@ export const deckRouter = router({
       .all();
     console.log(success`Fetched ${rows.length} decks`);
 
-    return rows;
+    return [
+      ...rows,
+      {
+        id: NO_DECK_ID,
+        name: "No Deck",
+        cardCount: NaN,
+        description: "Cards that are not in any deck",
+        createdAt: new Date(),
+      },
+      {
+        id: ALL_CARDS_DECK_ID,
+        name: "All Cards",
+        cardCount: NaN,
+        description: "All cards in all decks",
+        createdAt: new Date(),
+      },
+    ];
   }),
 
   // See https://trpc.io/docs/client/react/useInfiniteQuery
   infiniteCards: protectedProcedure
     .input(
       z.object({
-        deckId: z.string().uuid().optional().default(ALL_CARDS),
+        deckId: z.string().optional().default(ALL_CARDS_DECK_ID),
         limit: z.number().min(1).max(MAX_CARDS_TO_FETCH).nullish(),
         cursor: z
           .object({
@@ -74,9 +104,12 @@ export const deckRouter = router({
       const cursor = input.cursor;
 
       console.log("Checking if deck exists");
-      const isFetchingAllCards = deckId === ALL_CARDS;
+      const isFetchingAllCards = deckId === ALL_CARDS_DECK_ID;
+      const isFetchingCardsWithNoDeck = deckId === NO_DECK_ID;
+
       const exists =
         isFetchingAllCards ||
+        isFetchingCardsWithNoDeck ||
         !!(await db.query.decks.findFirst({
           columns: { id: true },
           where: and(
@@ -119,7 +152,11 @@ export const deckRouter = router({
         .where(
           and(
             eq(users.id, user.id),
-            isFetchingAllCards ? undefined : eq(cardsToDecks.deckId, deckId),
+            isFetchingAllCards
+              ? undefined
+              : isFetchingCardsWithNoDeck
+                ? isNull(cardsToDecks.deckId)
+                : eq(cardsToDecks.deckId, deckId),
             eq(cards.deleted, false),
             eq(cardContents.deleted, false),
             cursor

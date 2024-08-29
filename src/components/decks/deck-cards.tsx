@@ -1,5 +1,6 @@
 "use client";
 
+import { isSpecialDeck } from "@/common";
 import CreateFlashcardForm from "@/components/flashcard/create-flashcard-form";
 import FlashcardSimple, {
   FlashcardSimpleSkeleton,
@@ -126,17 +127,20 @@ export default function DeckCards({ deckId }: Props) {
       <section className="col-span-12 mb-6 flex w-full flex-col gap-y-4 pl-2">
         <Title title={deck.name} />
         <div className="mt-2 grid grid-cols-1 gap-x-2 gap-y-4 sm:mt-0 sm:grid-cols-2 sm:gap-x-4">
-          <div className="flex justify-center gap-2 sm:justify-start">
-            <p className="flex items-center sm:text-lg">
-              <NotebookTabs className="mr-1 h-5 w-5 sm:mr-2" />
-              {deck.cardCount}
-            </p>
-            <p className="flex items-center sm:text-lg">
-              <Clock className="mr-1 h-5 w-5 sm:mr-2" />
-              {format(deck.createdAt, "MMM d, yyyy")}
-            </p>
-          </div>
-
+          {isSpecialDeck(deck.id) ? (
+            <div></div>
+          ) : (
+            <div className="flex justify-center gap-2 sm:justify-start">
+              <p className="flex items-center sm:text-lg">
+                <NotebookTabs className="mr-1 h-5 w-5 sm:mr-2" />
+                {deck.cardCount}
+              </p>
+              <p className="flex items-center sm:text-lg">
+                <Clock className="mr-1 h-5 w-5 sm:mr-2" />
+                {format(deck.createdAt, "MMM d, yyyy")}
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-center gap-x-4 sm:ml-auto sm:gap-x-1">
             <TooltipIconButton
               // className="ml-auto"
@@ -248,7 +252,7 @@ export default function DeckCards({ deckId }: Props) {
               answer={editCardContent.answer}
               onEdit={async () => {
                 setEditCardFormOpen(false);
-                await utils.deck.infiniteCards.invalidate()
+                await utils.deck.infiniteCards.invalidate();
               }}
             />
           )}

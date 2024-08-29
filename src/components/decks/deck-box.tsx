@@ -9,7 +9,7 @@ const sectionClasses =
 
 function Title() {
   return (
-    <div className="col-span-12 sm:mb-4 flex items-center pl-2">
+    <div className="col-span-12 flex items-center pl-2 sm:mb-4">
       <h1 className="text-4xl md:text-4xl">Decks</h1>
       <Separator className="ml-2 shrink" />
     </div>
