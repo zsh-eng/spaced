@@ -328,7 +328,7 @@ export default function DeckCards({ deckId }: Props) {
             : "Nothing more to load"}
       </Button>
 
-      <div className="col-span-12 mb-6 flex w-full flex-col gap-y-4 sm:pl-2">
+      <div className="col-span-12 mt-6 mb-6 flex w-full flex-col gap-y-4 sm:pl-2">
         {isFetching && !isFetchingNextPage ? (
           <div className={containerClasses}>
             <FlashcardSimpleSkeleton />
