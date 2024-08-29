@@ -12,7 +12,7 @@ import { protectedProcedure, router } from "@/server/trpc";
 import { newDeck } from "@/utils/deck";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, or, sql, inArray } from "drizzle-orm";
+import { and, asc, eq, gt, or, sql, inArray, desc, lt } from "drizzle-orm";
 import { z } from "zod";
 
 const ALL_CARDS = "ALL_CARDS";
@@ -124,7 +124,7 @@ export const deckRouter = router({
             eq(cardContents.deleted, false),
             cursor
               ? or(
-                  gt(cards.createdAt, cursor.createdAt),
+                  lt(cards.createdAt, cursor.createdAt),
                   and(
                     eq(cards.createdAt, cursor.createdAt),
                     gt(cards.id, cursor.id),
@@ -134,7 +134,7 @@ export const deckRouter = router({
           ),
         )
         .limit(limit)
-        .orderBy(asc(cards.createdAt), asc(cards.id));
+        .orderBy(desc(cards.createdAt), asc(cards.id));
 
       console.log(success`Fetched deck ${deckId}`);
       const lastItem = cardsWithDeck[cardsWithDeck.length - 1];
