@@ -27,11 +27,6 @@ export default function Deckbox() {
           <DeckSkeleton />
           <DeckSkeleton />
           <DeckSkeleton />
-          <DeckSkeleton />
-          <DeckSkeleton />
-          <DeckSkeleton />
-          <DeckSkeleton />
-          <DeckSkeleton />
         </section>
       </>
     );
