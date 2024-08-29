@@ -66,7 +66,8 @@ export default function CreateManyFlashcardForm() {
     toast.promise(createManyMutation.mutateAsync(data), {
       loading: "Creating flashcards...",
       success: () => {
-        form.reset();
+        form.resetField("metadata");
+        form.resetField("cardInputs");
         return "Flashcards created.";
       },
       error: "Failed to create flashcards.",
