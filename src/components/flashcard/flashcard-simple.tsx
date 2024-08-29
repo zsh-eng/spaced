@@ -11,13 +11,19 @@ type Props = {
   card: Pick<Card, "state" | "createdAt" | "state" | "suspended">;
   cardContent: Pick<CardContent, "id" | "question" | "answer" | "createdAt">;
   onEdit: () => void;
+  onDelete: () => void;
 };
 
 export function FlashcardSimpleSkeleton() {
   return <Skeleton className="flex h-72 w-full flex-col gap-y-4" />;
 }
 
-export default function FlashcardSimple({ card, cardContent, onEdit }: Props) {
+export default function FlashcardSimple({
+  card,
+  cardContent,
+  onEdit,
+  onDelete,
+}: Props) {
   return (
     <UiCard className="flex w-full flex-col gap-y-4">
       <UiCardContent className="mt-6 h-60 overflow-y-auto py-0">
@@ -54,7 +60,11 @@ export default function FlashcardSimple({ card, cardContent, onEdit }: Props) {
           <Edit className="h-4 w-4" />
         </TooltipIconButton>
 
-        <TooltipIconButton tooltipContent="Delete" className="">
+        <TooltipIconButton
+          tooltipContent="Delete"
+          className=""
+          onClick={onDelete}
+        >
           <Trash className="h-4 w-4" />
         </TooltipIconButton>
       </UiCardFooter>

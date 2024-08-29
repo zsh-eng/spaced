@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipIconButton } from "@/components/ui/tooltip";
+import { useDeleteCard } from "@/hooks/card/use-delete-card";
 import { useDeleteDeck } from "@/hooks/deck/use-delete-deck";
 import { usePauseDeck } from "@/hooks/deck/use-pause-deck";
 import { trpc } from "@/utils/trpc";
@@ -46,6 +47,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
   deckId: string;
@@ -89,7 +91,9 @@ export default function DeckCards({ deckId }: Props) {
   const deck = deckData?.find((d) => d.id === deckId);
   const { mutateAsync: deleteDeck, isPending: isDeleting } = useDeleteDeck();
   const { mutate: pauseDeck } = usePauseDeck();
+  const { mutateAsync: deleteCard } = useDeleteCard();
   const router = useRouter();
+
   const [cardFormOpen, setCardFormOpen] = useState(false);
   const [editCardFormOpen, setEditCardFormOpen] = useState(false);
   const [editCardContent, setEditCardContent] = useState<{
@@ -274,6 +278,28 @@ export default function DeckCards({ deckId }: Props) {
                       });
                       setEditCardFormOpen(true);
                     }
+                  }}
+                  onDelete={async () => {
+                    console.log("Deleting card", card.cards.id);
+
+                    await deleteCard({
+                      id: card.cards.id,
+                    });
+                    await utils.deck.infiniteCards.invalidate();
+
+                    toast.success("Card deleted", {
+                      action: {
+                        label: "Undo",
+                        onClick: async () => {
+                          await deleteCard({
+                            id: card.cards.id,
+                            deleted: false,
+                          });
+                          await utils.deck.infiniteCards.invalidate();
+                        },
+                      },
+                      duration: 5000,
+                    });
                   }}
                   key={card.cards.id}
                   card={card.cards}
