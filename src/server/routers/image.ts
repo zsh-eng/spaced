@@ -40,7 +40,6 @@ if (!token) {
 
 export const imageRouter = router({
   // Image uploads from the markdown editor
-  // TODO add uploaded image links to the database to track usage
   upload: protectedProcedure
     .input(
       z.object({

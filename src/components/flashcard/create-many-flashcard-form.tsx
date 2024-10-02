@@ -4,6 +4,7 @@ import { isSpecialDeck } from "@/common";
 import AIGenerateFlashcardDialog from "@/components/flashcard/ai-generate-flashcard-dialog";
 import { FormMultiSelect } from "@/components/form/form-multi-select";
 import { FormTextarea } from "@/components/form/form-textarea";
+import { FormTextareaImageUpload } from "@/components/form/form-textarea-image-upload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UiCard } from "@/components/ui/card";
@@ -259,7 +260,7 @@ export default function CreateManyFlashcardForm() {
                   }
                 }}
               >
-                <FormTextarea
+                <FormTextareaImageUpload
                   className="h-40 resize-none border-0"
                   name={`cardInputs.${index}.question`}
                   label="Question"
@@ -269,7 +270,7 @@ export default function CreateManyFlashcardForm() {
 
                 <hr className="mx-auto w-8" />
 
-                <FormTextarea
+                <FormTextareaImageUpload
                   className="h-40 resize-none border-0"
                   name={`cardInputs.${index}.answer`}
                   label="Answer"
