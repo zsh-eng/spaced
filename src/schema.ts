@@ -34,6 +34,35 @@ export const users = sqliteTable("user", {
 export type NewUser = typeof users.$inferInsert;
 export type User = Omit<typeof users.$inferSelect, "emailVerified">;
 
+export const userMedia = sqliteTable(
+  "user_media",
+  {
+    id: text("id").primaryKey(),
+    userId: text("userId").notNull(),
+    url: text("url").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    userMediaUserIdIndx: index("user_media_user_id_indx").on(table.userId),
+    userMediaUserIdCreatedAtIndx: index("user_media_user_id_created_at_indx").on(
+      table.userId,
+      table.createdAt,
+    ),
+  }),
+);
+
+export type NewUserMedia = typeof userMedia.$inferInsert;
+export type UserMedia = typeof userMedia.$inferSelect;
+
+export const userMediaRelations = relations(userMedia, ({ one }) => ({
+  user: one(users, {
+    fields: [userMedia.userId],
+    references: [users.id],
+  }),
+}));
+
 export const accounts = sqliteTable(
   "account",
   {
@@ -117,7 +146,9 @@ export const reviewLogs = sqliteTable(
   (table) => {
     return {
       reviewLogsCardIdIndx: index("review_logs_card_id_indx").on(table.cardId),
-      reviewLogsCreatedAtIndx: index("review_logs_created_at_indx").on(table.createdAt),
+      reviewLogsCreatedAtIndx: index("review_logs_created_at_indx").on(
+        table.createdAt,
+      ),
     };
   },
 );
@@ -148,7 +179,7 @@ export const cards = sqliteTable(
     suspended: integer("suspended", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
-    
+
     userId: text("user_id").notNull(),
 
     // revlogs logs
@@ -162,8 +193,14 @@ export const cards = sqliteTable(
     return {
       cardsUserIdIndx: index("cards_user_id_indx").on(table.userId),
       // cards are sorted by user ID first, then the others
-      cardsUserIdCreatedAtIndx: index("cards_user_id_created_at_indx").on(table.userId, table.createdAt),
-      cardsUserIdDifficultyIndx: index("cards_user_id_difficulty_indx").on(table.userId, table.difficulty),
+      cardsUserIdCreatedAtIndx: index("cards_user_id_created_at_indx").on(
+        table.userId,
+        table.createdAt,
+      ),
+      cardsUserIdDifficultyIndx: index("cards_user_id_difficulty_indx").on(
+        table.userId,
+        table.difficulty,
+      ),
     };
   },
 );
@@ -195,7 +232,9 @@ export const cardContents = sqliteTable(
   },
   (table) => {
     return {
-      cardContentscardIdIndx: uniqueIndex("card_contents_card_id_indx").on(table.cardId),
+      cardContentscardIdIndx: uniqueIndex("card_contents_card_id_indx").on(
+        table.cardId,
+      ),
     };
   },
 );
