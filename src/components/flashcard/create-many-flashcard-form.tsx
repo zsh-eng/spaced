@@ -11,6 +11,7 @@ import { Form } from "@/components/ui/form";
 import { gridChildGrid } from "@/components/ui/grid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import UserImagesDialog from "@/components/user-images-dialog";
 import {
   CreateManyCardsFormValues,
   ObsidianCardMetadata,
@@ -196,6 +197,7 @@ export default function CreateManyFlashcardForm() {
               <TrashIcon className="mr-2 h-4 w-4" />
               Delete All
             </Button>
+
             <AIGenerateFlashcardDialog
               onGeneratedCards={({ cards }) => {
                 const previous = form.getValues("cardInputs");
@@ -209,6 +211,8 @@ export default function CreateManyFlashcardForm() {
                 });
               }}
             />
+
+            <UserImagesDialog />
           </div>
 
           <div className="flexm mt-2">

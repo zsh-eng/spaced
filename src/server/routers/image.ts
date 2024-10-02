@@ -1,6 +1,9 @@
+import db from "@/db";
+import { userMedia } from "@/schema";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 // https://stackoverflow.com/questions/26667820/upload-a-base64-encoded-image-using-formdata
@@ -45,7 +48,7 @@ export const imageRouter = router({
         name: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { base64String, name } = input;
       const file = dataURItoBlob(base64String);
       const formData = new FormData();
@@ -75,8 +78,31 @@ export const imageRouter = router({
         });
       }
 
+      console.log("Inserting image link into database");
+      await db.insert(userMedia).values({
+        id: crypto.randomUUID(),
+        userId: ctx.user.id,
+        url: imageLink,
+      });
+      console.log("Image link inserted into database");
+
       console.log(success`Image uploaded: ${imageLink}`);
 
       return imageLink as string;
     }),
+  list: protectedProcedure.query(async ({ ctx }) => {
+    // Ok to return user image URLs, unlikely to have a large number of images
+    console.log("Fetching images for user", ctx.user.id);
+    const images = await db
+      .select()
+      .from(userMedia)
+      .where(eq(userMedia.userId, ctx.user.id));
+
+    const returnedImages = images.map((image) => ({
+      url: image.url,
+      createdAt: image.createdAt,
+    }));
+
+    return returnedImages;
+  }),
 });
