@@ -5,21 +5,22 @@ import {
   NewCardsToDecks,
   NewDeck,
   NewReviewLog,
+  NewUserMedia,
   cardContents,
   cards,
   cardsToDecks,
   decks,
   ratings,
   reviewLogs,
-  states,
+  userMedia,
 } from "@/schema";
+import { wipeDatabase } from "@/scripts/utils";
 import { success } from "@/utils/format";
 import { gradeCard, mergeFsrsCard, newCard, newCardToCard } from "@/utils/fsrs";
 import { faker } from "@faker-js/faker";
 import { add, isBefore, sub } from "date-fns";
 import { createEmptyCard } from "ts-fsrs";
 import { Card, CardContent, ReviewLog } from "../schema";
-import { wipeDatabase } from "@/scripts/utils";
 
 // Data generated using the faker-js library.
 // See https://fakerjs.dev/api/
@@ -102,6 +103,11 @@ function simulateNewCardAndReviews(
   return [currentCard, logs];
 }
 
+function generateDummyImageUrl(): string {
+  const randomInt = faker.number.int({ min: 1, max: 300 });
+  return `https://picsum.photos/id/${randomInt}/512/512`;
+}
+
 /**
  * Seed the database with some random data.
  * Note that this script can take a while to run since we're inserting data into the Turso database.
@@ -170,6 +176,15 @@ async function main() {
   console.log(
     success`Seeded ${cardsToDecksToInsert.length} mappings between cards and decks`,
   );
+
+  console.log("Seeding images");
+  const imagesToInsert: NewUserMedia[] = Array.from({ length: 100 }, () => ({
+    id: crypto.randomUUID(),
+    userId,
+    url: generateDummyImageUrl(),
+  }));
+  await db.insert(userMedia).values(imagesToInsert);
+  console.log(success`Seeded ${imagesToInsert.length} images`);
 }
 
 main();
