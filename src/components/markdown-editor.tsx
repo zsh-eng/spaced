@@ -1,5 +1,6 @@
 "use client";
 
+import { useImageUpload } from "@/hooks/image/use-image-upload";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/utils/ui";
 import {
@@ -54,7 +55,7 @@ const toBase64 = (file: File): Promise<string> =>
   });
 
 const MilkdownEditor = ({ disabled, value, onChange, border }: Props) => {
-  const mutation = trpc.image.upload.useMutation({});
+  const mutation = useImageUpload();
 
   // See https://milkdown.dev/docs/api/plugin-upload
   const uploader: Uploader = async (files, schema) => {

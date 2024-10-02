@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { useImageUpload } from "@/hooks/image/use-image-upload";
 import { trpc } from "@/utils/trpc";
 import { ClipboardEventHandler, useRef } from "react";
 import { FieldValues } from "react-hook-form";
@@ -42,7 +43,7 @@ export function FormTextareaImageUpload<TFieldValues extends FieldValues>({
   description,
   rows,
 }: FormTextareaImageUploadProps<TFieldValues>) {
-  const imageUploadMutation = trpc.image.upload.useMutation();
+  const imageUploadMutation = useImageUpload();
 
   const handlePaste: ClipboardEventHandler<HTMLTextAreaElement> = async (e) => {
     const dataTransfer = Array.from(e.clipboardData.items);
