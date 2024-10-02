@@ -1,0 +1,1 @@
+ALTER TABLE `userMedia` RENAME TO `user_media`;
