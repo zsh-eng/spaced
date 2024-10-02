@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -70,8 +76,20 @@ export default function AIGenerateFlashcardDialog({
         className={cn(buttonVariants({ size: "icon", variant: "ghost" }))}
         onClick={() => setOpen(true)}
       >
-        <Sparkles className="h-4 w-4" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              className={cn(buttonVariants({ size: "icon", variant: "ghost" }))}
+            >
+              <Sparkles className="h-4 w-4" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Generate with AI</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Generate with AI</DialogTitle>
