@@ -3,7 +3,7 @@ import { userMedia } from "@/schema";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { success } from "@/utils/format";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 // https://stackoverflow.com/questions/26667820/upload-a-base64-encoded-image-using-formdata
@@ -95,7 +95,8 @@ export const imageRouter = router({
     const images = await db
       .select()
       .from(userMedia)
-      .where(eq(userMedia.userId, ctx.user.id));
+      .where(eq(userMedia.userId, ctx.user.id))
+      .orderBy(desc(userMedia.createdAt));
 
     const returnedImages = images.map((image) => ({
       url: image.url,
