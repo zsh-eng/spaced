@@ -596,11 +596,25 @@ export const cardRouter = router({
     .input(
       z.object({
         query: z.string(),
+        context: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { user } = ctx;
       console.log("AI generating card for query:", input.query);
+      const content = `
+${input.context ? `The following is the context for the user's query.
+Do not generate flashcards for the context, but use it to inform your response.
+<context>
+${input.context}
+</context>` : ""}
+
+Think step-by-step about the user's input, and generate flashcards relevant to the input.
+<input>
+${input.query}
+</input>
+`;
+
       const { usage, object } = await generateObject({
         model: openai(BASE_MODEL),
         messages: [
@@ -610,7 +624,7 @@ export const cardRouter = router({
           },
           {
             role: "user",
-            content: input.query,
+            content: content,
           },
         ],
         schema: aiCardOutputSchema,

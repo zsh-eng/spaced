@@ -39,6 +39,7 @@ export default function AIGenerateFlashcardDialog({
   onGeneratedCards,
 }: AIGenerateFlashcardDialogProps) {
   const [query, setQuery] = useState("");
+  const [context, setContext] = useState("");
   const { mutateAsync, isPending } = useAIGenerateCard();
   const [open, setOpen] = useState(false);
 
@@ -97,12 +98,20 @@ export default function AIGenerateFlashcardDialog({
             Provide the content and let AI generate the flashcards for you.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <Textarea
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
+            placeholder="Enter the context for the user's query..."
+            className="text-sm"
+            rows={5}
+          />
           <Textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter the content to generate flashcards..."
             className="text-sm"
+            rows={16}
           />
           <DialogFooter className="mt-4">
             <Button type="submit" disabled={isPending}>
