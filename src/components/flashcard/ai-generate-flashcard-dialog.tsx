@@ -22,7 +22,7 @@ import { useAIGenerateCard } from "@/hooks/card/use-ai-generate-card";
 import { cn } from "@/utils/ui";
 import { TRPCClientError } from "@trpc/client";
 import { Loader2, Sparkles } from "lucide-react";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type AIGenerateFlashcardDialogProps = {
@@ -39,9 +39,18 @@ export default function AIGenerateFlashcardDialog({
   onGeneratedCards,
 }: AIGenerateFlashcardDialogProps) {
   const [query, setQuery] = useState("");
-  const [context, setContext] = useState("");
+  const [context, setContext] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("ai-context") ?? "";
+  });
+
   const { mutateAsync, isPending } = useAIGenerateCard();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("ai-context", context);
+  }, [context]);
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (e) => {
     e.preventDefault();
