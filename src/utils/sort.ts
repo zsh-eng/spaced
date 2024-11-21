@@ -37,8 +37,14 @@ const CREATED_AT_DESC: Sort = {
   db: desc(cards.createdAt),
 };
 
+const ID_ASC: Sort = {
+  fn: (a, b) => a.id.localeCompare(b.id),
+  db: asc(cards.id),
+};
+
 export const CardSorts = {
   DIFFICULTY_ASC,
   CREATED_AT_ASC,
   CREATED_AT_DESC,
+  ID_ASC,
 } as const;

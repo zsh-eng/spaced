@@ -143,7 +143,7 @@ async function getNewCards(
         lte(cards.suspended, now),
       ),
     )
-    .orderBy(CardSorts.CREATED_AT_ASC.db)
+    .orderBy(CardSorts.ID_ASC.db)
     .limit(limit);
   console.log(success`Fetched ${cardWithContents.length} new cards`);
 
