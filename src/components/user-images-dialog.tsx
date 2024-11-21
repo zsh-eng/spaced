@@ -57,6 +57,7 @@ export default function UserImagesDialog() {
                   size: "icon",
                 }),
               )}
+              type="button"
               onClick={() => setOpen(true)}
             >
               <ImageIcon className="h-4 w-4" />

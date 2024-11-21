@@ -90,6 +90,7 @@ export default function AIGenerateFlashcardDialog({
           <Tooltip>
             <TooltipTrigger
               className={cn(buttonVariants({ size: "icon", variant: "ghost" }))}
+              type="button"
             >
               <Sparkles className="h-4 w-4" />
             </TooltipTrigger>
