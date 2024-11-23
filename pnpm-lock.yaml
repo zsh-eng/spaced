@@ -12,7 +12,7 @@ importers:
         specifier: ^0.0.53
         version: 0.0.53(zod@3.23.8)
       '@auth/drizzle-adapter':
-        specifier: ^1.7.2
+        specifier: 1.7.2
         version: 1.7.2
       '@hookform/resolvers':
         specifier: ^3.9.0
