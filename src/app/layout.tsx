@@ -45,5 +45,3 @@ async function RootLayout({
 
 // See https://trpc.io/docs/client/nextjs/setup#5-configure-_apptsx
 export default RootLayout;
-
-export const runtime = "edge";
