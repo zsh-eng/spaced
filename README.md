@@ -12,7 +12,7 @@ If you have any suggestions or feedback, please feel free to open an issue.
 
 The second one is always better.
 
-I've been building a new version of spaced that is local-first, works online, is much faster, has better UX, and shows you your stats.
+I've been building a new version of spaced that is local-first, works offline, is much faster, has better UX, and shows you your stats.
 
 Check it out [here](https://github.com/zsh-eng/spaced2).
 
