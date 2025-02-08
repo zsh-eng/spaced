@@ -16,6 +16,8 @@ I've been building a new version of spaced that is local-first, works online, is
 
 Check it out [here](https://github.com/zsh-eng/spaced2).
 
+![spaced2](./spaced-screenshots.png)
+
 ## Motivation
 
 Spaced repetition is proven to be one of the **most effective ways to learn**.
