@@ -8,6 +8,14 @@ It uses spaced repetition to help you learn more efficiently.
 Note: This is project is still in early development.
 If you have any suggestions or feedback, please feel free to open an issue.
 
+## NOTICE
+
+The second one is always better.
+
+I've been building a new version of spaced that is local-first, works online, is much faster, has better UX, and shows you your stats.
+
+Check it out [here](https://github.com/zsh-eng/spaced2).
+
 ## Motivation
 
 Spaced repetition is proven to be one of the **most effective ways to learn**.
